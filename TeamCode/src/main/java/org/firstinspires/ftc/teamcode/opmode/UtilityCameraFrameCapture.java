@@ -81,20 +81,10 @@ public class UtilityCameraFrameCapture extends LinearOpMode
     {
         VisionPortal portal;
 
-        if (USING_WEBCAM)
-        {
-            portal = new VisionPortal.Builder()
-                    .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                    .setCameraResolution(new Size(RESOLUTION_WIDTH, RESOLUTION_HEIGHT))
-                    .build();
-        }
-        else
-        {
-            portal = new VisionPortal.Builder()
-                    .setCamera(INTERNAL_CAM_DIR)
-                    .setCameraResolution(new Size(RESOLUTION_WIDTH, RESOLUTION_HEIGHT))
-                    .build();
-        }
+        portal = new VisionPortal.Builder()
+                .setCamera(INTERNAL_CAM_DIR)
+                .setCameraResolution(new Size(RESOLUTION_WIDTH, RESOLUTION_HEIGHT))
+                .build();
 
         while (!isStopRequested())
         {
