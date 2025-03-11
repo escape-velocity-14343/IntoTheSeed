@@ -4,6 +4,8 @@ import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 
+import org.firstinspires.ftc.teamcode.commands.custom.RunIfCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
@@ -13,6 +15,7 @@ import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.PivotSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
 
 /**
@@ -20,25 +23,23 @@ import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
  */
 public class SubPosReadyCommand extends SequentialCommandGroup {
 
-    public SubPosReadyCommand(ExtensionSubsystem extension, PivotSubsystem pivot, WristSubsystem wrist, IntakeSubsystem intake, double extendInches) {
-
-        // validate that this extension is within extension limit
-        assert extendInches < SlideConstants.submersibleIntakeMaxExtension;
+    public SubPosReadyCommand(ExtensionSubsystem extension, PivotSubsystem pivot, WristSubsystem wrist, IntakeSubsystem intake, TurretSubsystem turret, double angle, double extendInches) {
 
         addCommands(
-                new ParallelCommandGroup(
-                        // extend to the target
-                        new ExtendCommand(extension, extendInches).withTimeout(extension.getReasonableExtensionMillis(extendInches)),
-
-                        // wait until extension is below a certain threshold to stay within extension limit, then pivot to neutral
+                new RunIfCommand(
                         new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> extension.getCurrentInches() < SlideConstants.maxPivotExtension),
-                                new PivotCommand(pivot, PivotConstants.neutralPos)
-                        )
-
+                                new FullIntakeFoldCommand(intake, turret, wrist),
+                                new ExtendCommand(extension, 0),
+                                new PivotCommand(pivot, PivotConstants.intakeReadyPos)
+                        ),
+                        () -> !pivot.isClose(PivotConstants.intakeReadyPos)
                 ),
+
+                new ExtendCommand(extension, extendInches).withTimeout(extension.getReasonableExtensionMillis(extendInches)),
                 // flip down wrist to a ready position
-                new WristCommand(wrist, IntakeConstants.intakeReadyPos)
+                new WristCommand(wrist, IntakeConstants.toptakePos).alongWith(
+                        new TurretCommand(turret, angle)
+                )
         );
     }
 

@@ -9,9 +9,9 @@ import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.lib.DrivetrainSquIDController;
 import org.firstinspires.ftc.teamcode.lib.Util;
-import org.firstinspires.ftc.teamcode.opmode.auton.PU5Apple;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.PinpointSubsystem;
 
@@ -139,7 +139,7 @@ public class DefaultGoToPointCommand extends CommandBase {
         }
 
         // velocity end
-        if (pinpoint.getVelocity().getTranslation().getNorm() < PU5Apple.intakeStallVelocity) {
+        if (pinpoint.getVelocity().getTranslation().getNorm() < AutoConstants.stallVelocity) {
             if (!isZeroVelocity) {
                 zeroVelocityTimer.reset();
                 isZeroVelocity = true;

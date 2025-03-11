@@ -4,11 +4,14 @@ import android.util.Log;
 
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 
+import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
+import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.PivotSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
 
 /**
@@ -17,13 +20,13 @@ import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
 public class SubPosCommand extends SequentialCommandGroup {
     ExtensionSubsystem extension;
 
-    public SubPosCommand(ExtensionSubsystem extension, WristSubsystem wrist, IntakeSubsystem intake) {
+    public SubPosCommand(ExtensionSubsystem extension, WristSubsystem wrist, IntakeSubsystem intake, PivotSubsystem pivot) {
         addCommands(
-                new WristCommand(wrist, IntakeConstants.groundPos)
-                        .alongWith(new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1))
+                new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
+                new PivotCommand(pivot, PivotConstants.intakePos)
         );
         // must require extension because manual control must use it, so this ensures any other commands using extension get interrupted
-        addRequirements(extension);
+        addRequirements(extension, wrist);
         this.extension = extension;
     }
 

@@ -7,10 +7,13 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
+import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.AnalogEncoder;
 import org.firstinspires.ftc.teamcode.lib.CachingVoltageSensor;
 import org.firstinspires.ftc.teamcode.lib.SquIDController;
 import org.firstinspires.ftc.teamcode.lib.Util;
+
+import java.util.function.DoubleSupplier;
 
 public class PivotSubsystem extends SubsystemBase {
     private DcMotor motor0, motor1;
@@ -22,6 +25,7 @@ public class PivotSubsystem extends SubsystemBase {
     private SquIDController squid = new SquIDController();
     AnalogEncoder encoder;
     private CachingVoltageSensor voltage;
+    private DoubleSupplier extensionInches = () -> 0;
 
     public PivotSubsystem(HardwareMap hMap, CachingVoltageSensor voltage) {
         motor0 = hMap.dcMotor.get("tilt0");
@@ -34,13 +38,19 @@ public class PivotSubsystem extends SubsystemBase {
 
         this.voltage = voltage;
 
-        squid.setPID(PivotConstants.kP);
+        squid.setPID(PivotConstants.kPRetracted);
         timer.reset();
     }
+
+    public void setExtensionSupplier(DoubleSupplier extensionInches) {
+        this.extensionInches = extensionInches;
+    }
+
     @Override
     public void periodic() {
         double lastPos = currentPos;
         currentPos = encoder.getAngle();
+        squid.setPID(PivotConstants.kPRetracted * (1- extensionInches.getAsDouble()/ SlideConstants.maxExtension) + PivotConstants.kPExtended * extensionInches.getAsDouble() / SlideConstants.maxExtension);
         pivotVelocity = (lastPos - currentPos) / timer.seconds();
         if (!manualControl) {
             tiltToPos(target);

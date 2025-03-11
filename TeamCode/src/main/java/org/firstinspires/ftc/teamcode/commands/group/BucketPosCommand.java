@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 
+import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.PivotSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
 
 public class BucketPosCommand extends SequentialCommandGroup {
@@ -25,10 +27,9 @@ public class BucketPosCommand extends SequentialCommandGroup {
         super(commands);
     }
 
-    public BucketPosCommand(ExtensionSubsystem extension, PivotSubsystem pivot, WristSubsystem wrist) {
+    public BucketPosCommand(ExtensionSubsystem extension, PivotSubsystem pivot, WristSubsystem wrist, TurretSubsystem turret) {
         addCommands(
                 //new ExtendCommand(extension, 1),
-                new WristCommand(wrist, IntakeConstants.groundPos),
                 new ParallelCommandGroup(
                         // minus two to prevent it from overshooting
                         new PivotCommand(pivot, PivotConstants.topLimit).interruptOn(() -> pivot.getPivotVelocity() < AutoConstants.autoscoreMaxPivotVel && pivot.getCurrentPosition() > PivotConstants.topLimit - 4),
@@ -36,7 +37,8 @@ public class BucketPosCommand extends SequentialCommandGroup {
                                 new WaitUntilCommand(() -> pivot.getCurrentPosition() > PivotConstants.outtakeExtendDegrees),
                                 new ExtendCommand(extension, SlideConstants.bucketPos + (DriveConstants.highExtend ? SlideConstants.highExtendInches : 0)).withTimeout(1000).interruptOn(() -> extension.getCurrentInches() > SlideConstants.bucketPos - 2)
                         ),
-                        new WaitUntilCommand(()->extension.getCurrentInches() > SlideConstants.bucketPos-2).withTimeout(1000).andThen(new WristCommand(wrist, IntakeConstants.scoringPos))
+                        new WaitUntilCommand(()->extension.getCurrentInches() > SlideConstants.bucketPos-2).withTimeout(1000).andThen(new WristCommand(wrist, IntakeConstants.scoringPos)),
+                        new TurretCommand(turret, 0)
                 ),
 
                 new InstantCommand(() -> Log.i("%2", "BucketPos End"))

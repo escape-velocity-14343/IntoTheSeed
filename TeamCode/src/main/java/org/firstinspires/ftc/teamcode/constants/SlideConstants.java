@@ -5,14 +5,14 @@ import com.acmerobotics.dashboard.config.Config;
 @Config
 
 public class SlideConstants {
-    public static double kP = 0.002;
+    public static double kP = 0.004;
     public static double kI = 0;
     public static double kD = 0;
     public static double kS = 0;
-    public static double ticksPerInch = 31.6;
-    public static double maxExtension = 29.5;
+    public static double ticksPerInch = 54.9;
+    public static double maxExtension = 31;
 
-    public static double bucketPos = 28;
+    public static double bucketPos = 31;
     public static double lowBucketPos = 11.5;
 
     public static double tiltInches = 15;
@@ -25,18 +25,18 @@ public class SlideConstants {
     /**
      * The maximum extension, in inches, while pivoting down.
      */
-    public static double maxPivotExtension = 25;
+    public static double maxPivotExtension = 2;
     /**
      * Feedforward value that is multiplied by <code>Math.cos(slideAngle)</code>
      */
     public static double FEEDFORWARD_bottom = 0.2;
-    public static double FEEDFORWARD_top = 0.25; //TUNED VALUE
+    public static double FEEDFORWARD_top = 0; //TUNED VALUE
 
 
     public static double autonPiece1Extension = 12;
     public static double autonPiece3Extension = 13.5;
 
-    public static double submersibleIntakeMaxExtension = 18.25;
+    public static double submersibleIntakeMaxExtension = 20;
     public static double submersibleIntakeMaxClawExtension = 17;
 
     public static double autonPiecee3ExtensionPower = 0.3;

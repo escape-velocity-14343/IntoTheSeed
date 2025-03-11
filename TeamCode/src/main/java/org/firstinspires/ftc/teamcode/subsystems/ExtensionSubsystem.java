@@ -42,10 +42,9 @@ public class ExtensionSubsystem extends SubsystemBase {
 
         motor0 = (DcMotorEx) hMap.dcMotor.get("slide0");
         motor0.setDirection(DcMotorSimple.Direction.REVERSE);
-        motor0.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motor0.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         motor1 = (DcMotorEx) hMap.dcMotor.get("slide1");
-        motor1.setDirection(DcMotorSimple.Direction.REVERSE);
-        motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         motor0.setCurrentAlert(4, CurrentUnit.AMPS);
         motor1.setCurrentAlert(4, CurrentUnit.AMPS);
 
@@ -140,11 +139,11 @@ public class ExtensionSubsystem extends SubsystemBase {
 
         power *= voltage.getVoltageNormalized();
 
-        if (power < -0.7 && angleSupplier.get() > PivotConstants.specimenTopBarAngle + 5) {
+        /*if (power < -0.7 && angleSupplier.get() > PivotConstants.specimenTopBarAngle + 5) {
             power = -0.7;
         } else if (power < 0) {
             power *= 0.9;
-        }
+        }*/
 
         if (ticks >= 0 && !(getCurrentInches() <= 0 && power < 0) && !(getCurrentInches() >= SlideConstants.maxExtension && power > 0)) {
             setPower(power);

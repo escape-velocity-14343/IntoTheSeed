@@ -43,7 +43,7 @@ public class PinpointSubsystem extends SubsystemBase implements Localizer {
         //pinpoint.setYawScalar(yawScalar);
         pinpoint.recalibrateIMU();
 
-        pinpoint.setEncoderResolution(GoBildaPinpoint.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
+        pinpoint.setEncoderResolution(GoBildaPinpoint.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         pinpoint.setEncoderDirections(
                 flipX ? GoBildaPinpoint.EncoderDirection.REVERSED : GoBildaPinpoint.EncoderDirection.FORWARD,
                 flipY ? GoBildaPinpoint.EncoderDirection.REVERSED : GoBildaPinpoint.EncoderDirection.FORWARD

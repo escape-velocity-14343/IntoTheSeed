@@ -13,6 +13,9 @@ public class AutoConstants {
 
     public static double autoscoreMaxVel = 8.5;
 
+    // velocity necessary to skip to next point
+    public static double stallVelocity = 0.5;
+
     // Milliseconds
     public static long outtakePause = 50;
     public static long outtakeTimeout = 1300;

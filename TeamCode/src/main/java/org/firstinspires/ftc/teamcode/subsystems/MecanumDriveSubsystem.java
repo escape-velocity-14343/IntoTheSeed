@@ -15,10 +15,10 @@ public class MecanumDriveSubsystem extends SubsystemBase {
     public MecanumDriveSubsystem(DcMotor fr, DcMotor fl, DcMotor br, DcMotor bl, Localizer localizer, CachingVoltageSensor voltage) {
         this.fr = fr;
         this.fl = fl;
-        fl.setDirection(DcMotorSimple.Direction.REVERSE);
         this.br = br;
         this.bl = bl;
-        bl.setDirection(DcMotorSimple.Direction.REVERSE);
+        br.setDirection(DcMotorSimple.Direction.REVERSE);
+        fr.setDirection(DcMotorSimple.Direction.REVERSE);
         this.odo = localizer;
         this.voltage = voltage;
     }
@@ -33,6 +33,8 @@ public class MecanumDriveSubsystem extends SubsystemBase {
      * @param heading in degrees
      * */
     public void driveFieldCentric(double x, double y, double rx, double heading) {
+
+        rx = -rx;
 
         double headingRads = -Math.toRadians(heading);
 
