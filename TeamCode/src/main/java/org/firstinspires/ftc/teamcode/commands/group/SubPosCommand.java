@@ -34,7 +34,7 @@ public class SubPosCommand extends SequentialCommandGroup {
     public SubPosCommand(ExtensionSubsystem extension, WristSubsystem wrist, IntakeSubsystem intake, PivotSubsystem pivot, DoubleSupplier power) {
         addCommands(
                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
-                new PivotCommand(pivot, PivotConstants.intakeReadyPos-power.getAsDouble()*(PivotConstants.intakeReadyPos-PivotConstants.intakePos))
+                new PivotCommand(pivot, PivotConstants.intakeReadyPos-power.getAsDouble()*(PivotConstants.intakeReadyPos-PivotConstants.intakePos)/0.55)
         );
         // must require extension because manual control must use it, so this ensures any other commands using extension get interrupted
         addRequirements(extension, wrist);

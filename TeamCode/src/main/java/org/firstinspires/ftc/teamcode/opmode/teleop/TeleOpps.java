@@ -131,21 +131,27 @@ public class TeleOpps extends Robot {
 
         // ------- INTAKE -------
         driverPad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(
-               new ScheduleCommand(new SubPosReadyCommand(extension, pivot, wrist, intake, turret, 0, SlideConstants.submersibleIntakeMaxExtension))
+               new SubPosReadyCommand(extension, pivot, wrist, intake, turret, 0, SlideConstants.submersibleIntakeMaxExtension)
         );
 
         driverPad.getGamepadButton(GamepadKeys.Button.B).whenPressed(
-                new ScheduleCommand(new SubPosReadyCommand(extension, pivot, wrist, intake, turret, 90, SlideConstants.submersibleIntakeMaxExtension))
+                new SubPosReadyCommand(extension, pivot, wrist, intake, turret, 90, SlideConstants.submersibleIntakeMaxExtension)
         );
 
+//        driverPad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
+//                new TurretCommand(turret, turret.getPosition()-25)
+//        );
+//        driverPad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
+//                new TurretCommand(turret, turret.getPosition()+25)
+//        );
         driverPad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
-                new TurretCommand(turret, turret.getPosition()-25)
+                new TurretCommand(turret, () -> turret.getPosition()-45)
         );
         driverPad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new TurretCommand(turret, turret.getPosition()+25)
+                new TurretCommand(turret, () -> turret.getPosition()+45)
         );
 
-        new Trigger(() -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)>0.05&&driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)<0.8).whileActiveContinuous(
+        new Trigger(() -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)>0.05&&driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)<0.6).whileActiveContinuous(
                 new SubPosCommand(extension, wrist, intake, pivot, ()->driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER))
         );
         new Trigger(() -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)>=0.8).whileActiveOnce(

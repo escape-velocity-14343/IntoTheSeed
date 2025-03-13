@@ -48,8 +48,8 @@ public class IntakeConstants {
     public static double autoAlignTol = 10;
 
     // global offset
-    // 1 tick of skip = 0.05 position
-    public static double wristOffset = -0.2;
+    // 1 tooth of skip = 0.05 position
+    public static double wristOffset = -0.15;
 
     public static double visionSizeWeight = 1;
     public static double intakeSensorVoltageThres = 0.25;

@@ -33,7 +33,7 @@ public class SubPosReadyCommand extends SequentialCommandGroup {
                                 new ExtendCommand(extension, 0),
                                 new PivotCommand(pivot, PivotConstants.intakeReadyPos)
                         ),
-                        () -> pivot.isClose(PivotConstants.intakeReadyPos)
+                        () -> !pivot.isClose(PivotConstants.intakeReadyPos)
                 ),
 
                 new ExtendCommand(extension, extendInches).withTimeout(extension.getReasonableExtensionMillis(extendInches)),
