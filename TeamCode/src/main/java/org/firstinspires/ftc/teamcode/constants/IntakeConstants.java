@@ -51,8 +51,6 @@ public class IntakeConstants {
     // 1 tooth of skip = 0.05 position
     public static double wristOffset = -0.15;
 
-    public static double visionSizeWeight = 1;
     public static double intakeSensorVoltageThres = 0.25;
 
-    public static double spitToBackMs = 100;
 }

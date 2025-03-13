@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import android.transition.Slide;
 import android.util.Log;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -54,8 +55,8 @@ public class ExtensionSubsystem extends SubsystemBase {
         motor0.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         motor1 = (DcMotorEx) hMap.dcMotor.get("slide1");
         motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        motor0.setCurrentAlert(4, CurrentUnit.AMPS);
-        motor1.setCurrentAlert(4, CurrentUnit.AMPS);
+        motor0.setCurrentAlert(SlideConstants.alertCurrent, CurrentUnit.AMPS);
+        motor1.setCurrentAlert(SlideConstants.alertCurrent, CurrentUnit.AMPS);
 
         squid.setPID(SlideConstants.kP);
 
@@ -209,11 +210,20 @@ public class ExtensionSubsystem extends SubsystemBase {
         // extensionPowerMul only applies to the squid output because the feedforward should stay constant
         double power =
                 +squid.calculate(ticks, getCurrentPosition()) * extensionPowerMul
-                        + SlideConstants.FEEDFORWARD_top * Math.sin(Math.toRadians(pivotSubsystem.getCurrentPosition()));
+                        + SlideConstants.kS + interpolate(getCurrentInches()) * Math.sin(Math.toRadians(pivotSubsystem.getCurrentPosition()));
 
         power *= voltage.getVoltageNormalized();
 
         openloop(power);
+    }
+
+    private double interpolate(double x){
+        double x1 = 0;
+        double y1 = SlideConstants.FEEDFORWARD_bottom;
+        double x2 = SlideConstants.bucketPos;
+        double y2 = SlideConstants.FEEDFORWARD_top;
+
+        return y1 + (x) * (y2-y1)/(x2-x1);
     }
 
     /**
