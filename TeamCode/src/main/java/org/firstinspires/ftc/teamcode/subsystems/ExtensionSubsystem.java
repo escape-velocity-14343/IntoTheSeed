@@ -73,9 +73,11 @@ public class ExtensionSubsystem extends SubsystemBase {
         submersibleLimitTrigger = new Trigger(() -> manualControl)
                         .and(new Trigger(() -> getCurrentInches() > SlideConstants.submersibleIntakeMaxExtension))
                         .and(forwardTarget)
-                        .and(new Trigger(() -> pivotSubsystem.isClose(PivotConstants.intakePos)));
+                        .and(new Trigger(() -> pivotSubsystem.isClose(PivotConstants.intakePos)))
+                        .whenActive(() -> Log.i("A", "Extension limit has been breached"));
         maxExtensionLimitTrigger = new Trigger(() -> getCurrentInches() >= SlideConstants.maxExtension)
-                .and(forwardTarget);
+                .and(forwardTarget)
+                .whenActive(() -> Log.i("A", "Extension limit has been breached"));
 
         underZero.whenActive(this::reset);
         gainScheduleTrigger.whenActive(() -> squid.setPID(SlideConstants.kP * SlideConstants.bucketPosGainScheduleMult)).whenInactive(() -> squid.setPID(SlideConstants.kP));
@@ -83,10 +85,6 @@ public class ExtensionSubsystem extends SubsystemBase {
         // V good for award bait-
 //        downwardsStallTrigger.whenActive(() -> resetOffset = getCurrentPosition());
 //        submersibleLimitTrigger.whileActiveContinuous(stopC());
-        //Make instant command that requires this? ^
-
-        //.whenActive(() -> Log.i("A", "Extension limit has been breached"))
-        //Make instant command that requires this? ^
 
         setDefaultCommand(new RunCommand(() -> openloop(0), this));
     }
@@ -211,17 +209,12 @@ public class ExtensionSubsystem extends SubsystemBase {
         //Hardware Access every loop
         currentPos = -motor0.getCurrentPosition() - resetOffset;
 
-        if (manualControlTrigger.negate().and(maxExtensionLimitTrigger.negate()).get()){
+        if (manualControlTrigger.negate().and(maxExtensionLimitTrigger.negate()).and(submersibleLimitTrigger.negate()).get()){
             extendInches(targetInches);
         }
 
         FtcDashboard.getInstance().getTelemetry().addData("slide position", this.getCurrentInches());
         FtcDashboard.getInstance().getTelemetry().addData("slide motor power", motor0.getPower());
-        FtcDashboard.getInstance().getTelemetry().addData("forward power?", forwardPower());
-        FtcDashboard.getInstance().getTelemetry().addData("trigger debug", maxExtensionLimitTrigger.get());
-        FtcDashboard.getInstance().getTelemetry().addData("manual debug", !manualControlTrigger.get());
-        FtcDashboard.getInstance().getTelemetry().addData("forward", forwardTarget);
-        FtcDashboard.getInstance().getTelemetry().addData("bigger", getCurrentInches() >= SlideConstants.maxExtension);
     }
 }
 
