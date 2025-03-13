@@ -40,6 +40,7 @@ public class ExtensionSubsystem extends SubsystemBase {
     public Trigger maxExtensionLimitTrigger;
     public Trigger forwardTarget;
     public Trigger manualControlTrigger;
+    public Trigger extended;
 
     public ExtensionSubsystem(
             HardwareMap hMap, PivotSubsystem pivotSubsystem, CachingVoltageSensor voltage) {
@@ -85,6 +86,7 @@ public class ExtensionSubsystem extends SubsystemBase {
                 new Trigger(() -> getCurrentInches() >= SlideConstants.maxExtension)
                         .and(forwardTarget)
                         .whenActive(() -> Log.i("A", "Maximum Extension limit has been breached"));
+        extended = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold);
 
         underZero.whenActive(this::reset);
         // Stall Detection is cooked because u might as well just have the driver run bucket or

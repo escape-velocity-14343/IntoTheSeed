@@ -101,7 +101,7 @@ public class TeleOpps extends Robot {
         new Trigger(() -> gamepad1.options).whileActiveOnce(new InstantCommand(pinpoint::resetYaw));
 
         // ------- BUCKET --------
-        driverPad.getGamepadButton(GamepadKeys.Button.X).whenPressed(bucketPos());
+        driverPad.getGamepadButton(GamepadKeys.Button.X).and(extension.extended.negate()).whenActive(bucketPos());
 
         driverPad
                 .getGamepadButton(GamepadKeys.Button.A)
