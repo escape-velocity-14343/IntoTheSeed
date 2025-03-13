@@ -41,7 +41,7 @@ public class ExtendCommand extends CommandBase {
             oldExtensionPowerMul = extend.getPowerMul();
             extend.setPowerMul(powerMul);
         }
-        extend.extendInches(target);
+        extend.setTargetInches(target);
     }
 
     @Override

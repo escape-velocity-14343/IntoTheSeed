@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -33,6 +34,7 @@ public class ExtensionPIDTest extends LinearOpMode {
         wrist = new WristSubsystem(hardwareMap);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         waitForStart();
+        CommandScheduler.getInstance().schedule(new InstantCommand(() -> extension.setManualControl(false)));
         while (!isStopRequested()) {
             CommandScheduler.getInstance().schedule(new ExtendCommand(extension, targetInches));
             CommandScheduler.getInstance().schedule((new PivotCommand(pivot, targetDegrees)));

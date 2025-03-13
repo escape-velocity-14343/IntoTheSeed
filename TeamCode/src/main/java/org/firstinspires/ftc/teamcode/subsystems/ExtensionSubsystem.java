@@ -41,7 +41,7 @@ public class ExtensionSubsystem extends SubsystemBase {
     public Trigger downwardsStallTrigger;
     public Trigger submersibleLimitTrigger;
     public Trigger maxExtensionLimitTrigger;
-    public Trigger forwardPower;
+    public Trigger forwardTarget;
     public Trigger manualControlTrigger;
 
 
@@ -65,31 +65,38 @@ public class ExtensionSubsystem extends SubsystemBase {
 
     public void initialize() {
         manualControlTrigger = new Trigger(() -> manualControl);
-        forwardPower = new Trigger(() -> motor0.getPower() > 0 && motor1.getPower() < 0);
+        forwardTarget = new Trigger(() -> forwardTarget());
         underZero = new Trigger(() -> getCurrentPosition() < 0);
         gainScheduleTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.bucketPosGainSchedulePos);
         downwardsStallTrigger = new Trigger(() -> getCurrentPosition() < 5)
                 .and(new Trigger(() -> backwardPower()));
         submersibleLimitTrigger = new Trigger(() -> manualControl)
                         .and(new Trigger(() -> getCurrentInches() > SlideConstants.submersibleIntakeMaxExtension))
-                        .and(forwardPower)
+                        .and(forwardTarget)
                         .and(new Trigger(() -> pivotSubsystem.isClose(PivotConstants.intakePos)));
         maxExtensionLimitTrigger = new Trigger(() -> getCurrentInches() >= SlideConstants.maxExtension)
-                .and(forwardPower);
+                .and(forwardTarget);
 
         underZero.whenActive(this::reset);
         gainScheduleTrigger.whenActive(() -> squid.setPID(SlideConstants.kP * SlideConstants.bucketPosGainScheduleMult)).whenInactive(() -> squid.setPID(SlideConstants.kP));
         // Stall Detection is cooked because u might as well just have the driver run bucket or something to make sure it's unjammed
         // V good for award bait-
 //        downwardsStallTrigger.whenActive(() -> resetOffset = getCurrentPosition());
-        submersibleLimitTrigger.whileActiveContinuous(stopC());
+//        submersibleLimitTrigger.whileActiveContinuous(stopC());
         //Make instant command that requires this? ^
 
-        maxExtensionLimitTrigger.whileActiveContinuous(stopC());
         //.whenActive(() -> Log.i("A", "Extension limit has been breached"))
         //Make instant command that requires this? ^
 
         setDefaultCommand(new RunCommand(() -> openloop(0), this));
+    }
+
+    public boolean forwardTarget(){
+        return targetInches - getCurrentInches() > 0;
+    }
+
+    public boolean backwardTarget(){
+        return !forwardTarget();
     }
 
     public boolean forwardPower() {
@@ -139,16 +146,19 @@ public class ExtensionSubsystem extends SubsystemBase {
         return manualControl;
     }
 
+    public void setTargetInches(double inches){
+        targetInches = inches;
+    }
+
     /**
      * this sets the target as well
      */
-    public void extendInches(double inches) {
+    private void extendInches(double inches) {
         targetInches = inches;
-        manualControl = false;
         extendToPosition((int) (inches * SlideConstants.ticksPerInch));
     }
 
-    public void extendToPosition(int ticks) {
+    private void extendToPosition(int ticks) {
         // extensionPowerMul only applies to the squid output because the feedforward should stay constant
         double power =
                 +squid.calculate(ticks, getCurrentPosition()) * extensionPowerMul
@@ -201,7 +211,7 @@ public class ExtensionSubsystem extends SubsystemBase {
         //Hardware Access every loop
         currentPos = -motor0.getCurrentPosition() - resetOffset;
 
-        if (!manualControlTrigger.get() && !maxExtensionLimitTrigger.get()){
+        if (manualControlTrigger.negate().and(maxExtensionLimitTrigger.negate()).get()){
             extendInches(targetInches);
         }
 
@@ -209,6 +219,9 @@ public class ExtensionSubsystem extends SubsystemBase {
         FtcDashboard.getInstance().getTelemetry().addData("slide motor power", motor0.getPower());
         FtcDashboard.getInstance().getTelemetry().addData("forward power?", forwardPower());
         FtcDashboard.getInstance().getTelemetry().addData("trigger debug", maxExtensionLimitTrigger.get());
+        FtcDashboard.getInstance().getTelemetry().addData("manual debug", !manualControlTrigger.get());
+        FtcDashboard.getInstance().getTelemetry().addData("forward", forwardTarget);
+        FtcDashboard.getInstance().getTelemetry().addData("bigger", getCurrentInches() >= SlideConstants.maxExtension);
     }
 }
 
