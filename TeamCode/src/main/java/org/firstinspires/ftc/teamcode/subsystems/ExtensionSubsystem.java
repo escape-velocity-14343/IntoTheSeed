@@ -155,7 +155,7 @@ public class ExtensionSubsystem extends SubsystemBase {
     }
 
     /**
-     * Set's scalar for slide extension speed, ideally for manual control scaling
+     * Sets scalar for slide extension speed, ideally for manual control scaling
      *
      * @param extensionPowerMul
      */

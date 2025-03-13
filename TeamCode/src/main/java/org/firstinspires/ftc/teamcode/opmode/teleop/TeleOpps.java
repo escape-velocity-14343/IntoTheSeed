@@ -138,12 +138,6 @@ public class TeleOpps extends Robot {
         //        driverPad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
         //                new TurretCommand(turret, turret.getPosition()+25)
         //        );
-        driverPad
-                .getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .whenPressed(new TurretCommand(turret, () -> turret.getPosition() - 45));
-        driverPad
-                .getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whenPressed(new TurretCommand(turret, () -> turret.getPosition() + 45));
 
         new Trigger(
                         () ->
@@ -174,7 +168,26 @@ public class TeleOpps extends Robot {
                                 () -> getState() == FSMStates.INTAKE));
     }
 
-    public void configureOperator() {}
+    public void configureOperator() {
+        operatorPad
+                .getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
+                .whenPressed(new TurretCommand(turret, () -> turret.getPosition() - 45));
+        operatorPad
+                .getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
+                .whenPressed(new TurretCommand(turret, () -> turret.getPosition() + 45));
+
+        operatorPad
+                .getGamepadButton(GamepadKeys.Button.B)
+                .whenPressed(
+                        new SubPosReadyCommand(
+                                extension,
+                                pivot,
+                                wrist,
+                                intake,
+                                turret,
+                                90,
+                                SlideConstants.submersibleIntakeMinExtension));
+    }
 
     public void configureDualControl() {}
 }

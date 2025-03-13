@@ -24,6 +24,7 @@ public class SlideConstants {
 
     public static double FEEDFORWARD_top = 0.12; // TUNED VALUE
 
+    public static double submersibleIntakeMinExtension = 10;
     public static double submersibleIntakeMaxExtension = 20;
 
     public static double specimenRaisePosition = 0;
