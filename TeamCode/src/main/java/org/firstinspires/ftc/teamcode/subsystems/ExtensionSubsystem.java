@@ -67,7 +67,6 @@ public class ExtensionSubsystem extends SubsystemBase {
         manualControlTrigger = new Trigger(() -> manualControl);
         forwardTarget = new Trigger(() -> forwardTarget());
         underZero = new Trigger(() -> getCurrentPosition() < 0);
-        gainScheduleTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.bucketPosGainSchedulePos);
         downwardsStallTrigger = new Trigger(() -> getCurrentPosition() < 5)
                 .and(new Trigger(() -> backwardPower()));
         submersibleLimitTrigger = new Trigger(() -> manualControl)
@@ -80,7 +79,6 @@ public class ExtensionSubsystem extends SubsystemBase {
                 .whenActive(() -> Log.i("A", "Extension limit has been breached"));
 
         underZero.whenActive(this::reset);
-        gainScheduleTrigger.whenActive(() -> squid.setPID(SlideConstants.kP * SlideConstants.bucketPosGainScheduleMult)).whenInactive(() -> squid.setPID(SlideConstants.kP));
         // Stall Detection is cooked because u might as well just have the driver run bucket or something to make sure it's unjammed
         // V good for award bait-
 //        downwardsStallTrigger.whenActive(() -> resetOffset = getCurrentPosition());
