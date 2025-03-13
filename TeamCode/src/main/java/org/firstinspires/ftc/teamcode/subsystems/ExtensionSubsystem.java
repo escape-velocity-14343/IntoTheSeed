@@ -29,7 +29,7 @@ public class ExtensionSubsystem extends SubsystemBase {
     private int currentPos = 0;
     private double targetInches = 0;
     private final SquIDController squid = new SquIDController();
-    private boolean manualControl = true;
+    private boolean manualControl = false;
     private int resetOffset = 0;
     private double extensionPowerMul = 1.0;
 
@@ -215,8 +215,7 @@ public class ExtensionSubsystem extends SubsystemBase {
         //Hardware Access every loop
         currentPos = -motor0.getCurrentPosition() - resetOffset;
 
-        if (manualControlTrigger.negate().and(maxExtensionLimitTrigger.negate()).get()){
-            //.and(submersibleLimitTrigger.negate())
+        if (manualControlTrigger.negate().and(maxExtensionLimitTrigger.negate()).and(submersibleLimitTrigger.negate()).get()){
             extendInches(targetInches);
         }
 
