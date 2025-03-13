@@ -56,6 +56,7 @@ public abstract class Robot extends LinearOpMode {
     //public CameraSubsystem cam;
     public ElapsedTime timer = new ElapsedTime();
     public CommandScheduler cs = CommandScheduler.getInstance();
+
     public void initialize() {
         DriveConstants.highExtend = false;
         AutoConstants.subBarrierY = 24.0;

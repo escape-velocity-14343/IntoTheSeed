@@ -3,10 +3,14 @@ package org.firstinspires.ftc.teamcode.opmode.test;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.lib.CachingVoltageSensor;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
@@ -30,9 +34,9 @@ public class ExtensionPIDTest extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         waitForStart();
         while (!isStopRequested()) {
-            extension.extendInches(targetInches);
-            pivot.tiltToPos(targetDegrees);
-            wrist.setWrist(IntakeConstants.foldedPos);
+            CommandScheduler.getInstance().schedule(new ExtendCommand(extension, targetInches));
+            CommandScheduler.getInstance().schedule((new PivotCommand(pivot, targetDegrees)));
+            CommandScheduler.getInstance().schedule(new WristCommand(wrist, IntakeConstants.foldedPos));
 
             telemetry.addData("current pos", extension.getCurrentPosition());
             telemetry.addData("target", targetInches);
