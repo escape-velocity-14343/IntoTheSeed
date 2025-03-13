@@ -65,26 +65,28 @@ public class ExtensionSubsystem extends SubsystemBase {
         underZero = new Trigger(() -> getCurrentPosition() < 0);
         gainScheduleTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.bucketPosGainSchedulePos);
         downwardsStallTrigger = new Trigger(() -> getCurrentPosition() < 5 && motor0.isOverCurrent() && motor0.isOverCurrent());
-        submersibleLimitTrigger = new Trigger(() -> manualControl && getCurrentInches() > SlideConstants.submersibleIntakeMaxExtension && motor0.getPower() > 0 && motor1.getPower() > 0 && pivotSubsystem.isClose(PivotConstants.intakePos));
-        maxExtensionLimitTrigger = new Trigger(() -> !(getCurrentPosition() >= 0 && !(getCurrentInches() <= 0 && motor0.getPower() < 0) && !(getCurrentInches() >= SlideConstants.maxExtension && motor1.getPower() > 0)));
+        submersibleLimitTrigger = new Trigger(() -> manualControl && getCurrentInches() > SlideConstants.submersibleIntakeMaxExtension && motor0.getPower() > 0 && pivotSubsystem.isClose(PivotConstants.intakePos));
+        maxExtensionLimitTrigger = new Trigger(() -> getCurrentInches() >= SlideConstants.maxExtension && motor0.getPower() > 0);
 
         underZero.whenActive(this::reset);
         gainScheduleTrigger.whenActive(() -> squid.setPID(SlideConstants.kP * SlideConstants.bucketPosGainScheduleMult)).whenInactive(() -> squid.setPID(SlideConstants.kP));
         // Stall Detection is cooked because u might as well just have the driver run bucket or something to make sure it's unjammed
         // V good for award bait-
 //        downwardsStallTrigger.whenActive(() -> resetOffset = getCurrentPosition());
-        submersibleLimitTrigger.whileActiveContinuous(() -> {
-            motor0.setPower(0);
-            motor1.setPower(0);
-        });
+        submersibleLimitTrigger.whileActiveContinuous(this::stopC);
         //Make instant command that requires this? ^
 
-        maxExtensionLimitTrigger.whenActive(() -> {
-            Log.i("A", "Extension limit has been breached");
-            motor0.setPower(0);
-            motor1.setPower(0);
-        });
+        maxExtensionLimitTrigger.whenActive(() -> Log.i("A", "Extension limit has been breached"))
+                .whileActiveContinuous(this::stopC);
         //Make instant command that requires this? ^
+    }
+
+    public boolean forwardPower(){
+        return motor0.getPower() > 0 && motor1.getPower() < 0;
+    }
+
+    public boolean backwardPower(){
+        return !forwardPower();
     }
 
     public DoubleSupplier getVoltageScalarSupplier() {
@@ -194,6 +196,8 @@ public class ExtensionSubsystem extends SubsystemBase {
 
         FtcDashboard.getInstance().getTelemetry().addData("slide position", this.getCurrentInches());
         FtcDashboard.getInstance().getTelemetry().addData("slide motor power", motor0.getPower());
+        FtcDashboard.getInstance().getTelemetry().addData("forward power?", forwardPower());
+
     }
 }
 

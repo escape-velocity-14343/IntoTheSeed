@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
 public class ExtensionPIDTest extends LinearOpMode {
     public PivotSubsystem pivot;
     public ExtensionSubsystem extension;
+    public WristSubsystem wrist;
     public static double targetInches = 0;
     public static double targetDegrees = 0;
     @Override
@@ -25,12 +26,10 @@ public class ExtensionPIDTest extends LinearOpMode {
         CachingVoltageSensor voltage = new CachingVoltageSensor(hardwareMap);
         pivot = new PivotSubsystem(hardwareMap, voltage);
         extension = new ExtensionSubsystem(hardwareMap, pivot, voltage);
-        WristSubsystem wrist = new WristSubsystem(hardwareMap);
+        wrist = new WristSubsystem(hardwareMap);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         waitForStart();
         while (!isStopRequested()) {
-            extension.periodic();
-            pivot.periodic();
             extension.extendInches(targetInches);
             pivot.tiltToPos(targetDegrees);
             wrist.setWrist(IntakeConstants.foldedPos);
@@ -40,6 +39,8 @@ public class ExtensionPIDTest extends LinearOpMode {
             telemetry.addData("current inches", extension.getCurrentInches());
             telemetry.addData("is there", extension.isClose(targetInches));
             telemetry.update();
+
+            CommandScheduler.getInstance().run();
         }
         CommandScheduler.getInstance().reset();
     }

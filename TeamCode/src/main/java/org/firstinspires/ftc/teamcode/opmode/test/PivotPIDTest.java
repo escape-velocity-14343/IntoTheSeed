@@ -27,7 +27,6 @@ public class PivotPIDTest extends LinearOpMode {
         pivot.setExtensionSupplier(extension::getCurrentInches);
         waitForStart();
         while (!isStopRequested()) {
-            pivot.periodic();
             pivot.tiltToPos(target);
             wrist.setWrist(IntakeConstants.foldedPos);
 
@@ -35,6 +34,8 @@ public class PivotPIDTest extends LinearOpMode {
             telemetry.addData("target", target);
             telemetry.addData("is there", pivot.isClose(target));
             telemetry.update();
+
+            CommandScheduler.getInstance().run();
         }
         CommandScheduler.getInstance().reset();
     }

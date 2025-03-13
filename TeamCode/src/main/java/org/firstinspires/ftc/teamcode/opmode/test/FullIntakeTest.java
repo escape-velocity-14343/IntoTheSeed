@@ -37,6 +37,7 @@ public class FullIntakeTest extends LinearOpMode {
             intakeSubsystem.setClawer(claw);
             turret.rotateTo(turretDegrees);
 
+            CommandScheduler.getInstance().run();
         }
         CommandScheduler.getInstance().reset();
     }
