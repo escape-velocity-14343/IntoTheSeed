@@ -38,91 +38,31 @@ public class TeleOpps extends Robot {
         operatorPad = new GamepadEx(gamepad2);
 
         if (true) {
-            CommandScheduler.getInstance()
-                    .setDefaultCommand(
-                            mecanum,
-                            new DefaultDriveCommand(
-                                    mecanum,
-                                    () ->
-                                            Util.halfLinearHalfCubic(
-                                                            Math.abs(
-                                                                                    driverPad
-                                                                                                    .getLeftY()
-                                                                                            / driverPad
-                                                                                                    .getLeftX())
-                                                                            < 0.05
-                                                                    ? 0
-                                                                    : driverPad.getLeftY())
-                                                    * (getState() == FSMStates.INTAKE
-                                                                    || getState()
-                                                                            == FSMStates.OUTTAKE
-                                                            ? robotMovementMultiplier
-                                                            : 1),
-                                    () ->
-                                            Util.halfLinearHalfCubic(
-                                                            Math.abs(
-                                                                                    driverPad
-                                                                                                    .getLeftX()
-                                                                                            / driverPad
-                                                                                                    .getLeftY())
-                                                                            < 0.05
-                                                                    ? 0
-                                                                    : driverPad.getLeftX())
-                                                    * (getState() == FSMStates.INTAKE
-                                                                    || getState()
-                                                                            == FSMStates.OUTTAKE
-                                                            ? robotMovementMultiplier
-                                                            : 1),
-                                    () ->
-                                            Util.halfLinearHalfCubic(driverPad.getRightX())
-                                                    * (getState() == FSMStates.INTAKE
-                                                                    || getState()
-                                                                            == FSMStates.OUTTAKE
-                                                            ? robotMovementMultiplier
-                                                            : 1),
-                                    () -> pinpoint.getPose().getRotation().getDegrees()) {
-                                // @Override
-                                // public double getXModPower() {
-                                //    if (getState() != FSMStates.SPECIMEN) {
-                                //        return 0.0;
-                                //    }
-                                //
-                                //    return
-                                // }
-                            });
+            CommandScheduler.getInstance().setDefaultCommand(mecanum, new DefaultDriveCommand(
+                    mecanum,
+                    () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftY() / driverPad.getLeftX()) < 0.05 ? 0 : driverPad.getLeftY()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? robotMovementMultiplier : 1),
+                    () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftX() / driverPad.getLeftY()) < 0.05 ? 0 : driverPad.getLeftX()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? robotMovementMultiplier : 1),
+                    () -> Util.halfLinearHalfCubic(driverPad.getRightX()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? robotMovementMultiplier : 1),
+                    () -> pinpoint.getPose().getRotation().getDegrees()
+            ) {
+                //@Override
+                //public double getXModPower() {
+                //    if (getState() != FSMStates.SPECIMEN) {
+                //        return 0.0;
+                //    }
+                //
+                //    return
+                //}
+            });
         } else {
-            DefaultDriveCommand drive =
-                    new DefaultDriveCommand(
-                            mecanum,
-                            () ->
-                                    Util.halfLinearHalfCubic(
-                                                    driverPad.getLeftY() / driverPad.getLeftX()
-                                                                    < 0.05
-                                                            ? 0
-                                                            : driverPad.getLeftY())
-                                            * (getState() == FSMStates.INTAKE
-                                                            || getState() == FSMStates.OUTTAKE
-                                                    ? robotMovementMultiplier
-                                                    : 1),
-                            () ->
-                                    Util.halfLinearHalfCubic(
-                                                    driverPad.getLeftX() / driverPad.getLeftY()
-                                                                    < 0.05
-                                                            ? 0
-                                                            : driverPad.getLeftX())
-                                            * (getState() == FSMStates.INTAKE
-                                                            || getState() == FSMStates.OUTTAKE
-                                                    ? robotMovementMultiplier
-                                                    : 1),
-                            () ->
-                                    Util.halfLinearHalfCubic(driverPad.getRightX())
-                                            * (getState() == FSMStates.INTAKE
-                                                            || getState() == FSMStates.OUTTAKE
-                                                    ? robotMovementMultiplier
-                                                    : 1),
-                            () -> 0.0);
+            DefaultDriveCommand drive = new DefaultDriveCommand(mecanum,
+                    () -> Util.halfLinearHalfCubic(driverPad.getLeftY() / driverPad.getLeftX() < 0.05 ? 0 : driverPad.getLeftY()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? robotMovementMultiplier : 1),
+                    () -> Util.halfLinearHalfCubic(driverPad.getLeftX() / driverPad.getLeftY() < 0.05 ? 0 : driverPad.getLeftX()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? robotMovementMultiplier : 1),
+                    () -> Util.halfLinearHalfCubic(driverPad.getRightX()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? robotMovementMultiplier : 1),
+                    () -> 0.0);
             CommandScheduler.getInstance().setDefaultCommand(mecanum, drive);
         }
+
         // driverPad.getGamepadButton(GamepadKeys.Button.A).whenPressed(new RetractCommand(wrist,
         // pivot, extension));
 

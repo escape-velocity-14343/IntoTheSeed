@@ -25,8 +25,11 @@ android {
 
 spotless {
     java {
-        target '**/*.java'
-        googleJavaFormat('1.17.0').aosp() // Use Google's Java Formatter (AOSP style)
+//        target '**/*.java'
+        target 'src/*/webapp/**/*.css', 'src/*/webapp/**/*.scss'
+
+//        googleJavaFormat().aosp().reflowLongStrings() // Use Google's Java Formatter (AOSP style)
+        prettier()
         removeUnusedImports()
         trimTrailingWhitespace()
         indentWithSpaces(4) // Adjust indentation if needed
