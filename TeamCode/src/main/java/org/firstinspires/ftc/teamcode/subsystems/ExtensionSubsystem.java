@@ -282,7 +282,6 @@ public class ExtensionSubsystem extends SubsystemBase {
         FtcDashboard.getInstance().getTelemetry().addData("slide motor power", motor0.getPower());
         FtcDashboard.getInstance().getTelemetry().addData("manualControl", manualControlTrigger.get());
         FtcDashboard.getInstance().getTelemetry().addData("maxExtension", maxExtensionLimitTrigger.get());
-
     }
 }
 

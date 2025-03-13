@@ -46,19 +46,7 @@ public class PivotSubsystem extends SubsystemBase {
         this.extensionInches = extensionInches;
     }
 
-    @Override
-    public void periodic() {
-        double lastPos = currentPos;
-        currentPos = encoder.getAngle();
-        squid.setPID(PivotConstants.kPRetracted * (1- extensionInches.getAsDouble()/ SlideConstants.maxExtension) + PivotConstants.kPExtended * extensionInches.getAsDouble() / SlideConstants.maxExtension);
-        pivotVelocity = (lastPos - currentPos) / timer.seconds();
-        if (!manualControl) {
-            tiltToPos(target);
-        }
-        timer.reset();
-    }
-
-    public void setPower(double power) {
+    public void openloop(double power) {
         motor0.setPower(power*PivotConstants.direction);
         motor1.setPower(-power*PivotConstants.direction);
     }
@@ -73,7 +61,7 @@ public class PivotSubsystem extends SubsystemBase {
         if (power <= 0 && isClose(target) && target==PivotConstants.bottomLimit){
             power = -0.05;
         }
-        setPower(power);
+        openloop(power);
     }
 
     public void setTarget(double target){
@@ -111,5 +99,18 @@ public class PivotSubsystem extends SubsystemBase {
     public void stop() {
         motor0.setPower(0);
         motor1.setPower(0);
+    }
+
+
+    @Override
+    public void periodic() {
+        double lastPos = currentPos;
+        currentPos = encoder.getAngle();
+        squid.setPID(PivotConstants.kPRetracted * (1- extensionInches.getAsDouble()/ SlideConstants.maxExtension) + PivotConstants.kPExtended * extensionInches.getAsDouble() / SlideConstants.maxExtension);
+        pivotVelocity = (lastPos - currentPos) / timer.seconds();
+        if (!manualControl) {
+            tiltToPos(target);
+        }
+        timer.reset();
     }
 }

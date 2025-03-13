@@ -30,6 +30,24 @@ public class BasketSensorSubsystem extends SubsystemBase {
         sensorRight = hardwareMap.get(AnalogInput.class, "basketSensorRight");
     }
 
+    public void setDistanceUnit(DistanceUnit distanceUnit) {
+        unit = distanceUnit;
+    }
+
+    /**
+     * @return In whatever unit you set it to
+     */
+    public double getSensorLeft() {
+        return unit.fromCm(sensorLeftAverage * 500 / 3.3);
+    }
+
+    /**
+     * @return In whatever unit you set it to
+     */
+    public double getSensorRight() {
+        return unit.fromCm(sensorRightAverage * 500 / 3.3);
+    }
+
     @Override
     public void periodic() {
         sensorLeftData.add(sensorLeft.getVoltage());
@@ -49,23 +67,5 @@ public class BasketSensorSubsystem extends SubsystemBase {
         // noinspection OptionalGetWithoutIsPresent
         sensorRightAverage = sensorRightData.stream()
                 .reduce((total, el) -> total + el / sensorRightData.size()).get();
-    }
-
-    public void setDistanceUnit(DistanceUnit distanceUnit) {
-        unit = distanceUnit;
-    }
-
-    /**
-     * @return In whatever unit you set it to
-     */
-    public double getSensorLeft() {
-        return unit.fromCm(sensorLeftAverage * 500 / 3.3);
-    }
-
-    /**
-     * @return In whatever unit you set it to
-     */
-    public double getSensorRight() {
-        return unit.fromCm(sensorRightAverage * 500 / 3.3);
     }
 }

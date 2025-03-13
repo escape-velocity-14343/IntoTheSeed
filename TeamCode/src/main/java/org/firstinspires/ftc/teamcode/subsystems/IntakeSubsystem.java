@@ -22,7 +22,6 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private ElapsedTime lastResetTime;
 
-
     public IntakeSubsystem(HardwareMap hardwareMap) {
         intake = hardwareMap.crservo.get("intake");
         clawer = hardwareMap.servo.get("clawer");
@@ -32,7 +31,6 @@ public class IntakeSubsystem extends SubsystemBase {
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
         lastResetTime = new ElapsedTime();
     }
-
 
     /**
      * Speeds from 1.0 to -1.0
@@ -51,13 +49,16 @@ public class IntakeSubsystem extends SubsystemBase {
         clawer.setPosition(clawPos + IntakeConstants.clawOffset);
     }
 
-
     public double getFrontV() {
         return front.getVoltage();
     }
 
     public double getBackV() {
         return back.getVoltage();
+    }
+
+    public boolean getDSensorSupplier() {
+        return (front.getVoltage() > IntakeConstants.intakeSensorVoltageThres);
     }
 
     @Override
@@ -71,9 +72,5 @@ public class IntakeSubsystem extends SubsystemBase {
         }
 
         clawer.setPosition(clawPos + IntakeConstants.clawOffset);
-    }
-
-    public boolean getDSensorSupplier() {
-        return (front.getVoltage() > IntakeConstants.intakeSensorVoltageThres);
     }
 }
