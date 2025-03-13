@@ -62,7 +62,11 @@ public class ExtensionSubsystem extends SubsystemBase {
         this.initialize();
     }
 
-
+    /**
+     * Conditions for Extension losing power:
+     * 1. manualControl is true
+     * 2. past extension limits, GDC and physical limitations
+     */
     public void initialize() {
         manualControlTrigger = new Trigger(() -> manualControl);
         forwardTarget = new Trigger(() -> forwardTarget());
@@ -269,6 +273,9 @@ public class ExtensionSubsystem extends SubsystemBase {
         resetOffset = 0;
     }
 
+    /**
+     * The periodic loop for the subsystem.
+     */
     @Override
     public void periodic() {
         //Hardware Access every loop
