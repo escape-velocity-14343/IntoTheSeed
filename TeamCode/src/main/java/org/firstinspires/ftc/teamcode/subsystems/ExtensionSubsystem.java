@@ -73,10 +73,10 @@ public class ExtensionSubsystem extends SubsystemBase {
                         .and(new Trigger(() -> getCurrentInches() > SlideConstants.submersibleIntakeMaxExtension))
                         .and(forwardTarget)
                         .and(new Trigger(() -> pivotSubsystem.isClose(PivotConstants.intakePos)))
-                        .whenActive(() -> Log.i("A", "Extension limit has been breached"));
+                        .whenActive(() -> Log.i("A", "Submersible Extension limit has been breached"));
         maxExtensionLimitTrigger = new Trigger(() -> getCurrentInches() >= SlideConstants.maxExtension)
                 .and(forwardTarget)
-                .whenActive(() -> Log.i("A", "Extension limit has been breached"));
+                .whenActive(() -> Log.i("A", "Maximum Extension limit has been breached"));
 
         underZero.whenActive(this::reset);
         // Stall Detection is cooked because u might as well just have the driver run bucket or something to make sure it's unjammed
@@ -85,18 +85,35 @@ public class ExtensionSubsystem extends SubsystemBase {
 //        submersibleLimitTrigger.whileActiveContinuous(stopC());
     }
 
+    /**
+     * Checks whether the intended direction is up or down.
+     * <br> Is useful for extension limits, since AND conditions mean the power will never be set and cannot be observed.
+     * @return boolean
+     */
     public boolean forwardTarget(){
         return targetInches - getCurrentInches() > 0;
     }
 
+    /**
+     * Does the opposite of @forwardTarget
+     * @return boolean
+     */
     public boolean backwardTarget(){
         return !forwardTarget();
     }
 
+    /**
+     * Checks direction of applied power.
+     * @return boolean
+     */
     public boolean forwardPower() {
         return motor0.getPower() > 0 && motor1.getPower() < 0;
     }
 
+    /**
+     * Does the opposite of @forwardPower
+     * @return boolean
+     */
     public boolean backwardPower() {
         return !forwardPower();
     }
@@ -106,7 +123,8 @@ public class ExtensionSubsystem extends SubsystemBase {
     }
 
     /**
-     * @return A scalar that normalizes power outputs to the nominal voltage from the current voltage.
+     * A voltage scalar that normalizes power outputs to the nominal voltage from the current voltage
+     * @return double
      */
     public double getVoltageScalar() {
         return voltage.getVoltageNormalized();
@@ -120,12 +138,26 @@ public class ExtensionSubsystem extends SubsystemBase {
         return extensionPowerMul;
     }
 
+    /**
+     * Set's scalar for slide extension speed, ideally for manual control scaling
+     * @param extensionPowerMul
+     */
     public void setPowerMul(double extensionPowerMul) {
         this.extensionPowerMul = extensionPowerMul;
     }
 
     /**
-     * Sets the power of the slides
+     * Factory method for use inside a sequential command group
+     * @param extensionPowerMul
+     * @return Command
+     */
+    public Command setPowerMulC(double extensionPowerMul){
+        return new InstantCommand(() -> setPowerMul(extensionPowerMul));
+    }
+
+    /**
+     * Open Loop Slide Control
+     * @param power from [-1.0 to 1.0]
      */
     public void openloop(double power) {
         motor0.setPower(power * SlideConstants.direction);
@@ -148,18 +180,27 @@ public class ExtensionSubsystem extends SubsystemBase {
         return manualControl;
     }
 
+    /**
+     * Intended Access/Entry Point for ExtensionSubsystem
+     * @param inches
+     */
     public void setTargetInches(double inches){
         targetInches = inches;
     }
 
     /**
-     * this sets the target as well
+     * Internal Factory Method
+     * @param inches
      */
     private void extendInches(double inches) {
         targetInches = inches;
         extendToPosition((int) (inches * SlideConstants.ticksPerInch));
     }
 
+    /**
+     * Internal Factory Method
+     * @param ticks
+     */
     private void extendToPosition(int ticks) {
         // extensionPowerMul only applies to the squid output because the feedforward should stay constant
         double power =
@@ -172,36 +213,55 @@ public class ExtensionSubsystem extends SubsystemBase {
     }
 
     /**
-     * @param target in inches, use the same one as the pid target
+     * @param target in inches, uses the same one as the pid target
      */
     public boolean isClose(double target) {
         return Util.inRange(target, getCurrentInches(), SlideConstants.tolerance);
     }
 
     /**
-     * @return position in ticks
+     * Get current position in ticks
+     * @return double
      */
     public double getCurrentPosition() {
         return currentPos;
     }
 
+    /**
+     * Gets current position in Inches
+     * @return double
+     */
     public double getCurrentInches() {
         return getCurrentPosition() / SlideConstants.ticksPerInch;
     }
 
-    //Tempted to make this private lowk so also cancels everything else in the command scheduler, cuz ur forced to use stopC
+    /**
+     * Would be useful as an e-stop, binded to some trigger.
+     */
     public void stop() {
         openloop(0);
     }
 
+    /**
+     * Factory for stop()
+     * @return Command
+     */
     public Command stopC() {
         return new RunCommand(() -> stop(), this);
     }
 
+    /**
+     *
+     * @param targetInches
+     * @return
+     */
     public long getReasonableExtensionMillis(double targetInches) {
         return (long) (Math.abs(targetInches - getCurrentInches()) * SlideConstants.millisPerInch);
     }
 
+    /**
+     * Resets the position of the slides
+     */
     public void reset() {
         motor0.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor0.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
