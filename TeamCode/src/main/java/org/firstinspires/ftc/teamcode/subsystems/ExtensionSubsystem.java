@@ -251,9 +251,10 @@ public class ExtensionSubsystem extends SubsystemBase {
     }
 
     /**
-     *
+     * Gets upper bound on how long it should take us to go from current pos to target pos, in ms. <br>
+     * Used for timeouts.
      * @param targetInches
-     * @return
+     * @return long
      */
     public long getReasonableExtensionMillis(double targetInches) {
         return (long) (Math.abs(targetInches - getCurrentInches()) * SlideConstants.millisPerInch);
