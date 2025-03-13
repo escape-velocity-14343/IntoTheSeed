@@ -85,8 +85,6 @@ public class ExtensionSubsystem extends SubsystemBase {
         // V good for award bait-
 //        downwardsStallTrigger.whenActive(() -> resetOffset = getCurrentPosition());
 //        submersibleLimitTrigger.whileActiveContinuous(stopC());
-
-        setDefaultCommand(new RunCommand(() -> openloop(0), this));
     }
 
     public boolean forwardTarget(){
@@ -134,6 +132,14 @@ public class ExtensionSubsystem extends SubsystemBase {
     public void openloop(double power) {
         motor0.setPower(power * SlideConstants.direction);
         motor1.setPower(-power * SlideConstants.direction);
+    }
+
+    public Command enableManualControl(){
+        return new InstantCommand(() -> this.manualControl = true);
+    }
+
+    public Command disableManualControl(){
+        return new InstantCommand(() -> this.manualControl = false);
     }
 
     public void setManualControl(boolean set) {
@@ -209,12 +215,16 @@ public class ExtensionSubsystem extends SubsystemBase {
         //Hardware Access every loop
         currentPos = -motor0.getCurrentPosition() - resetOffset;
 
-        if (manualControlTrigger.negate().and(maxExtensionLimitTrigger.negate()).and(submersibleLimitTrigger.negate()).get()){
+        if (manualControlTrigger.negate().and(maxExtensionLimitTrigger.negate()).get()){
+            //.and(submersibleLimitTrigger.negate())
             extendInches(targetInches);
         }
 
         FtcDashboard.getInstance().getTelemetry().addData("slide position", this.getCurrentInches());
         FtcDashboard.getInstance().getTelemetry().addData("slide motor power", motor0.getPower());
+        FtcDashboard.getInstance().getTelemetry().addData("manualControl", manualControlTrigger.get());
+        FtcDashboard.getInstance().getTelemetry().addData("maxExtension", maxExtensionLimitTrigger.get());
+
     }
 }
 

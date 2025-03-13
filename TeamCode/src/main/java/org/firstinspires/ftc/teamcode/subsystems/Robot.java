@@ -83,10 +83,8 @@ public abstract class Robot extends LinearOpMode {
 
         pivot.setExtensionSupplier(extension::getCurrentInches);
 
-        // HOW DID THIS WORK
-        CommandScheduler.getInstance().registerSubsystem(extension, mecanum, pinpoint, pivot, wrist, intake, turret);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
+        CommandScheduler.getInstance().schedule(extension.disableManualControl());
     }
     public void update() {
         for (LynxModule hub : hubs) {
