@@ -38,8 +38,8 @@ public class ExtendCommand extends CommandBase {
     @Override
     public void initialize() {
         if (powerMul != null) {
-            oldExtensionPowerMul = extend.getExtensionPowerMul();
-            extend.setExtensionPowerMul(powerMul);
+            oldExtensionPowerMul = extend.getPowerMul();
+            extend.setPowerMul(powerMul);
         }
         extend.extendInches(target);
     }
@@ -52,7 +52,7 @@ public class ExtendCommand extends CommandBase {
     @Override
     public void end(boolean wasInterrupted) {
         if (powerMul != null) {
-            extend.setExtensionPowerMul(oldExtensionPowerMul);
+            extend.setPowerMul(oldExtensionPowerMul);
         }
         Log.i("%9", "Extension to " + target);
     }

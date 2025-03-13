@@ -24,7 +24,7 @@ public class ExtensionPIDTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         CachingVoltageSensor voltage = new CachingVoltageSensor(hardwareMap);
         pivot = new PivotSubsystem(hardwareMap, voltage);
-        extension = new ExtensionSubsystem(hardwareMap, pivot::getCurrentPosition, voltage);
+        extension = new ExtensionSubsystem(hardwareMap, pivot, voltage);
         WristSubsystem wrist = new WristSubsystem(hardwareMap);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         waitForStart();

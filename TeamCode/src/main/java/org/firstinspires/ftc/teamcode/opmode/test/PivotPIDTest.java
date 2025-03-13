@@ -22,7 +22,7 @@ public class PivotPIDTest extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         CachingVoltageSensor voltage = new CachingVoltageSensor(hardwareMap);
         PivotSubsystem pivot = new PivotSubsystem(hardwareMap, voltage);
-        ExtensionSubsystem extension = new ExtensionSubsystem(hardwareMap, pivot::getCurrentPosition, voltage);
+        ExtensionSubsystem extension = new ExtensionSubsystem(hardwareMap, pivot, voltage);
         WristSubsystem wrist = new WristSubsystem(hardwareMap);
         pivot.setExtensionSupplier(extension::getCurrentInches);
         waitForStart();

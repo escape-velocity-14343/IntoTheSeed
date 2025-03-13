@@ -92,6 +92,10 @@ public class PivotSubsystem extends SubsystemBase {
         return Util.inRange(target, currentPos, PivotConstants.tolerance);// || currentPos < PivotConstants.bottomLimit;
     }
 
+    /**
+     *
+     * @return In degrees
+     */
     public double getCurrentPosition() {
         return currentPos;
     }
