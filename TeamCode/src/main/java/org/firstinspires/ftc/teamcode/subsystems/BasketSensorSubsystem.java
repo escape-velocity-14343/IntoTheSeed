@@ -1,15 +1,12 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
 import java.util.LinkedList;
 import java.util.Queue;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 public class BasketSensorSubsystem extends SubsystemBase {
@@ -56,8 +53,10 @@ public class BasketSensorSubsystem extends SubsystemBase {
         }
 
         // noinspection OptionalGetWithoutIsPresent
-        sensorLeftAverage = sensorLeftData.stream()
-                .reduce((total, el) -> total + el / sensorLeftData.size()).get();
+        sensorLeftAverage =
+                sensorLeftData.stream()
+                        .reduce((total, el) -> total + el / sensorLeftData.size())
+                        .get();
 
         sensorRightData.add(sensorRight.getVoltage());
         if (sensorRightData.size() > rollingAverageSize) {
@@ -65,7 +64,9 @@ public class BasketSensorSubsystem extends SubsystemBase {
         }
 
         // noinspection OptionalGetWithoutIsPresent
-        sensorRightAverage = sensorRightData.stream()
-                .reduce((total, el) -> total + el / sensorRightData.size()).get();
+        sensorRightAverage =
+                sensorRightData.stream()
+                        .reduce((total, el) -> total + el / sensorRightData.size())
+                        .get();
     }
 }

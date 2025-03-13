@@ -4,7 +4,6 @@
  * It is extraordinarily rare that you will ever need to edit this file.
  */
 
-
 buildscript {
     repositories {
         mavenCentral()
@@ -13,12 +12,11 @@ buildscript {
     dependencies {
         // Note for FTC Teams: Do not modify this yourself.
         classpath 'com.android.tools.build:gradle:8.7.0'
+        classpath 'com.diffplug.spotless:spotless-plugin-gradle:6.25.0'
     }
 }
 
-plugins {
-    id("com.diffplug.spotless") version "6.25.0"
-}
+
 
 // This is now required because aapt2 has to be downloaded from the
 // google() repository beginning with version 3.2 of the Android Gradle Plugin

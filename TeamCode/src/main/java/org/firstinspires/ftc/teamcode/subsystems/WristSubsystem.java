@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
-
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 
 @Config
@@ -25,7 +24,7 @@ public class WristSubsystem extends SubsystemBase {
         this.rotation = rotation + IntakeConstants.wristOffset;
     }
 
-    //TODO: if we use analog thing make it return actual position
+    // TODO: if we use analog thing make it return actual position
     public double getPosition() {
         return wrist.getPosition();
     }

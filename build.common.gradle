@@ -20,21 +20,19 @@ import java.util.regex.Pattern
 apply plugin: 'com.android.application'
 apply plugin: 'com.diffplug.spotless'
 
-spotless {
-    java {
-        removeUnusedImports()
-
-        // Cleanthat will refactor your code, but it may break your style: apply it before your formatter
-        cleanthat()          // has its own section below
-
-        // Choose one of these formatters.
-        googleJavaFormat()   // has its own section below
-
-        formatAnnotations()  // fixes formatting of type annotations, see below
-
-        licenseHeader '/* (C) $YEAR */' // or licenseHeaderFile
-    }
-}
+//spotless {
+//    java {
+//        target 'src/*/java/**/*.java'
+//
+//        removeUnusedImports()
+//        // Choose one of these formatters.
+//        googleJavaFormat()   // has its own section below
+//
+//        formatAnnotations()  // fixes formatting of type annotations, see below
+//
+//        licenseHeader '/* (C) $YEAR */' // or licenseHeaderFile
+//    }
+//}
 
 android {
 

@@ -34,15 +34,21 @@ public class DrivetrainSquIDController {
 
         double distance = Math.max(getDistanceFromVelocity(currentVelMag), 0);
 
-        currentPose = currentPose.plus(new Transform2d(new Translation2d(Math.cos(velAngle) * distance,
-                Math.sin(velAngle) * distance), new Rotation2d()));
+        currentPose =
+                currentPose.plus(
+                        new Transform2d(
+                                new Translation2d(
+                                        Math.cos(velAngle) * distance,
+                                        Math.sin(velAngle) * distance),
+                                new Rotation2d()));
 
         double magnitude = currentPose.getTranslation().getDistance(targetPose.getTranslation());
         magnitude = squid.calculate(magnitude, 0);
         Translation2d delta = targetPose.getTranslation().minus(currentPose.getTranslation());
         double posAngle = Math.atan2(delta.getY(), delta.getX());
         loopTime.reset();
-        return new Pose2d(Math.cos(posAngle) * magnitude, Math.sin(posAngle) * magnitude, new Rotation2d());
+        return new Pose2d(
+                Math.cos(posAngle) * magnitude, Math.sin(posAngle) * magnitude, new Rotation2d());
     }
 
     private static double getDistanceFromVelocity(double velocity) {
@@ -50,5 +56,4 @@ public class DrivetrainSquIDController {
         // equation from regression
         return 0.00286 * velocity * velocity + 0.304 * velocity - 0.837;
     }
-
 }

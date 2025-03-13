@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.commands.custom;
 
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
-
 import java.util.function.BooleanSupplier;
 
 public class InterruptCommand extends CommandBase {

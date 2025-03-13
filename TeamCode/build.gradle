@@ -23,6 +23,17 @@ android {
     }
 }
 
+spotless {
+    java {
+        target '**/*.java'
+        googleJavaFormat('1.17.0').aosp() // Use Google's Java Formatter (AOSP style)
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        indentWithSpaces(4) // Adjust indentation if needed
+        endWithNewline()
+    }
+}
+
 dependencies {
     implementation project(':FtcRobotController')
 }

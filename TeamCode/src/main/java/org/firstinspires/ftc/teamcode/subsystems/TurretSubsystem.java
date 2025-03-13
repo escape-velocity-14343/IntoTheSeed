@@ -4,7 +4,6 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
-
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 
 public class TurretSubsystem extends SubsystemBase {
@@ -26,8 +25,8 @@ public class TurretSubsystem extends SubsystemBase {
         double correctedAngle = angle - IntakeConstants.minAngle;
         return correctedAngle / range;
     }
+
     public double getPosition() {
         return position;
     }
-
 }

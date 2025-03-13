@@ -1,4 +1,3 @@
-
 package org.firstinspires.ftc.teamcode.constants;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -23,7 +22,6 @@ public class PivotConstants {
     public static double neutralPos = bottomLimit;
     public static double intakeReadyPos = 13;
     public static double intakePos = 7.5;
-
 
     public static double specimenIntakeAngle = topLimit;
     public static double specimenTopBarAngle = 63;

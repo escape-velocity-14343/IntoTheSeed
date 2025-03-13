@@ -3,11 +3,9 @@ package org.firstinspires.ftc.teamcode.commands.custom;
 import static org.firstinspires.ftc.teamcode.constants.AutoConstants.autoscoreMaxVel;
 
 import android.util.Log;
-
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.teamcode.subsystems.PinpointSubsystem;
 
 public class WaitUntilStabilizedCommand extends CommandBase {
@@ -16,7 +14,7 @@ public class WaitUntilStabilizedCommand extends CommandBase {
     ElapsedTime timer = new ElapsedTime();
     Double timeout = 0.02;
 
-    public WaitUntilStabilizedCommand(PinpointSubsystem pinpointSubsystem){
+    public WaitUntilStabilizedCommand(PinpointSubsystem pinpointSubsystem) {
         this.pinpointSubsystem = pinpointSubsystem;
         timer.reset();
     }
@@ -33,7 +31,8 @@ public class WaitUntilStabilizedCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return (pinpointSubsystem.getVelocity().getTranslation().getNorm() < autoscoreMaxVel && (timer.seconds() > timeout));
+        return (pinpointSubsystem.getVelocity().getTranslation().getNorm() < autoscoreMaxVel
+                && (timer.seconds() > timeout));
     }
 
     @Override

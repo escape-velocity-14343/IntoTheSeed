@@ -1,9 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands.custom;
 
 import android.util.Log;
-
 import com.arcrobotics.ftclib.command.InstantCommand;
-
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 
 public class IntakeClawCommand extends InstantCommand {
@@ -12,6 +10,7 @@ public class IntakeClawCommand extends InstantCommand {
 
     /**
      * Positive is outtake, negative is intake
+     *
      * @param intake
      * @param position
      */
@@ -20,6 +19,7 @@ public class IntakeClawCommand extends InstantCommand {
         this.intake = intake;
         this.position = position;
     }
+
     @Override
     public void initialize() {
         intake.setClawer(position);

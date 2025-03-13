@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -9,7 +8,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 
 @Config
@@ -33,9 +31,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     /**
-     * Speeds from 1.0 to -1.0
-     * Positive is outtake
-     * Negative is intake
+     * Speeds from 1.0 to -1.0 Positive is outtake Negative is intake
      *
      * @param speed
      */

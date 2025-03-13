@@ -5,15 +5,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
+import java.util.function.DoubleSupplier;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.AnalogEncoder;
 import org.firstinspires.ftc.teamcode.lib.CachingVoltageSensor;
 import org.firstinspires.ftc.teamcode.lib.SquIDController;
 import org.firstinspires.ftc.teamcode.lib.Util;
-
-import java.util.function.DoubleSupplier;
 
 public class PivotSubsystem extends SubsystemBase {
     private DcMotor motor0, motor1;
@@ -47,24 +45,25 @@ public class PivotSubsystem extends SubsystemBase {
     }
 
     public void openloop(double power) {
-        motor0.setPower(power*PivotConstants.direction);
-        motor1.setPower(-power*PivotConstants.direction);
+        motor0.setPower(power * PivotConstants.direction);
+        motor1.setPower(-power * PivotConstants.direction);
     }
 
     public void tiltToPos(double target) {
         manualControl = false;
         setTarget(target);
-        double power = squid.calculate(target, getCurrentPosition()) * voltage.getVoltageNormalized();
-        //if (currentPos > PivotConstants.topLimit-1 && power >= 0) {
+        double power =
+                squid.calculate(target, getCurrentPosition()) * voltage.getVoltageNormalized();
+        // if (currentPos > PivotConstants.topLimit-1 && power >= 0) {
         //    power = 0.3;
-        //}
-        if (power <= 0 && isClose(target) && target==PivotConstants.bottomLimit){
+        // }
+        if (power <= 0 && isClose(target) && target == PivotConstants.bottomLimit) {
             power = -0.05;
         }
         openloop(power);
     }
 
-    public void setTarget(double target){
+    public void setTarget(double target) {
         manualControl = false;
         this.target = target;
     }
@@ -74,14 +73,16 @@ public class PivotSubsystem extends SubsystemBase {
     }
 
     /**
-    * @param target in inches, use the same one as the pid target
-    */
+     * @param target in inches, use the same one as the pid target
+     */
     public boolean isClose(double target) {
-        return Util.inRange(target, currentPos, PivotConstants.tolerance);// || currentPos < PivotConstants.bottomLimit;
+        return Util.inRange(
+                target,
+                currentPos,
+                PivotConstants.tolerance); // || currentPos < PivotConstants.bottomLimit;
     }
 
     /**
-     *
      * @return In degrees
      */
     public double getCurrentPosition() {
@@ -101,12 +102,16 @@ public class PivotSubsystem extends SubsystemBase {
         motor1.setPower(0);
     }
 
-
     @Override
     public void periodic() {
         double lastPos = currentPos;
         currentPos = encoder.getAngle();
-        squid.setPID(PivotConstants.kPRetracted * (1- extensionInches.getAsDouble()/ SlideConstants.maxExtension) + PivotConstants.kPExtended * extensionInches.getAsDouble() / SlideConstants.maxExtension);
+        squid.setPID(
+                PivotConstants.kPRetracted
+                                * (1 - extensionInches.getAsDouble() / SlideConstants.maxExtension)
+                        + PivotConstants.kPExtended
+                                * extensionInches.getAsDouble()
+                                / SlideConstants.maxExtension);
         pivotVelocity = (lastPos - currentPos) / timer.seconds();
         if (!manualControl) {
             tiltToPos(target);

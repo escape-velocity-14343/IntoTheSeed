@@ -1,23 +1,19 @@
 package org.firstinspires.ftc.teamcode.commands.custom;
 
 import android.util.Log;
-
 import com.arcrobotics.ftclib.command.CommandBase;
-
-import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
-
 import javax.annotation.Nullable;
+import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
 
 public class ExtendCommand extends CommandBase {
     ExtensionSubsystem extend;
     double target;
-    @Nullable
-    private Double powerMul = null;
+    @Nullable private Double powerMul = null;
     private double oldExtensionPowerMul;
 
     /**
      * @param subsystem
-     * @param target    in inches
+     * @param target in inches
      */
     public ExtendCommand(ExtensionSubsystem subsystem, double target) {
         this.extend = subsystem;
@@ -27,8 +23,9 @@ public class ExtendCommand extends CommandBase {
 
     /**
      * @param subsystem
-     * @param target    in inches
-     * @param powerMul  the power multipler to feed into the subsystem, will reset to the previous power multiplier once command finishes
+     * @param target in inches
+     * @param powerMul the power multipler to feed into the subsystem, will reset to the previous
+     *     power multiplier once command finishes
      */
     public ExtendCommand(ExtensionSubsystem subsystem, double target, double powerMul) {
         this(subsystem, target);

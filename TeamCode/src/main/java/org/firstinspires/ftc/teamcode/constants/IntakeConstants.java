@@ -27,7 +27,6 @@ public class IntakeConstants {
     public static double closedPos = 0.9;
     public static double singleIntakePos = 0.85;
 
-
     public static double clawOffset = -0.1;
 
     // turret constants
@@ -36,7 +35,6 @@ public class IntakeConstants {
 
     // randomly worked from old folded pos
     public static double rightAnglePos = 0.86;
-
 
     // auto constants
     public static double autoOuttakeSpeed = -0.15;
@@ -52,5 +50,4 @@ public class IntakeConstants {
     public static double wristOffset = -0.15;
 
     public static double intakeSensorVoltageThres = 0.25;
-
 }

@@ -1,10 +1,7 @@
 package org.firstinspires.ftc.teamcode.lib;
 
-
-
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class AnalogEncoder {
@@ -29,27 +26,26 @@ public class AnalogEncoder {
         inverted = false;
     }
 
-    public AnalogEncoder(String key, HardwareMap hMap){
+    public AnalogEncoder(String key, HardwareMap hMap) {
         this.sensor = hMap.analogInput.get(key);
     }
 
-    public void setInverted(boolean inverted){
+    public void setInverted(boolean inverted) {
         this.inverted = inverted;
     }
 
-    /**
-     * Sets offset of the encoder
-     */
-    public void setPositionOffset(double offset){
+    /** Sets offset of the encoder */
+    public void setPositionOffset(double offset) {
         this.offset = offset;
     }
 
-    public void setMaxVoltage(double maxVoltage){
+    public void setMaxVoltage(double maxVoltage) {
         this.maxVoltage = maxVoltage;
     }
 
     /**
      * Sets the maximum angle of the analog encoder. This means that 3.3V = max angle.
+     *
      * @param maxAngle Angle at 3.3V.
      */
     public void setMaxAngle(double maxAngle) {
@@ -59,15 +55,15 @@ public class AnalogEncoder {
     /**
      * @return Degrees
      */
-    public double getAngle(){
-        return AngleUnit.normalizeDegrees((inverted ? -1 : 1) * (sensor.getVoltage() * maxAngle/maxVoltage) + offset);
+    public double getAngle() {
+        return AngleUnit.normalizeDegrees(
+                (inverted ? -1 : 1) * (sensor.getVoltage() * maxAngle / maxVoltage) + offset);
     }
+
     /**
-    * @return who would know
-    */
+     * @return who would know
+     */
     public double getRadians() {
         return Math.toRadians(getAngle());
     }
-
-
 }
