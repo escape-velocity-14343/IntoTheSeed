@@ -16,7 +16,7 @@ public class IntakeConstants {
     public static double bucketRetractPos = 0.05;
     public static double specimenReadyPos = 0.63;
     public static double intakeReadyPos = 0.8;
-    public static double toptakePos = 0.6;
+    public static double toptakePos = 0.55;
 
     // wrist command constants
     public static double timeMultiplier = 0.27;
@@ -27,7 +27,7 @@ public class IntakeConstants {
     public static double closedPos = 0.9;
     public static double singleIntakePos = 0.85;
 
-    public static double clawOffset = -0.1;
+    public static double clawOffset = 0.08;
 
     // turret constants
     public static double minAngle = -130;
@@ -47,7 +47,7 @@ public class IntakeConstants {
 
     // global offset
     // 1 tooth of skip = 0.05 position
-    public static double wristOffset = -0.15;
+    public static double wristOffset = -0.125;
 
     public static double intakeSensorVoltageThres = 0.25;
 }
