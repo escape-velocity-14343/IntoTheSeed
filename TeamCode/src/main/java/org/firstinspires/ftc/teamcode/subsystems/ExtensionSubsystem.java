@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import java.util.function.DoubleSupplier;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.CachingVoltageSensor;
@@ -64,7 +65,7 @@ public class ExtensionSubsystem extends SubsystemBase {
      * Conditions for Extension losing power: 1. manualControl is true 2. past extension limits, GDC
      * and physical limitations
      */
-    public void initialize() {
+    private void initialize() {
         manualControlTrigger = new Trigger(() -> manualControl);
         forwardTargetTrigger = new Trigger(() -> forwardTarget());
         underZeroTrigger = new Trigger(() -> getCurrentPosition() < 0);
@@ -176,12 +177,21 @@ public class ExtensionSubsystem extends SubsystemBase {
     }
 
     /**
-     * Returns a RunCommand factory, for binding to operator triggers during manual control
+     * Sets openloop power to the motors.
+     * <br><br>
+     * Returns a RunCommand factory, for binding to operator triggers during manual control,
+     * and for pure open loop control, like for stalling the robot.
+     * <br> Bind to a Trigger that is decorated with the manual control Trigger!
+     * <br> Throws warning if manual control is not enabled.
      * @param power
      * @return RunCommand Factory
      */
     public Command openloopC(DoubleSupplier power){
-        return new RunCommand(() -> openloopS(power), this);
+        if (manualControl){
+            return new RunCommand(() -> openloopS(power), this);
+        }
+        Log.i("WARNING", "RAN OPEN LOOP WHEN MANUAL CONTROL WAS NOT ENABLED");
+        return new InstantCommand();
     }
 
     /**
@@ -198,7 +208,7 @@ public class ExtensionSubsystem extends SubsystemBase {
      *
      * @param power from [-1.0 to 1.0]
      */
-    public void openloop(double power) {
+    private void openloop(double power) {
         motor0.setPower(power * SlideConstants.direction);
         motor1.setPower(-power * SlideConstants.direction);
     }
@@ -221,11 +231,30 @@ public class ExtensionSubsystem extends SubsystemBase {
 
     /**
      * Intended Access/Entry Point for ExtensionSubsystem
-     *
+     * <br> The way it's wrapped with Extend command adds logging and end state functionality.
      * @param inches
      */
     public void setTargetInches(double inches) {
         targetInches = inches;
+    }
+
+    /**
+     * Regular Extend Command reference owned in the subsystem. <br>
+     * See @ExtendCommand for actual implementation.
+     * @param target
+     * @return Command
+     */
+    public Command getExtendCommand(double target){
+        return new ExtendCommand(this, target);
+    }
+
+    /**
+     * Run Command factory for extend command, that never ends.
+     * @param target
+     * @return Command
+     */
+    public Command getExtendCommand(DoubleSupplier target){
+        return new RunCommand(() -> this.setTargetInches(target.getAsDouble()), this);
     }
 
     /**
