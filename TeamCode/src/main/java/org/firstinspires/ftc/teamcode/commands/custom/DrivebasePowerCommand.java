@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands.custom;
 
 import com.arcrobotics.ftclib.command.CommandBase;
-
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
 
 public class DrivebasePowerCommand extends CommandBase {
@@ -10,7 +9,8 @@ public class DrivebasePowerCommand extends CommandBase {
     private double yPower;
     private double hPower;
 
-    public DrivebasePowerCommand(MecanumDriveSubsystem drive, double xPower, double yPower, double hPower) {
+    public DrivebasePowerCommand(
+            MecanumDriveSubsystem drive, double xPower, double yPower, double hPower) {
         this.drive = drive;
         this.xPower = xPower;
         this.yPower = yPower;

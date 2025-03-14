@@ -1,16 +1,19 @@
 package org.firstinspires.ftc.teamcode.commands.custom;
 
 import com.arcrobotics.ftclib.command.CommandBase;
-
-import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
-
 import java.util.function.DoubleSupplier;
+import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
 
 public class DefaultDriveCommand extends CommandBase {
     MecanumDriveSubsystem drive;
     DoubleSupplier x, y, rx, heading;
 
-    public DefaultDriveCommand(MecanumDriveSubsystem driveSubsystem, DoubleSupplier inputX, DoubleSupplier inputY, DoubleSupplier inputRx, DoubleSupplier robotHeading) {
+    public DefaultDriveCommand(
+            MecanumDriveSubsystem driveSubsystem,
+            DoubleSupplier inputX,
+            DoubleSupplier inputY,
+            DoubleSupplier inputRx,
+            DoubleSupplier robotHeading) {
         this.drive = driveSubsystem;
         this.x = inputX;
         this.y = inputY;
@@ -21,7 +24,11 @@ public class DefaultDriveCommand extends CommandBase {
 
     @Override
     public void execute() {
-        drive.driveFieldCentric(-x.getAsDouble() + getXModPower(), y.getAsDouble() + getYModPower(), rx.getAsDouble() + getRModPower(), heading.getAsDouble());
+        drive.driveFieldCentric(
+                -x.getAsDouble() + getXModPower(),
+                y.getAsDouble() + getYModPower(),
+                rx.getAsDouble() + getRModPower(),
+                heading.getAsDouble());
     }
 
     public double getXModPower() {

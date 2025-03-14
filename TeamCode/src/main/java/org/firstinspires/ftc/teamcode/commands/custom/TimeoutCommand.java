@@ -37,5 +37,4 @@ public class TimeoutCommand extends CommandBase {
     public boolean isFinished() {
         return command.isFinished() || timer.milliseconds() > timeoutMs;
     }
-
 }

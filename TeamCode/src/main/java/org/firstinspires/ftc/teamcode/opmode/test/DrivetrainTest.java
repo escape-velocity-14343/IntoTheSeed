@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@TeleOp(group="1")
+@TeleOp(group = "1")
 public class DrivetrainTest extends LinearOpMode {
 
     @Override
@@ -24,8 +24,5 @@ public class DrivetrainTest extends LinearOpMode {
             br.setPower(-gamepad1.right_stick_y);
             bl.setPower(gamepad1.right_stick_x);
         }
-
-
     }
-
 }

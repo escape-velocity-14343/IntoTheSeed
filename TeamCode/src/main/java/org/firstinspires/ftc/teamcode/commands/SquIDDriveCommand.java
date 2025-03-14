@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.geometry.Pose2d;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -28,7 +27,12 @@ public class SquIDDriveCommand extends CommandBase {
     // default: 2°
     private double angularTolerance = 2;
 
-    public SquIDDriveCommand(PinpointSubsystem otos, MecanumDriveSubsystem drive, SquIDController controllerX, SquIDController controllerY, SquIDController controllerH) {
+    public SquIDDriveCommand(
+            PinpointSubsystem otos,
+            MecanumDriveSubsystem drive,
+            SquIDController controllerX,
+            SquIDController controllerY,
+            SquIDController controllerH) {
         this.otos = otos;
         this.drive = drive;
         this.controllerX = controllerX;
@@ -37,7 +41,8 @@ public class SquIDDriveCommand extends CommandBase {
         addRequirements(otos, drive);
     }
 
-    public SquIDDriveCommand(PinpointSubsystem otos, MecanumDriveSubsystem drive, double pX, double pY, double pH) {
+    public SquIDDriveCommand(
+            PinpointSubsystem otos, MecanumDriveSubsystem drive, double pX, double pY, double pH) {
         this(otos, drive, new SquIDController(), new SquIDController(), new SquIDController());
         controllerX.setPID(pX);
         controllerY.setPID(pY);
@@ -67,8 +72,7 @@ public class SquIDDriveCommand extends CommandBase {
         drive.driveFieldCentric(
                 controllerX.calculate(target.getX(DistanceUnit.INCH), otosPose.getX()),
                 controllerY.calculate(target.getY(DistanceUnit.INCH), otosPose.getY()),
-                controllerH.calculate(target.getHeading(AngleUnit.DEGREES), otosPose.getHeading())
-        );
+                controllerH.calculate(target.getHeading(AngleUnit.DEGREES), otosPose.getHeading()));
     }
 
     @Override
@@ -77,8 +81,10 @@ public class SquIDDriveCommand extends CommandBase {
 
         double dx = (target.getX(DistanceUnit.INCH) - otosPose.getX());
         double dy = (target.getY(DistanceUnit.INCH) - otosPose.getY());
-        double linearDistance = Math.sqrt(dx*dx + dy*dy);
-        double angularDistance = Util.getAngularDifference(target.getHeading(AngleUnit.DEGREES), otosPose.getRotation().getDegrees());
+        double linearDistance = Math.sqrt(dx * dx + dy * dy);
+        double angularDistance =
+                Util.getAngularDifference(
+                        target.getHeading(AngleUnit.DEGREES), otosPose.getRotation().getDegrees());
 
         return linearDistance < linearTolerance && angularDistance < angularTolerance;
     }

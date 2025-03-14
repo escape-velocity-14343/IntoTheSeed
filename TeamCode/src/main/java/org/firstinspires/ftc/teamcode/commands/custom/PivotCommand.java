@@ -1,9 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands.custom;
 
 import android.util.Log;
-
 import com.arcrobotics.ftclib.command.CommandBase;
-
 import org.firstinspires.ftc.teamcode.subsystems.PivotSubsystem;
 
 public class PivotCommand extends CommandBase {
@@ -11,11 +9,9 @@ public class PivotCommand extends CommandBase {
     double target;
 
     /**
-     *
      * @param pivotSubsystem
      * @param target in degrees
      */
-
     public PivotCommand(PivotSubsystem pivotSubsystem, double target) {
         this.pivotSubsystem = pivotSubsystem;
         this.target = target;
@@ -23,19 +19,19 @@ public class PivotCommand extends CommandBase {
     }
 
     @Override
-    public void initialize(){
+    public void initialize() {
         pivotSubsystem.setTarget(target);
     }
 
     @Override
     public void execute() {
-        //Log.v("%12", "Pivot Debug Target: " + target);
-        //Log.v("%12", "Pivot Debug Position: " + pivotSubsystem.getCurrentPosition());
-        //Log.v("%12", "Pivot Debug isClose: " + isFinished());
+        // Log.v("%12", "Pivot Debug Target: " + target);
+        // Log.v("%12", "Pivot Debug Position: " + pivotSubsystem.getCurrentPosition());
+        // Log.v("%12", "Pivot Debug isClose: " + isFinished());
     }
 
     @Override
-    public boolean isFinished(){
+    public boolean isFinished() {
         return pivotSubsystem.isClose(target);
     }
 

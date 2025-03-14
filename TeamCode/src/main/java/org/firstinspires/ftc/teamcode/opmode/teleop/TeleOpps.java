@@ -1,45 +1,25 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
-import static org.firstinspires.ftc.teamcode.constants.AutoConstants.autoscoreMaxVel;
-import static org.firstinspires.ftc.teamcode.constants.AutoConstants.scorePos;
-
-import android.util.Log;
-
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.ParallelCommandGroup;
-import com.arcrobotics.ftclib.command.PerpetualCommand;
-import com.arcrobotics.ftclib.command.RunCommand;
-import com.arcrobotics.ftclib.command.ScheduleCommand;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitCommand;
-import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.arcrobotics.ftclib.geometry.Pose2d;
-import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.commands.custom.BasketAlignCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.DefaultDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
-import org.firstinspires.ftc.teamcode.commands.custom.RunIfCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
 import org.firstinspires.ftc.teamcode.commands.group.IntakeRetractCommand;
 import org.firstinspires.ftc.teamcode.commands.group.RetractCommand;
+import org.firstinspires.ftc.teamcode.commands.group.SubPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosReadyCommand;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.Util;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
-
-import javax.crypto.spec.OAEPParameterSpec;
 
 @TeleOp(group = "0", name = "TeleOpp")
 @Config
@@ -82,8 +62,9 @@ public class TeleOpps extends Robot {
                     () -> 0.0);
             CommandScheduler.getInstance().setDefaultCommand(mecanum, drive);
         }
-        //driverPad.getGamepadButton(GamepadKeys.Button.A).whenPressed(new RetractCommand(wrist, pivot, extension));
 
+        // driverPad.getGamepadButton(GamepadKeys.Button.A).whenPressed(new RetractCommand(wrist,
+        // pivot, extension));
 
         configureDriver();
         configureOperator();
@@ -105,9 +86,9 @@ public class TeleOpps extends Robot {
             telemetry.addData("pose x", pinpoint.getPose().getX());
             telemetry.addData("pose y", pinpoint.getPose().getY());
             telemetry.addData("pose heading", pinpoint.getPose().getRotation().getDegrees());
-            //if (intake.getFrontV()>IntakeConstants.intakeSensorVoltageThres) {
+            // if (intake.getFrontV()>IntakeConstants.intakeSensorVoltageThres) {
             //    gamepad1.rumble(100);
-            //}
+            // }
             timer.reset();
             update();
         }
@@ -120,49 +101,95 @@ public class TeleOpps extends Robot {
         new Trigger(() -> gamepad1.options).whileActiveOnce(new InstantCommand(pinpoint::resetYaw));
 
         // ------- BUCKET --------
-        driverPad.getGamepadButton(GamepadKeys.Button.X)
-                .whenPressed(bucketPos());
+        driverPad.getGamepadButton(GamepadKeys.Button.X).and(extension.extended.negate()).whenActive(bucketPos());
 
-        driverPad.getGamepadButton(GamepadKeys.Button.A).whenPressed(
-                new RetractCommand(wrist, pivot, extension, turret)
-        );
+        driverPad
+                .getGamepadButton(GamepadKeys.Button.A)
+                .whenPressed(new RetractCommand(wrist, pivot, extension, turret));
 
         // ------- INTAKE -------
-        new Trigger(() -> gamepad1.right_trigger > 0.01).whileActiveOnce(
-               new ScheduleCommand(new SubPosReadyCommand(extension, pivot, wrist, intake, turret, 0, SlideConstants.submersibleIntakeMaxExtension))
-        );
+        driverPad
+                .getGamepadButton(GamepadKeys.Button.Y)
+                .whenPressed(
+                        new SubPosReadyCommand(
+                                extension,
+                                pivot,
+                                wrist,
+                                intake,
+                                turret,
+                                0,
+                                SlideConstants.submersibleIntakeMaxExtension));
 
-        new Trigger(() -> gamepad1.left_trigger > 0.01).whileActiveOnce(
-                new ScheduleCommand(new SubPosReadyCommand(extension, pivot, wrist, intake, turret, 90, SlideConstants.submersibleIntakeMaxExtension))
-        );
+        driverPad
+                .getGamepadButton(GamepadKeys.Button.B)
+                .whenPressed(
+                        new SubPosReadyCommand(
+                                extension,
+                                pivot,
+                                wrist,
+                                intake,
+                                turret,
+                                90,
+                                SlideConstants.submersibleIntakeMaxExtension));
 
-        driverPad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                        subPos().andThen(
-                                new WaitCommand(400),
-                                new IntakeRetractCommand(wrist, pivot, extension, turret)
-                        )
-        ).whenReleased(
-                new IntakeRetractCommand(wrist, pivot, extension, turret).alongWith(
-                        new IntakeControlCommand(intake, IntakeConstants.closedPos, 0)
-                )
-        );
+        //        driverPad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
+        //                new TurretCommand(turret, turret.getPosition()-25)
+        //        );
+        //        driverPad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
+        //                new TurretCommand(turret, turret.getPosition()+25)
+        //        );
 
-        driverPad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .whenPressed(new IntakeClawCommand(intake, IntakeConstants.openPos))
-                .whenReleased(
+        new Trigger(
+                        () ->
+                                driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05
+                                        && driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)
+                                                < 0.6)
+                .whileActiveContinuous(
+                        new SubPosCommand(
+                                extension,
+                                wrist,
+                                intake,
+                                pivot,
+                                () -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
+        new Trigger(() -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >= 0.8)
+                .whileActiveOnce(subPos())
+                .whenInactive(
+                        new IntakeRetractCommand(wrist, pivot, extension, turret)
+                                .alongWith(
+                                        new IntakeControlCommand(
+                                                intake, IntakeConstants.closedPos, 0)));
+
+        new Trigger(() -> driverPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) >= 0.8)
+                .whileActiveOnce(new IntakeClawCommand(intake, IntakeConstants.openPos))
+                .whenInactive(
                         new ConditionalCommand(
                                 new IntakeClawCommand(intake, IntakeConstants.singleIntakePos),
                                 new IntakeClawCommand(intake, IntakeConstants.closedPos),
-                                () ->  getState() == FSMStates.INTAKE));
-
-
+                                () -> getState() == FSMStates.INTAKE));
     }
 
     public void configureOperator() {
+        operatorPad
+                .getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
+                .whenPressed(new TurretCommand(turret, () -> turret.getPosition() - 45));
+        operatorPad
+                .getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
+                .whenPressed(new TurretCommand(turret, () -> turret.getPosition() + 45));
+
+        operatorPad
+                .getGamepadButton(GamepadKeys.Button.B)
+                .whenPressed(
+                        new SubPosReadyCommand(
+                                extension,
+                                pivot,
+                                wrist,
+                                intake,
+                                turret,
+                                90,
+                                SlideConstants.submersibleIntakeMinExtension));
     }
 
-    public void configureDualControl() {
-    }
+    public void configureDualControl() {}
 }
 
 //  ______________

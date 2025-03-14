@@ -16,7 +16,7 @@ public class IntakeConstants {
     public static double bucketRetractPos = 0.05;
     public static double specimenReadyPos = 0.63;
     public static double intakeReadyPos = 0.8;
-    public static double toptakePos = 0.8;
+    public static double toptakePos = 0.6;
 
     // wrist command constants
     public static double timeMultiplier = 0.27;
@@ -27,23 +27,7 @@ public class IntakeConstants {
     public static double closedPos = 0.9;
     public static double singleIntakePos = 0.85;
 
-
-    public static double clawOffset = -0.175;
-
-    // backtake
-    public static double backPos = 0.275;
-    public static double backSinglePos = 0.17;
-    public static double backClosedPos = 0.12;
-
-    // sub clear constants
-    public static double subClearWipePos = 0.5;
-    public static double subClearLinearPos = 0.47;
-    public static double subClearRetractPos = 0.9;
-
-    public static double subClear2WipePos = 0.65;
-    public static double subClear2LinearPos = 0.6;
-    public static double subClear2RetractPos = 0.2;
-    public static double subClearMillis = 400;
+    public static double clawOffset = -0.1;
 
     // turret constants
     public static double minAngle = -130;
@@ -51,7 +35,6 @@ public class IntakeConstants {
 
     // randomly worked from old folded pos
     public static double rightAnglePos = 0.86;
-
 
     // auto constants
     public static double autoOuttakeSpeed = -0.15;
@@ -63,11 +46,8 @@ public class IntakeConstants {
     public static double autoAlignTol = 10;
 
     // global offset
-    // 1 tick of skip = 0.05 position
+    // 1 tooth of skip = 0.05 position
     public static double wristOffset = -0.15;
 
-    public static double visionSizeWeight = 1;
     public static double intakeSensorVoltageThres = 0.25;
-
-    public static double spitToBackMs = 100;
 }

@@ -4,13 +4,12 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
 
 @Config
-@TeleOp(group="Test")
+@TeleOp(group = "Test")
 public class FullIntakeTest extends LinearOpMode {
     public WristSubsystem wrist;
     public IntakeSubsystem intakeSubsystem;
@@ -30,13 +29,13 @@ public class FullIntakeTest extends LinearOpMode {
 
         CommandScheduler.getInstance().registerSubsystem(wrist, intakeSubsystem, turret);
 
-
-        while (!isStopRequested()){
+        while (!isStopRequested()) {
             wrist.setWrist(wristPos);
             intakeSubsystem.setIntakeSpeed(speed);
             intakeSubsystem.setClawer(claw);
             turret.rotateTo(turretDegrees);
 
+            CommandScheduler.getInstance().run();
         }
         CommandScheduler.getInstance().reset();
     }

@@ -1,15 +1,12 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
 import java.util.LinkedList;
 import java.util.Queue;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 public class BasketSensorSubsystem extends SubsystemBase {
@@ -30,27 +27,6 @@ public class BasketSensorSubsystem extends SubsystemBase {
         sensorRight = hardwareMap.get(AnalogInput.class, "basketSensorRight");
     }
 
-    @Override
-    public void periodic() {
-        sensorLeftData.add(sensorLeft.getVoltage());
-        if (sensorLeftData.size() > rollingAverageSize) {
-            sensorLeftData.remove();
-        }
-
-        // noinspection OptionalGetWithoutIsPresent
-        sensorLeftAverage = sensorLeftData.stream()
-                .reduce((total, el) -> total + el / sensorLeftData.size()).get();
-
-        sensorRightData.add(sensorRight.getVoltage());
-        if (sensorRightData.size() > rollingAverageSize) {
-            sensorRightData.remove();
-        }
-
-        // noinspection OptionalGetWithoutIsPresent
-        sensorRightAverage = sensorRightData.stream()
-                .reduce((total, el) -> total + el / sensorRightData.size()).get();
-    }
-
     public void setDistanceUnit(DistanceUnit distanceUnit) {
         unit = distanceUnit;
     }
@@ -67,5 +43,30 @@ public class BasketSensorSubsystem extends SubsystemBase {
      */
     public double getSensorRight() {
         return unit.fromCm(sensorRightAverage * 500 / 3.3);
+    }
+
+    @Override
+    public void periodic() {
+        sensorLeftData.add(sensorLeft.getVoltage());
+        if (sensorLeftData.size() > rollingAverageSize) {
+            sensorLeftData.remove();
+        }
+
+        // noinspection OptionalGetWithoutIsPresent
+        sensorLeftAverage =
+                sensorLeftData.stream()
+                        .reduce((total, el) -> total + el / sensorLeftData.size())
+                        .get();
+
+        sensorRightData.add(sensorRight.getVoltage());
+        if (sensorRightData.size() > rollingAverageSize) {
+            sensorRightData.remove();
+        }
+
+        // noinspection OptionalGetWithoutIsPresent
+        sensorRightAverage =
+                sensorRightData.stream()
+                        .reduce((total, el) -> total + el / sensorRightData.size())
+                        .get();
     }
 }
