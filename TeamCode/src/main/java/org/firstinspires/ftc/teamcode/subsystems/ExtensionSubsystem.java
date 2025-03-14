@@ -178,6 +178,21 @@ public class ExtensionSubsystem extends SubsystemBase {
 
     /**
      * Sets openloop power to the motors.
+     * <br> <br>
+     * Returns a InstantCommand factory, for setting the motor powers instantaneously.
+     * @param power
+     * @return
+     */
+    public Command openloopC(Double power){
+        if (manualControl){
+            return new InstantCommand(() -> openloop(power), this);
+        }
+        Log.i("WARNING", "RAN OPEN LOOP WHEN MANUAL CONTROL WAS NOT ENABLED");
+        return new InstantCommand();
+    }
+
+    /**
+     * Sets openloop power to the motors.
      * <br><br>
      * Returns a RunCommand factory, for binding to operator triggers during manual control,
      * and for pure open loop control, like for stalling the robot.

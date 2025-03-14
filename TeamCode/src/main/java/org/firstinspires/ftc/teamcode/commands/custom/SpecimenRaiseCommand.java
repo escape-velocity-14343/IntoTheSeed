@@ -27,9 +27,9 @@ public class SpecimenRaiseCommand extends SequentialCommandGroup {
                                         extension.getReasonableExtensionMillis(
                                                 SlideConstants.specimenRaisePosition))),
                 new InstantCommand(() -> extension.setManualControl(true)),
-                new InstantCommand(() -> extension.openloopC(() -> -1)),
+                new InstantCommand(() -> extension.openloopC(-1.0)),
                 new WaitCommand(300),
-                new InstantCommand(() -> extension.openloopC(() -> 0)),
+                new InstantCommand(() -> extension.openloopC(0.0)),
                 new InstantCommand(() -> extension.setManualControl(false)));
     }
 
