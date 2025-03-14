@@ -35,4 +35,6 @@ public class SlideConstants {
 
     public static double highExtendInches = 1.5;
     public static double extendedThreshold = 8;
+
+    public static double manualControlDeadband = 0.1;
 }

@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
 import org.firstinspires.ftc.teamcode.commands.custom.DefaultDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
@@ -17,6 +18,7 @@ import org.firstinspires.ftc.teamcode.commands.group.RetractCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosReadyCommand;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
+import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.Util;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
@@ -73,7 +75,6 @@ public class TeleOpps extends Robot {
         /*new RunCommand(() -> extension.setPower(- gamepad2.left_trigger - gamepad1.left_trigger), extension),
         () -> extension.getCurrentPosition() / SlideConstants.ticksPerInch < SlideConstants.submersibleIntakeMaxExtension))*/
 
-        // pinpoint.resetYaw()));
         waitForStart();
         while (!isStopRequested()) {
             telemetry.addData("motorpos", extension.getCurrentInches());
@@ -101,7 +102,7 @@ public class TeleOpps extends Robot {
         new Trigger(() -> gamepad1.options).whileActiveOnce(new InstantCommand(pinpoint::resetYaw));
 
         // ------- BUCKET --------
-        driverPad.getGamepadButton(GamepadKeys.Button.X).and(extension.extended.negate()).whenActive(bucketPos());
+        driverPad.getGamepadButton(GamepadKeys.Button.X).and(extension.extendedTrigger.negate()).whenActive(bucketPos());
 
         driverPad
                 .getGamepadButton(GamepadKeys.Button.A)
@@ -140,10 +141,10 @@ public class TeleOpps extends Robot {
         //        );
 
         new Trigger(
-                        () ->
-                                driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05
-                                        && driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)
-                                                < 0.6)
+                () ->
+                        driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05
+                                && driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)
+                                < 0.6)
                 .whileActiveContinuous(
                         new SubPosCommand(
                                 extension,
@@ -176,20 +177,37 @@ public class TeleOpps extends Robot {
                 .getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whenPressed(new TurretCommand(turret, () -> turret.getPosition() + 45));
 
-        operatorPad
-                .getGamepadButton(GamepadKeys.Button.B)
-                .whenPressed(
-                        new SubPosReadyCommand(
-                                extension,
-                                pivot,
-                                wrist,
-                                intake,
-                                turret,
-                                90,
-                                SlideConstants.submersibleIntakeMinExtension));
+//        operatorPad
+//                .getGamepadButton(GamepadKeys.Button.B)
+//                .whenPressed(
+//                        new SubPosReadyCommand(
+//                                extension,
+//                                pivot,
+//                                wrist,
+//                                intake,
+//                                turret,
+//                                90,
+//                                SlideConstants.submersibleIntakeMinExtension));
+
+        operatorPad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(extension.resetC());
+
+        Trigger leftOperatorTrigger = new Trigger(() -> operatorPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.1);
+        Trigger rightOperatorTrigger = new Trigger(() -> operatorPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1);
+
+        extension.manualControlTrigger.whenActive(extension.openloopC(() -> Util.applyDeadband(operatorPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) - operatorPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER), SlideConstants.manualControlDeadband)));
+        pivot.manualControlTrigger.whenActive(pivot.openloopC(() -> Util.applyDeadband(operatorPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) - operatorPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER), PivotConstants.manualControlDeadband)));
+
+        //A and Y on opposite sides
+        //X and B on opposite sides
+        operatorPad.getGamepadButton(GamepadKeys.Button.A).whenPressed(extension.enableManualControl());
+        operatorPad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(extension.disableManualControl());
+
+        operatorPad.getGamepadButton(GamepadKeys.Button.X).whenPressed(pivot.enableManualControl());
+        operatorPad.getGamepadButton(GamepadKeys.Button.B).whenPressed(pivot.disableManualControl());
     }
 
-    public void configureDualControl() {}
+    public void configureDualControl() {
+    }
 }
 
 //  ______________

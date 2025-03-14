@@ -33,14 +33,14 @@ public class ExtensionSubsystem extends SubsystemBase {
     private final PivotSubsystem pivotSubsystem;
 
     // Triggers
-    public Trigger underZero;
+    public Trigger underZeroTrigger;
     public Trigger gainScheduleTrigger;
     public Trigger downwardsStallTrigger;
     public Trigger submersibleLimitTrigger;
     public Trigger maxExtensionLimitTrigger;
-    public Trigger forwardTarget;
+    public Trigger forwardTargetTrigger;
     public Trigger manualControlTrigger;
-    public Trigger extended;
+    public Trigger extendedTrigger;
 
     public ExtensionSubsystem(
             HardwareMap hMap, PivotSubsystem pivotSubsystem, CachingVoltageSensor voltage) {
@@ -66,8 +66,8 @@ public class ExtensionSubsystem extends SubsystemBase {
      */
     public void initialize() {
         manualControlTrigger = new Trigger(() -> manualControl);
-        forwardTarget = new Trigger(() -> forwardTarget());
-        underZero = new Trigger(() -> getCurrentPosition() < 0);
+        forwardTargetTrigger = new Trigger(() -> forwardTarget());
+        underZeroTrigger = new Trigger(() -> getCurrentPosition() < 0);
         downwardsStallTrigger =
                 new Trigger(() -> getCurrentPosition() < 5).and(new Trigger(() -> backwardPower()));
         submersibleLimitTrigger =
@@ -78,17 +78,17 @@ public class ExtensionSubsystem extends SubsystemBase {
                                                 getCurrentInches()
                                                         > SlideConstants
                                                                 .submersibleIntakeMaxExtension))
-                        .and(forwardTarget)
+                        .and(forwardTargetTrigger)
                         .and(new Trigger(() -> pivotSubsystem.isClose(PivotConstants.intakePos)))
                         .whenActive(
                                 () -> Log.i("A", "Submersible Extension limit has been breached"));
         maxExtensionLimitTrigger =
                 new Trigger(() -> getCurrentInches() >= SlideConstants.maxExtension)
-                        .and(forwardTarget)
+                        .and(forwardTargetTrigger)
                         .whenActive(() -> Log.i("A", "Maximum Extension limit has been breached"));
-        extended = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold);
+        extendedTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold);
 
-        underZero.whenActive(this::reset);
+        underZeroTrigger.whenActive(this::reset);
         // Stall Detection is cooked because u might as well just have the driver run bucket or
         // something to make sure it's unjammed
         // V good for award bait-
@@ -173,6 +173,24 @@ public class ExtensionSubsystem extends SubsystemBase {
      */
     public Command setPowerMulC(double extensionPowerMul) {
         return new InstantCommand(() -> setPowerMul(extensionPowerMul));
+    }
+
+    /**
+     * Returns a RunCommand factory, for binding to operator triggers during manual control
+     * @param power
+     * @return RunCommand Factory
+     */
+    public Command openloopC(DoubleSupplier power){
+        return new RunCommand(() -> openloopS(power), this);
+    }
+
+    /**
+     * Internal factory method for openloop slide control
+     * @param power
+     * @return
+     */
+    private void openloopS(DoubleSupplier power){
+        openloop(power.getAsDouble());
     }
 
     /**
@@ -304,6 +322,13 @@ public class ExtensionSubsystem extends SubsystemBase {
         motor0.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor0.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         resetOffset = 0;
+    }
+
+    /**
+     * Factory command for reseting the position of the slides
+     */
+    public Command resetC(){
+        return new InstantCommand(this::reset, this);
     }
 
     /** The periodic loop for the subsystem. */

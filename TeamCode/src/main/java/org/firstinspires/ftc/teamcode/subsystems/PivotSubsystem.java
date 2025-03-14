@@ -1,6 +1,12 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import android.util.Log;
+
+import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.arcrobotics.ftclib.command.button.Trigger;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -24,6 +30,9 @@ public class PivotSubsystem extends SubsystemBase {
     AnalogEncoder encoder;
     private CachingVoltageSensor voltage;
     private DoubleSupplier extensionInches = () -> 0;
+    private boolean supplierSet = false;
+    private Trigger extensionSetTrigger = new Trigger(() -> supplierSet).whileActiveContinuous(() -> Log.i("WARNING", "PIVOT EXTENSION SUPPPLIER UNSET"));
+    public Trigger manualControlTrigger = new Trigger(() -> manualControl);
 
     public PivotSubsystem(HardwareMap hMap, CachingVoltageSensor voltage) {
         motor0 = hMap.dcMotor.get("tilt0");
@@ -42,6 +51,19 @@ public class PivotSubsystem extends SubsystemBase {
 
     public void setExtensionSupplier(DoubleSupplier extensionInches) {
         this.extensionInches = extensionInches;
+        supplierSet = true;
+    }
+
+    public Command openloopC(DoubleSupplier power){
+        return new RunCommand(() -> openloopS(power), this);
+    }
+
+    /**
+     * internal factory method for openloop power
+     * @param power
+     */
+    private void openloopS(DoubleSupplier power){
+        openloop(power.getAsDouble());
     }
 
     public void openloop(double power) {
@@ -87,6 +109,14 @@ public class PivotSubsystem extends SubsystemBase {
      */
     public double getCurrentPosition() {
         return currentPos;
+    }
+
+    public Command enableManualControl() {
+        return new InstantCommand(() -> this.manualControl = true);
+    }
+
+    public Command disableManualControl() {
+        return new InstantCommand(() -> this.manualControl = false);
     }
 
     public void setManualControl(boolean manualControl) {

@@ -25,4 +25,6 @@ public class PivotConstants {
 
     public static double specimenIntakeAngle = topLimit;
     public static double specimenTopBarAngle = 63;
+
+    public static double manualControlDeadband = 0.1;
 }

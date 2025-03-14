@@ -37,6 +37,14 @@ public class Util {
         return v;
     }
 
+    public static double applyDeadband(double value, double deadband) {
+        if (Math.abs(value) < deadband) {
+            return 0;
+        } else {
+            return value;
+        }
+    }
+
     public static double signedPower(double value, double power) {
         return Math.pow(Math.abs(value), power) * Math.signum(value);
     }
