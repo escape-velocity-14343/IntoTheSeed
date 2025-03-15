@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.function.DoubleSupplier;
+
+import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.AnalogEncoder;
@@ -83,6 +85,10 @@ public class PivotSubsystem extends SubsystemBase {
             power = -0.05;
         }
         openloop(power);
+    }
+
+    public Command getPivotCommand(double target){
+        return new PivotCommand(this, target);
     }
 
     public void setTarget(double target) {

@@ -67,10 +67,10 @@ public class ExtensionSubsystem extends SubsystemBase {
      */
     private void initialize() {
         manualControlTrigger = new Trigger(() -> manualControl);
-        forwardTargetTrigger = new Trigger(() -> forwardTarget());
+        forwardTargetTrigger = new Trigger(() -> isForwardTarget());
         underZeroTrigger = new Trigger(() -> getCurrentPosition() < 0);
         downwardsStallTrigger =
-                new Trigger(() -> getCurrentPosition() < 5).and(new Trigger(() -> backwardPower()));
+                new Trigger(() -> getCurrentPosition() < 5).and(new Trigger(() -> isBackwardPower()));
         submersibleLimitTrigger =
                 new Trigger(() -> manualControl)
                         .and(
@@ -104,7 +104,7 @@ public class ExtensionSubsystem extends SubsystemBase {
      *
      * @return boolean
      */
-    public boolean forwardTarget() {
+    public boolean isForwardTarget() {
         return targetInches - getCurrentInches() > 0;
     }
 
@@ -113,8 +113,8 @@ public class ExtensionSubsystem extends SubsystemBase {
      *
      * @return boolean
      */
-    public boolean backwardTarget() {
-        return !forwardTarget();
+    public boolean isBackwardTarget() {
+        return !isForwardTarget();
     }
 
     /**
@@ -122,7 +122,7 @@ public class ExtensionSubsystem extends SubsystemBase {
      *
      * @return boolean
      */
-    public boolean forwardPower() {
+    public boolean isForwardPower() {
         return motor0.getPower() > 0 && motor1.getPower() < 0;
     }
 
@@ -131,8 +131,8 @@ public class ExtensionSubsystem extends SubsystemBase {
      *
      * @return boolean
      */
-    public boolean backwardPower() {
-        return !forwardPower();
+    public boolean isBackwardPower() {
+        return !isForwardPower();
     }
 
     public DoubleSupplier getVoltageScalarSupplier() {
@@ -301,6 +301,11 @@ public class ExtensionSubsystem extends SubsystemBase {
         openloop(power);
     }
 
+    /**
+     * Method for interpolating feedforward for slides, against gravity.
+     * @param x
+     * @return
+     */
     private double interpolate(double x) {
         double x1 = 0;
         double y1 = SlideConstants.FEEDFORWARD_bottom;
@@ -393,11 +398,5 @@ public class ExtensionSubsystem extends SubsystemBase {
                 .getTelemetry()
                 .addData("slide position", this.getCurrentInches());
         FtcDashboard.getInstance().getTelemetry().addData("slide motor power", motor0.getPower());
-        FtcDashboard.getInstance()
-                .getTelemetry()
-                .addData("manualControl", manualControlTrigger.get());
-        FtcDashboard.getInstance()
-                .getTelemetry()
-                .addData("maxExtension", maxExtensionLimitTrigger.get());
     }
 }
