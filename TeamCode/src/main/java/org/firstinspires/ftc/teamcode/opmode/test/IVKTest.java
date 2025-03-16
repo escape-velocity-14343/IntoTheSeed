@@ -26,6 +26,8 @@ public class IVKTest extends LinearOpMode {
         voltage = new CachingVoltageSensor(hardwareMap);
         pivot = new PivotSubsystem(hardwareMap, voltage);
         extension = new ExtensionSubsystem(hardwareMap, pivot, voltage);
+        pivot.setExtensionSupplier(extension::getCurrentInches);
+
         waitForStart();
 
         while (!isStopRequested()) {

@@ -251,6 +251,7 @@ public class ExtensionSubsystem extends SubsystemBase {
      */
     public void setTargetInches(double inches) {
         targetInches = inches;
+        manualControl = false;
     }
 
     /**
@@ -398,5 +399,9 @@ public class ExtensionSubsystem extends SubsystemBase {
                 .getTelemetry()
                 .addData("slide position", this.getCurrentInches());
         FtcDashboard.getInstance().getTelemetry().addData("slide motor power", motor0.getPower());
+
+        FtcDashboard.getInstance().getTelemetry().addData("maxExtensionTrigger", maxExtensionLimitTrigger.get());
+        FtcDashboard.getInstance().getTelemetry().addData("SubmersibleLimitTrigger", submersibleLimitTrigger.get());
+        FtcDashboard.getInstance().getTelemetry().addData("manualControlTrigger", manualControlTrigger.get());
     }
 }
