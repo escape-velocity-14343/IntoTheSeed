@@ -20,7 +20,7 @@ public class PivotConstants {
     public static double retractDegrees = bottomLimit;
 
     public static double neutralPos = bottomLimit;
-    public static double intakeReadyPos = 13;
+    public static double intakeReadyPos = 15;
     public static double intakePos = 7.5;
 
     public static double specimenIntakeAngle = topLimit;
