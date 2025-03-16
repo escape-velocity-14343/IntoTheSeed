@@ -91,6 +91,15 @@ public class PivotSubsystem extends SubsystemBase {
         return new PivotCommand(this, target);
     }
 
+    public Command getPivotCommand(DoubleSupplier target){
+        return new RunCommand(() -> setTarget(target.getAsDouble()), this);
+    }
+
+    public void setTarget(DoubleSupplier target){
+        manualControl = false;
+
+    }
+
     public void setTarget(double target) {
         manualControl = false;
         this.target = target;
