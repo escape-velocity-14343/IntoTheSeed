@@ -39,6 +39,7 @@ public class ExtendCommand extends CommandBase {
             extend.setPowerMul(powerMul);
         }
         extend.setTargetInches(target);
+        extend.setManualControl(false);
     }
 
     @Override

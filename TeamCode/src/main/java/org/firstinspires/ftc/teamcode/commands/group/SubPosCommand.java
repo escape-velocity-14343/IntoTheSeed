@@ -45,7 +45,7 @@ public class SubPosCommand extends SequentialCommandGroup {
 //                                        * (PivotConstants.intakeReadyPos - PivotConstants.intakePos)
 //                                        / 0.55));
                 pivot.getPivotCommand(
-                        () -> Math.max(PivotConstants.intakePos, PivotConstants.intakeReadyPos
+                        () -> Math.max(PivotConstants.intakePos+2, PivotConstants.intakeReadyPos
                                 - power.getAsDouble()
                                 * (PivotConstants.intakeReadyPos
                                 - PivotConstants.intakePos)
