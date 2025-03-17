@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -93,6 +94,12 @@ public class TeleOpps extends Robot {
             timer.reset();
             update();
         }
+        CommandScheduler.getInstance().schedule(
+                new SequentialCommandGroup(
+                        extension.disableManualControl(),
+                        pivot.disableManualControl()
+                )
+        );
         CommandScheduler.getInstance().reset();
     }
 
@@ -145,6 +152,7 @@ public class TeleOpps extends Robot {
                         driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05
                                 && driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)
                                 < 0.6)
+                .and(extension.extendedTrigger.negate())
                 .whileActiveContinuous(
                         new SubPosCommand(
                                 extension,
@@ -153,12 +161,20 @@ public class TeleOpps extends Robot {
                                 pivot,
                                 () -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
         new Trigger(() -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >= 0.8)
-                .whileActiveOnce(subPos())
-                .whenInactive(
+                .and(extension.extendedTrigger.negate())
+                .whenActive(new SequentialCommandGroup(
+                        subPos(),
                         new IntakeRetractCommand(wrist, pivot, extension, turret)
-                                .alongWith(
-                                        new IntakeControlCommand(
-                                                intake, IntakeConstants.closedPos, 0)));
+                        .alongWith(
+                                new IntakeControlCommand(
+                                        intake, IntakeConstants.closedPos, 0))));
+//                .whileActiveOnce(subPos())
+//                .whenInactive(
+//                        new IntakeRetractCommand(wrist, pivot, extension, turret)
+//                                .alongWith(
+//                                        new IntakeControlCommand(
+//                                                intake, IntakeConstants.closedPos, 0)));
+
 
         new Trigger(() -> driverPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) >= 0.8)
                 .whileActiveOnce(new IntakeClawCommand(intake, IntakeConstants.openPos))
