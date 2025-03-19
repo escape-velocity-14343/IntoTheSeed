@@ -109,7 +109,7 @@ public class TeleOpps extends Robot {
         new Trigger(() -> gamepad1.options).whileActiveOnce(new InstantCommand(pinpoint::resetYaw));
 
         // ------- BUCKET --------
-        driverPad.getGamepadButton(GamepadKeys.Button.X).and(extension.extendedTrigger.negate()).whenActive(bucketPos());
+        driverPad.getGamepadButton(GamepadKeys.Button.X).and(extension.isExtendedTrigger.negate()).whenActive(bucketPos());
 
         driverPad
                 .getGamepadButton(GamepadKeys.Button.A)
@@ -152,7 +152,7 @@ public class TeleOpps extends Robot {
                         driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05
                                 && driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)
                                 < 0.6)
-                .and(extension.extendedTrigger.negate())
+                .and(extension.isExtendedTrigger.negate())
                 .whileActiveContinuous(
                         new SubPosCommand(
                                 extension,
@@ -161,7 +161,7 @@ public class TeleOpps extends Robot {
                                 pivot,
                                 () -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
         new Trigger(() -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >= 0.8)
-                .and(extension.extendedTrigger.negate())
+                .and(extension.isExtendedTrigger.negate())
                 .whenActive(new SequentialCommandGroup(
                         subPos(),
                         new IntakeRetractCommand(wrist, pivot, extension, turret)

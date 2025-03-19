@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.constants.VisionConstants;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
@@ -15,10 +14,11 @@ import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
 @Config
 public class ChassisCameraTest extends LinearOpMode {
     public static boolean isRed = true;
-    VisionSubsystem HighCameraSubsystem;
+    VisionSubsystem highCameraSubsystem;
 
     public static int exposure = 40;
     public static int whiteBalance = 4000;
+    public static boolean awb = false;
 
     DcMotor fr, fl, br, bl;
 
@@ -31,11 +31,15 @@ public class ChassisCameraTest extends LinearOpMode {
         br.setDirection(DcMotorSimple.Direction.REVERSE);
         fr.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        HighCameraSubsystem = new VisionSubsystem(hardwareMap, VisionConstants.chassisCameraName, () -> isRed, telemetry);
+        highCameraSubsystem = new VisionSubsystem(hardwareMap, VisionConstants.chassisCameraName, () -> isRed, telemetry);
 
-        HighCameraSubsystem.waitForSetExposure(3000, 10000, exposure);
+        highCameraSubsystem.waitForSetExposure(3000, 10000, exposure);
 //        HighCameraSubsystem.waitForSetGain(3000, 10000, gain);
-        HighCameraSubsystem.waitForSetWhiteBalance(3000, 10000, whiteBalance);
+        if (awb) {
+            highCameraSubsystem.setAWB();
+        }
+        else
+            highCameraSubsystem.waitForSetWhiteBalance(3000, 10000, whiteBalance);
 
         waitForStart();
         while (opModeIsActive()){

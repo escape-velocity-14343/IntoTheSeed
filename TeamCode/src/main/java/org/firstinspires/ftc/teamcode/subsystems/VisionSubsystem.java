@@ -366,6 +366,15 @@ public class VisionSubsystem extends SubsystemBase {
         Log.i(cameraName.toString(), "white balance: " + whiteBalanceControl.getWhiteBalanceTemperature());
         return whiteBalanceControl.setWhiteBalanceTemperature(gain);
     }
+    public boolean setAWB(){
+        if (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            return false;
+        }
+
+        WhiteBalanceControl whiteBalanceControl = visionPortal.getCameraControl(WhiteBalanceControl.class);
+        return whiteBalanceControl.setMode(WhiteBalanceControl.Mode.AUTO);
+    }
+
 
     public Optional<Integer> getMaxWhiteBalance(){
         if (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {

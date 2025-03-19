@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import android.util.Log;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SubsystemBase;
@@ -42,7 +41,7 @@ public class ExtensionSubsystem extends SubsystemBase {
     public Trigger maxExtensionLimitTrigger;
     public Trigger forwardTargetTrigger;
     public Trigger manualControlTrigger;
-    public Trigger extendedTrigger;
+    public Trigger isExtendedTrigger;
 
     public ExtensionSubsystem(
             HardwareMap hMap, PivotSubsystem pivotSubsystem, CachingVoltageSensor voltage) {
@@ -88,7 +87,7 @@ public class ExtensionSubsystem extends SubsystemBase {
                 new Trigger(() -> getCurrentInches() >= SlideConstants.maxExtension)
                         .and(forwardTargetTrigger)
                         .whenActive(() -> Log.i("A", "Maximum Extension limit has been breached"));
-        extendedTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold);
+        isExtendedTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold);
 
         underZeroTrigger.whenActive(this::resetC);
         // Stall Detection is cooked because u might as well just have the driver run bucket or
