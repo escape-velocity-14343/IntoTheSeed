@@ -22,13 +22,26 @@ public class GVFFollower {
     private ArrayList<Spline> splines;
     private int currentSplineIndex = 0;
     private DrivetrainSquIDController drivetrainSquIDController = new DrivetrainSquIDController();
+
+    /**
+     * Higher values means the bot sticks closer to the path.
+     */
     public static double correctionP = 0.1;
+
+    /**
+     * Higher values means the bot follows curvature more. This value is able to make
+     * the bot follow curvature too much.
+     */
     public static double curvatureP = 0.1;
 
     /**
      * Increase if the bot isn't going forwards at full speed.
      */
     public static double forwardMult = 5;
+
+    /**
+     * Number of inches before the bot transitions to the next spline.
+     */
     public static double splineTransitionInches = 2.0;
 
     /**
@@ -36,6 +49,9 @@ public class GVFFollower {
      */
     public static double pathEndUsageInches = 15.0;
 
+    public GVFFollower() {
+
+    }
 
     /**
      * Returns a Pose2d that can be fed directly into the drivebase as (x, y, heading).
@@ -100,6 +116,12 @@ public class GVFFollower {
 
         return new Pose2d(movementVec.getX(), movementVec.getY(), Rotation2d.fromDegrees(rot));
 
+    }
+
+    public Pose2d getEndpoint() {
+        Spline lastSpline = splines.get(splines.size() - 1)
+        Vector2d endpoint = lastSpline.getValue(lastSpline.getLength());
+        return new Pose2d(endpoint.getX(), endpoint.getY(), new Rotation2d(lastSpline.getVelocity(lastSpline.getLength()).angle()));
     }
 
     public void setSplines(Spline... splines) {
