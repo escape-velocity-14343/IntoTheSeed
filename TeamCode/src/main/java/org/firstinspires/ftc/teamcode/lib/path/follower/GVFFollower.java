@@ -119,7 +119,7 @@ public class GVFFollower {
     }
 
     public Pose2d getEndpoint() {
-        Spline lastSpline = splines.get(splines.size() - 1)
+        Spline lastSpline = splines.get(splines.size() - 1);
         Vector2d endpoint = lastSpline.getValue(lastSpline.getLength());
         return new Pose2d(endpoint.getX(), endpoint.getY(), new Rotation2d(lastSpline.getVelocity(lastSpline.getLength()).angle()));
     }
