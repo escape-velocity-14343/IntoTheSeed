@@ -186,11 +186,7 @@ public class ExtensionSubsystem extends SubsystemBase {
      * @return
      */
     public Command openloopC(Double power){
-        if (manualControl){
-            return new InstantCommand(() -> openloop(power), this);
-        }
-        Log.i("WARNING", "RAN OPEN LOOP WHEN MANUAL CONTROL WAS NOT ENABLED");
-        return new InstantCommand();
+        return new InstantCommand(() -> openloop(power), this);
     }
 
     /**
@@ -204,11 +200,7 @@ public class ExtensionSubsystem extends SubsystemBase {
      * @return RunCommand Factory
      */
     public Command openloopC(DoubleSupplier power){
-        if (manualControl){
-            return new RunCommand(() -> openloopS(power), this);
-        }
-        Log.i("WARNING", "RAN OPEN LOOP WHEN MANUAL CONTROL WAS NOT ENABLED");
-        return new InstantCommand();
+        return new RunCommand(() -> openloopS(power), this);
     }
 
     /**

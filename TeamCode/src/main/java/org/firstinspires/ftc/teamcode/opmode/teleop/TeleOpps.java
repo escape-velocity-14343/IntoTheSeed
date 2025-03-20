@@ -162,7 +162,7 @@ public class TeleOpps extends Robot {
                                 () -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
         new Trigger(() -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >= 0.8)
                 .and(extension.nearBucketPositionTrigger.negate())
-                .whenActive(new SequentialCommandGroup(
+                .whenInactive(new SequentialCommandGroup(
                         subPos(),
                         new IntakeRetractCommand(wrist, pivot, extension, turret)
                         .alongWith(
