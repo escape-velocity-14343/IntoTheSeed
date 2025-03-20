@@ -39,6 +39,7 @@ public class ExtensionSubsystem extends SubsystemBase {
     public Trigger downwardsStallTrigger;
     public Trigger submersibleLimitTrigger;
     public Trigger maxExtensionLimitTrigger;
+    public Trigger nearBucketPositionTrigger;
     public Trigger forwardTargetTrigger;
     public Trigger manualControlTrigger;
     public Trigger isExtendedTrigger;
@@ -88,6 +89,7 @@ public class ExtensionSubsystem extends SubsystemBase {
                         .and(forwardTargetTrigger)
                         .whenActive(() -> Log.i("A", "Maximum Extension limit has been breached"));
         isExtendedTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold);
+        nearBucketPositionTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold && pivotSubsystem.isClose(PivotConstants.topLimit));
 
         underZeroTrigger.whenActive(this::resetC);
         // Stall Detection is cooked because u might as well just have the driver run bucket or

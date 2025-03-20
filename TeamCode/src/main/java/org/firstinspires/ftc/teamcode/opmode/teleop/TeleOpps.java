@@ -152,7 +152,7 @@ public class TeleOpps extends Robot {
                         driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.05
                                 && driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)
                                 < 0.6)
-                .and(extension.isExtendedTrigger.negate())
+                .and(extension.nearBucketPositionTrigger.negate())
                 .whileActiveContinuous(
                         new SubPosCommand(
                                 extension,
@@ -161,7 +161,7 @@ public class TeleOpps extends Robot {
                                 pivot,
                                 () -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
         new Trigger(() -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >= 0.8)
-                .and(extension.isExtendedTrigger.negate())
+                .and(extension.nearBucketPositionTrigger.negate())
                 .whenActive(new SequentialCommandGroup(
                         subPos(),
                         new IntakeRetractCommand(wrist, pivot, extension, turret)
