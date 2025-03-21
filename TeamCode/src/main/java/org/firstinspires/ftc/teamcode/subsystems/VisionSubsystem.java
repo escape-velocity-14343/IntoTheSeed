@@ -13,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.WhiteBalanceControl;
 import org.firstinspires.ftc.teamcode.constants.VisionConstants;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
@@ -33,18 +34,21 @@ import java.util.function.BooleanSupplier;
 public class VisionSubsystem extends SubsystemBase {
     public BooleanSupplier isRed = () -> false;
 
-    public static int lowAreaFilter = 600;
-    public static int AreaFilterYellow = 1200;
-    public static int highAreaFilter = 2500;
-    public static double lowRatioFilter = 1.3;
-    public static double RatioFilterYellow = 1.5;
-    public static double highRatioFilter = 2.8;
+    public static int lowAreaFilter = 100; //try like 400-500 later
+    public static int AreaFilterYellow = 100;
+    public static int highAreaFilter = 50000;
+    public static double lowRatioFilter = 1;
+    public static double RatioFilterYellow = 3;
+    public static double highRatioFilter = 3;
 
     public static int exposureMillis = 50;
+    //H: 0-179, S: 0-255, V: 0-255
+
+    // YCrCb (24, 154, 122)
     ColorRange blue = new ColorRange(
-            ColorSpace.YCrCb,
-            new Scalar(0, 0, 0),
-            new Scalar(0, 0, 0)
+            ColorSpace.HSV,
+            new Scalar(100, 50, 5),
+            new Scalar(140, 255, 255)
     );
 
 //    ColorRange blue = new ColorRange(
@@ -53,48 +57,62 @@ public class VisionSubsystem extends SubsystemBase {
 //            new Scalar(0, 0, 0)
 //    );
 
-    ColorRange red = new ColorRange(
-            ColorSpace.HSV,
-            new Scalar(0, 0, 0),
-            new Scalar(0, 0, 0)
-    );
+    //348°/2, 36%, 74%
+    // ->
 
+//    public static final ColorRange RED = new ColorRange(
+//            ColorSpace.YCrCb,
+//            new Scalar( 32, 176,  0),
+//            new Scalar(255, 255, 132)
+//    );
+//    ColorRange red = new ColorRange(
+//            ColorSpace.RGB,
+//            new Scalar(50, 50, 50),
+//            new Scalar(255, 200, 200)
+//    );
+//    ColorRange red = new ColorRange(
+//            ColorSpace.YCrCb,
+//            new Scalar(32, 190, 30),
+//            new Scalar(255, 255, 132));
+
+    //53°/2, 13%, 100%
     ColorRange yellow = new ColorRange(
             ColorSpace.HSV,
-            new Scalar(0, 0, 0),
-            new Scalar(0, 0, 0)
+            new Scalar(10, 120, 120),
+            new Scalar(50, 255, 255)
     );
 
     ColorBlobLocatorProcessor.Builder allianceLocatorProcessBuilder = new ColorBlobLocatorProcessor.Builder()
             .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
 //            .setRoi(ImageRegion.entireFrame())
-            .setRoi(ImageRegion.asUnityCenterCoordinates(-1.0, 1.0, 1.0, -1.0))
-            .setBlurSize(1)
-            .setErodeSize(4);
+            .setRoi(ImageRegion.asImageCoordinates(0, 0, VisionConstants.width, VisionConstants.height))
+            .setRoiColor(0);
+//            .setBlurSize(1)
+//            .setErodeSize(4);
 
     ColorBlobLocatorProcessor allianceLocatorProcessor;
     ColorBlobLocatorProcessor yellowLocatorProcessor = new ColorBlobLocatorProcessor.Builder()
             .setTargetColorRange(yellow)
             .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
-            .setRoi(ImageRegion.asUnityCenterCoordinates(-0.8, 0.8, 0.8, -0.8))
-//            .setRoi(ImageRegion.asUnityCenterCoordinates(-1.0, 1.0, 1.0, -1.0))
-            .setBlurSize(1)
-            .setErodeSize(6)
+            .setRoi(ImageRegion.asImageCoordinates(0, 0, VisionConstants.width, VisionConstants.height))
+            .setRoiColor(3)
+//            .setBlurSize(1)
+//            .setErodeSize(6)
             .build();
 
     Telemetry telemetry;
     VisionPortal visionPortal;
-    ExposureControl control;
+    CameraName cameraName;
 
 
-    public VisionSubsystem(HardwareMap hMap, BooleanSupplier isRed, Telemetry telemetry){
-        CameraName slideCamera = hMap.get(WebcamName.class, VisionConstants.slideCameraName);
+    public VisionSubsystem(HardwareMap hMap, String name, BooleanSupplier isRed, Telemetry telemetry){
+        cameraName = hMap.get(WebcamName.class, name);
 
         this.isRed = isRed;
         this.telemetry = telemetry;
 
         if (isRed.getAsBoolean()){
-            allianceLocatorProcessBuilder.setTargetColorRange(red);
+            allianceLocatorProcessBuilder.setTargetColorRange(ColorRange.RED);
         }
         else{
             allianceLocatorProcessBuilder.setTargetColorRange(blue);
@@ -107,11 +125,11 @@ public class VisionSubsystem extends SubsystemBase {
         ColorBlobLocatorProcessor.BlobSort largestSort =
                 new ColorBlobLocatorProcessor.BlobSort(ColorBlobLocatorProcessor.BlobCriteria.BY_CONTOUR_AREA, SortOrder.DESCENDING);
 
-        allianceLocatorProcessor.addFilter(areaFilter);
-        allianceLocatorProcessor.addFilter(ratioFilter);
-        allianceLocatorProcessor.setSort(largestSort);
-
         allianceLocatorProcessor = allianceLocatorProcessBuilder.build();
+
+//        allianceLocatorProcessor.addFilter(areaFilter);
+//        allianceLocatorProcessor.addFilter(ratioFilter);
+        allianceLocatorProcessor.setSort(largestSort);
 
         ColorBlobLocatorProcessor.BlobFilter areaFilterYellow =
                 new ColorBlobLocatorProcessor.BlobFilter(ColorBlobLocatorProcessor.BlobCriteria.BY_CONTOUR_AREA, AreaFilterYellow, highAreaFilter);
@@ -119,12 +137,12 @@ public class VisionSubsystem extends SubsystemBase {
                 new ColorBlobLocatorProcessor.BlobFilter(ColorBlobLocatorProcessor.BlobCriteria.BY_ASPECT_RATIO, RatioFilterYellow, highRatioFilter);
 
         yellowLocatorProcessor.addFilter(areaFilterYellow);
-        yellowLocatorProcessor.addFilter(ratioFilterYellow);
+//        yellowLocatorProcessor.addFilter(ratioFilterYellow);
         yellowLocatorProcessor.setSort(largestSort);
 
         visionPortal = new VisionPortal.Builder()
-                .setCamera(slideCamera)
-                .setCameraResolution(new Size(1280, 800))
+                .setCamera(cameraName)
+                .setCameraResolution(new Size(VisionConstants.width, VisionConstants.height))
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
                 .enableLiveView(true)
                 .setAutoStopLiveView(true)
@@ -132,7 +150,10 @@ public class VisionSubsystem extends SubsystemBase {
                 .addProcessor(allianceLocatorProcessor)
                 .build();
 
-        control = visionPortal.getCameraControl(ExposureControl.class);
+//        waitForSetEverything(3000, 10000, 50, 1000, 1000);
+        waitForSetExposure(2000, 10000, 30);
+        waitForSetWhiteBalance(2000, 10000, 3000);
+//        waitForSetGain(2000, 10000, 2000);
     }
 
     /**
@@ -240,6 +261,12 @@ public class VisionSubsystem extends SubsystemBase {
         return boxFit.angle;
     }
 
+    public void waitForSetEverything(long timeoutMs, int maxAttempts, int exposure, int gain, int whiteBalance){
+        waitForSetExposure(timeoutMs, maxAttempts, exposure);
+//        waitForSetGain(timeoutMs, maxAttempts, gain);
+        waitForSetWhiteBalance(timeoutMs, maxAttempts, whiteBalance);
+    }
+
     public boolean waitForSetExposure(long timeoutMs, int maxAttempts) {
         return waitForSetExposure(timeoutMs, maxAttempts, exposureMillis);
     }
@@ -249,32 +276,50 @@ public class VisionSubsystem extends SubsystemBase {
         int attempts = 0;
         long msAfterStart = 0;
         while (msAfterStart < timeoutMs && attempts++ < maxAttempts) {
-            Log.i("camera", String.format("Attempting to set camera exposure, attempt %d, %d ms after start", attempts, msAfterStart));
+            Log.i(cameraName.toString(), String.format("Attempting to set camera exposure, attempt %d, %d ms after start", attempts, msAfterStart));
             if (setExposure(exposure)) {
-                Log.i("camera", "Set exposure succeeded");
+                Log.i(cameraName.toString(), "Set exposure succeeded");
                 return true;
             }
             msAfterStart = System.currentTimeMillis() - startMs;
         }
 
-        Log.e("camera", "Set exposure failed");
+        Log.e(cameraName.toString(), "Set exposure failed");
         return false;
     }
 
+    @Deprecated
     public boolean waitForSetGain(long timeoutMs, int maxAttempts, int gain) {
         long startMs = System.currentTimeMillis();
         int attempts = 0;
         long msAfterStart = 0;
         while (msAfterStart < timeoutMs && attempts++ < maxAttempts) {
-            Log.i("camera", String.format("Attempting to set camera gain, attempt %d, %d ms after start", attempts, msAfterStart));
+            Log.i(cameraName.toString(), String.format("Attempting to set camera gain, attempt %d, %d ms after start", attempts, msAfterStart));
             if (setGain(gain)) {
-                Log.i("camera", "Set gain succeeded");
+                Log.i(cameraName.toString(), "Set gain succeeded");
                 return true;
             }
             msAfterStart = System.currentTimeMillis() - startMs;
         }
 
-        Log.e("camera", "Set gain failed");
+        Log.e(cameraName.toString(), "Set gain failed");
+        return false;
+    }
+
+    public boolean waitForSetWhiteBalance(long timeoutMs, int maxAttempts, int whiteBalance) {
+        long startMs = System.currentTimeMillis();
+        int attempts = 0;
+        long msAfterStart = 0;
+        while (msAfterStart < timeoutMs && attempts++ < maxAttempts) {
+            Log.i(cameraName.toString(), String.format("Attempting to set camera white balance, attempt %d, %d ms after start", attempts, msAfterStart));
+            if (setWhiteBalance(whiteBalance)) {
+                Log.i(cameraName.toString(), "Set white balance succeeded");
+                return true;
+            }
+            msAfterStart = System.currentTimeMillis() - startMs;
+        }
+
+        Log.e(cameraName.toString(), "Set white balance failed");
         return false;
     }
 
@@ -286,11 +331,14 @@ public class VisionSubsystem extends SubsystemBase {
             return false;
         }
 
-        control.setMode(ExposureControl.Mode.Manual);
-        Log.i("camera", "exposure: " + control.getExposure(TimeUnit.MILLISECONDS));
-        return control.setExposure(exposure, TimeUnit.MILLISECONDS);
+        ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
+
+        exposureControl.setMode(ExposureControl.Mode.Manual);
+        Log.i(cameraName.toString(), "exposure: " + exposureControl.getExposure(TimeUnit.MILLISECONDS));
+        return exposureControl.setExposure(exposure, TimeUnit.MILLISECONDS);
     }
 
+    @Deprecated
     /**
      * @return whether the set was successful or not
      * @param gain
@@ -302,11 +350,63 @@ public class VisionSubsystem extends SubsystemBase {
         }
 
         GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
-        Log.i("camera", "exposure: " + control.getExposure(TimeUnit.MILLISECONDS));
+
+        Log.i(cameraName.toString(), "gain: " + gainControl.getGain());
         return gainControl.setGain(gain);
+    }
+
+    public boolean setWhiteBalance(int gain){
+        if (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            return false;
+        }
+
+        WhiteBalanceControl whiteBalanceControl = visionPortal.getCameraControl(WhiteBalanceControl.class);
+
+        whiteBalanceControl.setMode(WhiteBalanceControl.Mode.MANUAL);
+        Log.i(cameraName.toString(), "white balance: " + whiteBalanceControl.getWhiteBalanceTemperature());
+        return whiteBalanceControl.setWhiteBalanceTemperature(gain);
+    }
+    public boolean setAWB(){
+        if (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            return false;
+        }
+
+        WhiteBalanceControl whiteBalanceControl = visionPortal.getCameraControl(WhiteBalanceControl.class);
+        return whiteBalanceControl.setMode(WhiteBalanceControl.Mode.AUTO);
+    }
+
+
+    public Optional<Integer> getMaxWhiteBalance(){
+        if (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            return Optional.empty();
+        }
+
+        WhiteBalanceControl whiteBalanceControl = visionPortal.getCameraControl(WhiteBalanceControl.class);
+
+        return Optional.of(whiteBalanceControl.getMaxWhiteBalanceTemperature());
+    }
+
+    public Optional<Integer> getMinWhiteBalance(){
+        if (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            return Optional.empty();
+        }
+
+        WhiteBalanceControl whiteBalanceControl = visionPortal.getCameraControl(WhiteBalanceControl.class);
+
+        return Optional.of(whiteBalanceControl.getMinWhiteBalanceTemperature());
     }
 
     public void saveFrame(String name) {
         visionPortal.saveNextFrameRaw(name);
+    }
+
+
+    public void turnOnStreaming(boolean enabled){
+        if(enabled){
+            visionPortal.resumeStreaming();
+        }
+        else{
+            visionPortal.stopStreaming();
+        }
     }
 }

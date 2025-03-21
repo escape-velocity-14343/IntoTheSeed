@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import android.util.Log;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SubsystemBase;
@@ -40,9 +39,10 @@ public class ExtensionSubsystem extends SubsystemBase {
     public Trigger downwardsStallTrigger;
     public Trigger submersibleLimitTrigger;
     public Trigger maxExtensionLimitTrigger;
+    public Trigger nearBucketPositionTrigger;
     public Trigger forwardTargetTrigger;
     public Trigger manualControlTrigger;
-    public Trigger extendedTrigger;
+    public Trigger isExtendedTrigger;
 
     public ExtensionSubsystem(
             HardwareMap hMap, PivotSubsystem pivotSubsystem, CachingVoltageSensor voltage) {
@@ -88,7 +88,8 @@ public class ExtensionSubsystem extends SubsystemBase {
                 new Trigger(() -> getCurrentInches() >= SlideConstants.maxExtension)
                         .and(forwardTargetTrigger)
                         .whenActive(() -> Log.i("A", "Maximum Extension limit has been breached"));
-        extendedTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold);
+        isExtendedTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold);
+        nearBucketPositionTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold && pivotSubsystem.isClose(PivotConstants.topLimit));
 
         underZeroTrigger.whenActive(this::resetC);
         // Stall Detection is cooked because u might as well just have the driver run bucket or
@@ -185,11 +186,7 @@ public class ExtensionSubsystem extends SubsystemBase {
      * @return
      */
     public Command openloopC(Double power){
-        if (manualControl){
-            return new InstantCommand(() -> openloop(power), this);
-        }
-        Log.i("WARNING", "RAN OPEN LOOP WHEN MANUAL CONTROL WAS NOT ENABLED");
-        return new InstantCommand();
+        return new InstantCommand(() -> openloop(power), this);
     }
 
     /**
@@ -203,11 +200,7 @@ public class ExtensionSubsystem extends SubsystemBase {
      * @return RunCommand Factory
      */
     public Command openloopC(DoubleSupplier power){
-        if (manualControl){
-            return new RunCommand(() -> openloopS(power), this);
-        }
-        Log.i("WARNING", "RAN OPEN LOOP WHEN MANUAL CONTROL WAS NOT ENABLED");
-        return new InstantCommand();
+        return new RunCommand(() -> openloopS(power), this);
     }
 
     /**
