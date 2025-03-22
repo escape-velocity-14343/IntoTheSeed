@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.commands.group;
 
 import android.util.Log;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
+
 import java.util.function.DoubleSupplier;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
@@ -23,7 +25,8 @@ public class SubPosCommand extends SequentialCommandGroup {
             PivotSubsystem pivot) {
         addCommands(
                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
-                new PivotCommand(pivot, PivotConstants.intakePos));
+                new PivotCommand(pivot, PivotConstants.intakePos)
+        );
         // must require extension because manual control must use it, so this ensures any other
         // commands using extension get interrupted
         addRequirements(extension, wrist);
@@ -52,7 +55,7 @@ public class SubPosCommand extends SequentialCommandGroup {
 
     @Override
     public void end(boolean interrupted) {
-        extension.setManualControl(true);
+//        extension.setManualControl(true);
         Log.i("%6", "Sub Pos Command, Interrupted: " + interrupted);
     }
 }

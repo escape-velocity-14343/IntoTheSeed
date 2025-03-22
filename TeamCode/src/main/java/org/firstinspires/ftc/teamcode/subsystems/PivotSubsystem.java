@@ -31,7 +31,7 @@ public class PivotSubsystem extends SubsystemBase {
     private CachingVoltageSensor voltage;
     private DoubleSupplier extensionInches = () -> 0;
     private boolean supplierSet = false;
-    private Trigger extensionSetTrigger = new Trigger(() -> supplierSet).whileActiveContinuous(() -> Log.i("WARNING", "PIVOT EXTENSION SUPPPLIER UNSET"));
+//    private Trigger extensionSetTrigger = new Trigger(() -> supplierSet).whileActiveContinuous(() -> Log.i("WARNING", "PIVOT EXTENSION SUPPLIER UNSET"));
     public Trigger manualControlTrigger = new Trigger(() -> manualControl);
 
     public PivotSubsystem(HardwareMap hMap, CachingVoltageSensor voltage) {

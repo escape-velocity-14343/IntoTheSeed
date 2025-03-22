@@ -6,17 +6,17 @@ import com.acmerobotics.dashboard.config.Config;
 public class IntakeConstants {
 
     // wrist constants
-    public static double foldedPos = 0.35;
+    public static double foldedPos = 0.275;
     public static double halfFoldPos = 0.47;
     public static double groundPos = 0.56;
-    public static double scoringPos = 0.3;
+    public static double scoringPos = 0.275;
     public static double specimenScoringPos = 0.4;
     public static double scoringPosReversed = 0.75;
     public static double parkPos = 0.45;
     public static double bucketRetractPos = 0.05;
     public static double specimenReadyPos = 0.63;
     public static double intakeReadyPos = 0.8;
-    public static double toptakePos = 0.55;
+    public static double toptakePos = 0.575;
 
     // wrist command constants
     public static double timeMultiplier = 0.27;

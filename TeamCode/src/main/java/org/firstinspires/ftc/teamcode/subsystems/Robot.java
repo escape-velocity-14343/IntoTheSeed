@@ -11,29 +11,42 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BooleanSupplier;
+
 import org.firstinspires.ftc.teamcode.commands.group.BucketPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.IntakePosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.LowBucketPosCommand;
+import org.firstinspires.ftc.teamcode.commands.group.RetractCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosCommand;
-import org.firstinspires.ftc.teamcode.constants.AutoConstants;
+import org.firstinspires.ftc.teamcode.commands.group.SubPosReadyCommand;
 import org.firstinspires.ftc.teamcode.constants.DriveConstants;
+import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.CachingVoltageSensor;
 
 public abstract class Robot extends LinearOpMode {
 
     public enum FSMStates {
+        READY,
+        INTAKE_READY,
         INTAKE,
         HANG,
         OUTTAKE,
         SPECIMEN,
         FOLD,
-        AUTOSCORE,
-        NONE
+        AUTOSCORE
+    }
+    public enum StateProgress {
+        NONE,
+        PROGRESS,
+        READY
     }
 
-    public FSMStates robotState = FSMStates.NONE;
+    public FSMStates robotState = FSMStates.READY;
+    public StateProgress robotProgress = StateProgress.NONE;
     public AtomicBoolean reverseClaw = new AtomicBoolean(false);
     public AtomicBoolean lowBucket = new AtomicBoolean(false);
 
@@ -51,19 +64,20 @@ public abstract class Robot extends LinearOpMode {
     public TurretSubsystem turret;
 
     public IMU imu;
-    // public CameraSubsystem cam;
+
     public ElapsedTime timer = new ElapsedTime();
     public CommandScheduler cs = CommandScheduler.getInstance();
 
+    private double lastIntakeWristAngle;
+
     public void initialize() {
         DriveConstants.highExtend = false;
-        AutoConstants.subBarrierY = 24.0;
-        // cs.reset();
+
         hubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule hub : hubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
-        // otos = new OTOSSubsystem(hardwareMap);
+
         voltage = new CachingVoltageSensor(hardwareMap);
         // basketSensor = new BasketSensorSubsystem(hardwareMap);
 
@@ -110,26 +124,68 @@ public abstract class Robot extends LinearOpMode {
 
     public Command intakePos() {
         return new IntakePosCommand(extension, pivot, wrist, intake)
-                .alongWith(new InstantCommand(() -> setState(FSMStates.INTAKE)));
+                .andThen(setStateCommand(FSMStates.INTAKE));
     }
 
-    public Command subPos() {
+    public Command intake() {
         return new SubPosCommand(extension, wrist, intake, pivot)
-                .alongWith(new InstantCommand(() -> setState(FSMStates.INTAKE)));
+                .andThen(setStateCommand(FSMStates.INTAKE));
     }
 
     public Command bucketPos() {
         return new ConditionalCommand(
                 LowBucketPosCommand.newWithWristPos(extension, pivot, wrist),
                 new BucketPosCommand(extension, pivot, wrist, turret),
-                lowBucket::get);
+                lowBucket::get
+        ).andThen(setStateCommand(FSMStates.OUTTAKE));
+    }
+
+    public Command retract() {
+        return new RetractCommand(wrist, pivot, extension, turret, intake).andThen(setStateCommand(FSMStates.READY));
+    }
+
+    public Command intakeReady(double wristAngle) {
+        return new SubPosReadyCommand(
+                extension,
+                pivot,
+                wrist,
+                intake,
+                turret,
+                wristAngle,
+                SlideConstants.submersibleIntakeMaxExtension,
+                notInAnyState(FSMStates.INTAKE_READY, FSMStates.INTAKE)
+        )/*.alongWith(new InstantCommand(() -> lastIntakeWristAngle = wristAngle))*/.andThen(setStateCommand(FSMStates.INTAKE_READY));
+    }
+
+    public Command intakeReady() {
+        return intakeReady(lastIntakeWristAngle);
     }
 
     public void setState(FSMStates state) {
         robotState = state;
     }
 
+    public Command setStateCommand(FSMStates state) {
+        return new InstantCommand(() -> setState(state));
+    }
+
     public FSMStates getState() {
         return robotState;
+    }
+
+    public BooleanSupplier inState(FSMStates state) {
+        return () -> getState() == state;
+    }
+
+    public BooleanSupplier inAnyState(FSMStates... state) {
+        return () -> Arrays.stream(state).anyMatch((testState) -> getState() == testState);
+    }
+
+    public BooleanSupplier notInState(FSMStates state) {
+        return () -> getState() != state;
+    }
+
+    public BooleanSupplier notInAnyState(FSMStates... state) {
+        return () -> Arrays.stream(state).allMatch((testState) -> getState() != testState);
     }
 }

@@ -8,7 +8,7 @@ public class SlideConstants {
     public static double kI = 0;
     public static double kD = 0;
     public static double kS = 0.13;
-    public static double ticksPerInch = 54.9;
+    public static double ticksPerInch = 54.9/1.5555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555;
     public static double maxExtension = 31;
 
     public static double bucketPos = 31;
