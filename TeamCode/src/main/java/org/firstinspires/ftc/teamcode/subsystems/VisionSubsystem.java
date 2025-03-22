@@ -37,17 +37,19 @@ import java.util.function.BooleanSupplier;
 
 @Config
 public class VisionSubsystem extends SubsystemBase {
-    public static Scalar minimumRed1 = new Scalar(0, 125, 50);
+    public static Scalar minimumRed1 = new Scalar(0, 70, 50);
     public static Scalar maximumRed1 = new Scalar(12, 255, 255);
 
-    public static Scalar minimumRed2 = new Scalar(168, 125, 50);
+    public static Scalar minimumRed2 = new Scalar(168, 70, 50);
     public static Scalar maximumRed2 = new Scalar(180, 255, 255);
 
-    public static Scalar minimumBlue = new Scalar(100, 125, 50);
+    public static Scalar minimumBlue = new Scalar(100, 100, 50);
     public static Scalar maximumBlue = new Scalar(140, 255, 255);
 
     public static Scalar minimumYellow = new Scalar(13, 60, 60);
     public static Scalar maximumYellow = new Scalar(50, 255, 255);
+
+    public static boolean useGlowUp = true;
 
     public static int exposureMillis = 50;
     public static int minContourArea = 200;
@@ -95,12 +97,21 @@ public class VisionSubsystem extends SubsystemBase {
 
         CameraName camera = hMap.get(WebcamName.class, name);
 
-        visionPortal = new VisionPortal.Builder()
-                .addProcessors(glowUp, colorLocator)
-                .setCameraResolution(new Size(320, 240))
-                .setCamera(camera)
-                .enableLiveView(true)
-                .build();
+        if (useGlowUp) {
+            visionPortal = new VisionPortal.Builder()
+                    .addProcessors(glowUp, colorLocator)
+                    .setCameraResolution(new Size(320, 240))
+                    .setCamera(camera)
+                    .enableLiveView(true)
+                    .build();
+        } else {
+            visionPortal = new VisionPortal.Builder()
+                    .addProcessors(colorLocator)
+                    .setCameraResolution(new Size(320, 240))
+                    .setCamera(camera)
+                    .enableLiveView(true)
+                    .build();
+        }
 
         setEnabled(true);
         waitForSetExposure(1000, 1000);

@@ -164,7 +164,6 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
 
         List<MatOfPoint> polygons = new ArrayList<>();
         polygons.add(maskShape);
-        Imgproc.fillPoly(roiMask, polygons, new Scalar(255));
         Log.i("cv test", "done with init of processor");
     }
 
@@ -222,7 +221,7 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
         Log.i("cv test", "opencv size of the mask: " + mask.size());
         Log.i("cv test", "opencv type of the roimask: " + roiMask.type());
         Log.i("cv test", "opencv size of the roimask: " + roiMask.size());*/
-        Core.bitwise_and(mask, roiMask, mask);
+        //Core.bitwise_and(mask, roiMask, mask);
 
 
         ArrayList<MatOfPoint> contours = new ArrayList<>();
@@ -331,14 +330,14 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
         }
         Path path = new Path();
 
-        Point[] contourPts = points;
+        /*Point[] contourPts = new Point[0];
 
         path.moveTo((float) (contourPts[0].x) * scaleBmpPxToCanvasPx, (float)(contourPts[0].y) * scaleBmpPxToCanvasPx);
         for (int i = 1; i < contourPts.length; i++)
         {
             path.lineTo((float) (contourPts[i].x) * scaleBmpPxToCanvasPx, (float) (contourPts[i].y) * scaleBmpPxToCanvasPx);
         }
-        path.close();
+        path.close();*/
 
         canvas.drawPath(path, contourPaint);
 
