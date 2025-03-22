@@ -173,11 +173,7 @@ public class PivotSubsystem extends SubsystemBase {
         //Update encoder reading every loop
         currentPos = encoder.getAngle();
         squid.setPID(
-                PivotConstants.kPRetracted
-                                * (1 - extensionInches.getAsDouble() / SlideConstants.maxExtension)
-                        + PivotConstants.kPExtended
-                                * extensionInches.getAsDouble()
-                                / SlideConstants.maxExtension);
+                PivotConstants.kPRetracted);
         pivotVelocity = (lastPos - currentPos) / timer.seconds();
         if (!manualControl) {
             tiltToPos(target);
