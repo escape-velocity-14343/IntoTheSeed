@@ -59,6 +59,7 @@ public abstract class Robot extends LinearOpMode {
     // @Deprecated
     // public OTOSSubsystem otos;
     public PinpointSubsystem pinpoint;
+//    public VisionSubsystem visionSubsystem;
     public CachingVoltageSensor voltage;
     public BasketSensorSubsystem basketSensor;
     public TurretSubsystem turret;

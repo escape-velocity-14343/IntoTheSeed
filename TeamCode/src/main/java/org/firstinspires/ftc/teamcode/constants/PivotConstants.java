@@ -5,10 +5,9 @@ import com.acmerobotics.dashboard.config.Config;
 @Config
 public class PivotConstants {
     public static double kPRetracted = 0.03;
-    public static double kPExtended = 0.05;
-    public static double kI = 0;
-    public static double kD = 0;
     public static double kS = 0;
+    public static double kGRetracted = 0;
+    public static double kGFullyExtended = 0;
 
     public static double bottomLimit = 0.5;
     public static double topLimit = 86;
@@ -20,7 +19,7 @@ public class PivotConstants {
     public static double retractDegrees = bottomLimit;
 
     public static double neutralPos = bottomLimit;
-    public static double intakeReadyPos = 13;
+    public static double intakeReadyPos = 15;
     public static double intakePos = 7.5;
 
     public static double specimenIntakeAngle = topLimit;

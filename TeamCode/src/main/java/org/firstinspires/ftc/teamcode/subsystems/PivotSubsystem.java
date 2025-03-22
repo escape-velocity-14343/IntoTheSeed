@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.function.DoubleSupplier;
+
+import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.AnalogEncoder;
@@ -31,7 +33,7 @@ public class PivotSubsystem extends SubsystemBase {
     private CachingVoltageSensor voltage;
     private DoubleSupplier extensionInches = () -> 0;
     private boolean supplierSet = false;
-//    private Trigger extensionSetTrigger = new Trigger(() -> supplierSet).whileActiveContinuous(() -> Log.i("WARNING", "PIVOT EXTENSION SUPPLIER UNSET"));
+    private Trigger extensionSetTrigger = new Trigger(() -> !supplierSet).whileActiveContinuous(() -> Log.i("WARNING", "PIVOT EXTENSION SUPPPLIER UNSET"));
     public Trigger manualControlTrigger = new Trigger(() -> manualControl);
 
     public PivotSubsystem(HardwareMap hMap, CachingVoltageSensor voltage) {
@@ -85,6 +87,19 @@ public class PivotSubsystem extends SubsystemBase {
         openloop(power);
     }
 
+    public Command getPivotCommand(double target){
+        return new PivotCommand(this, target);
+    }
+
+    public Command getPivotCommand(DoubleSupplier target){
+        return new RunCommand(() -> setTarget(target.getAsDouble()), this);
+    }
+
+    public void setTarget(DoubleSupplier target){
+        manualControl = false;
+
+    }
+
     public void setTarget(double target) {
         manualControl = false;
         this.target = target;
@@ -132,9 +147,30 @@ public class PivotSubsystem extends SubsystemBase {
         motor1.setPower(0);
     }
 
+    private double interpolate(double x) {
+        double x1 = 0;
+        double y1 = PivotConstants.kGRetracted;
+        double x2 = SlideConstants.bucketPos;
+        double y2 = PivotConstants.kGFullyExtended;
+
+        return y1 + (x) * (y2 - y1) / (x2 - x1);
+    }
+
+    private double interpolatedRawFeedforward(){
+        return interpolate(extensionInches.getAsDouble());
+    }
+
+    private double getKg(){
+        return (interpolatedRawFeedforward() * Math.sin(getCurrentPosition()));
+    }
+
     @Override
     public void periodic() {
+        //Cache last position
         double lastPos = currentPos;
+        pivotVelocity = (lastPos - currentPos) / timer.seconds();
+
+        //Update encoder reading every loop
         currentPos = encoder.getAngle();
         squid.setPID(
                 PivotConstants.kPRetracted
@@ -146,6 +182,7 @@ public class PivotSubsystem extends SubsystemBase {
         if (!manualControl) {
             tiltToPos(target);
         }
+        //Timer reset
         timer.reset();
     }
 }

@@ -31,6 +31,8 @@ public class ExtensionPIDTest extends LinearOpMode {
         pivot = new PivotSubsystem(hardwareMap, voltage);
         extension = new ExtensionSubsystem(hardwareMap, pivot, voltage);
         wrist = new WristSubsystem(hardwareMap);
+        pivot.setExtensionSupplier(extension::getCurrentInches);
+
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         waitForStart();
         CommandScheduler.getInstance()

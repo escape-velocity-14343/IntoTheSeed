@@ -5,6 +5,7 @@ import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.commands.group.DefaultGoToPointCommand;
+import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
 @TeleOp(group = "Test")
@@ -20,6 +21,7 @@ public class GTPointTest extends Robot {
         initialize();
         pinpoint.setPosition(0, 0);
         waitForStart();
+        wrist.setWrist(IntakeConstants.foldedPos);
 
         // cs.schedule(
         //        new SequentialCommandGroup(
