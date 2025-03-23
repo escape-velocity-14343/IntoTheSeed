@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.VisionConstants;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
+import org.firstinspires.ftc.vision.VisionPortal;
 
 @TeleOp
 @Config
@@ -36,7 +37,8 @@ public class ChassisCameraTest extends LinearOpMode {
         else{
             AutoConstants.alliance = AutoConstants.Alliance.BLUE;
         }
-        highCameraSubsystem = new VisionSubsystem(hardwareMap, VisionConstants.chassisCameraName, telemetry);
+        int[] viewportids = VisionPortal.makeMultiPortalView(1, VisionPortal.MultiPortalLayout.VERTICAL);
+        highCameraSubsystem = new VisionSubsystem(hardwareMap, VisionConstants.chassisCameraName, telemetry, viewportids[0]);
 
         highCameraSubsystem.waitForSetExposure(3000, 10000, exposure);
 

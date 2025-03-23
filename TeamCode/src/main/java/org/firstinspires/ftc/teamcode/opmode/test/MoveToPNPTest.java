@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.constants.VisionConstants;
 import org.firstinspires.ftc.teamcode.lib.RobotPnP;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
+import org.firstinspires.ftc.vision.VisionPortal;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,6 +30,7 @@ public class MoveToPNPTest extends Robot {
 
     public static boolean red = true;
     VisionSubsystem highCameraSubsystem;
+    VisionSubsystem slideCameraSubsystem;
 
     public static double cx = 338.083;
     public static double cy = 218.771;
@@ -54,11 +56,17 @@ public class MoveToPNPTest extends Robot {
         } else {
             AutoConstants.alliance = AutoConstants.Alliance.BLUE;
         }
-        highCameraSubsystem = new VisionSubsystem(hardwareMap, VisionConstants.chassisCameraName, telemetry);
+        int[] viewportids = VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.VERTICAL);
+
+        slideCameraSubsystem = new VisionSubsystem(hardwareMap, VisionConstants.slideCameraName, telemetry, viewportids[1]);
+        highCameraSubsystem = new VisionSubsystem(hardwareMap, VisionConstants.chassisCameraName, telemetry, viewportids[0]);
+
+
 
         highCameraSubsystem.waitForSetExposure(3000, 10000, exposure);
+        slideCameraSubsystem.waitForSetExposure(3000, 10000, exposure);
 
-        CommandScheduler.getInstance().registerSubsystem(highCameraSubsystem);
+        CommandScheduler.getInstance().registerSubsystem(highCameraSubsystem, slideCameraSubsystem);
 
         waitForStart();
 
@@ -75,7 +83,7 @@ public class MoveToPNPTest extends Robot {
 
         cs.schedule(
                 new SequentialCommandGroup(
-                        new WaitCommand(5000),
+                        new WaitCommand(150),
 
                         new InstantCommand(() -> {
                             Vector2d samplePos = highCameraSubsystem.getSamplePos();
@@ -86,12 +94,12 @@ public class MoveToPNPTest extends Robot {
 
         while (opModeIsActive()) {
             update();
-            if (timer.seconds() > 5 && !thing) {
+            if (timer.seconds() > 1 && !thing) {
                 thing = true;
                 cs.schedule(
                         new GoToPointWithDefaultCommand(
                                 new Pose2d(
-                                        sampleFCPos.get().getX() - 28,
+                                        sampleFCPos.get().getX() - 24,
                                         sampleFCPos.get().getY(),
                                         new Rotation2d()
                                 ), gtpc

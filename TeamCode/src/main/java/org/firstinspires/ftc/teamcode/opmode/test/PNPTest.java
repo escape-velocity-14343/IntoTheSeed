@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.constants.VisionConstants;
 import org.firstinspires.ftc.teamcode.lib.RobotPnP;
 import org.firstinspires.ftc.teamcode.subsystems.PinpointSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
+import org.firstinspires.ftc.vision.VisionPortal;
 
 @TeleOp
 @Config
@@ -48,7 +49,8 @@ public class PNPTest extends LinearOpMode {
         else{
             AutoConstants.alliance = AutoConstants.Alliance.BLUE;
         }
-        highCameraSubsystem = new VisionSubsystem(hardwareMap, VisionConstants.chassisCameraName, telemetry);
+        int[] viewportids = VisionPortal.makeMultiPortalView(1, VisionPortal.MultiPortalLayout.VERTICAL);
+        highCameraSubsystem = new VisionSubsystem(hardwareMap, VisionConstants.chassisCameraName, telemetry, viewportids[0]);
         pinpoint = new PinpointSubsystem(hardwareMap);
         pinpoint.reset();
         pinpoint.resetYaw();

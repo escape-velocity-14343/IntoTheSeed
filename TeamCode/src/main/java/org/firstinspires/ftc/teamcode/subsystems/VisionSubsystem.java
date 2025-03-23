@@ -71,7 +71,7 @@ public class VisionSubsystem extends SubsystemBase {
     CameraName cameraName;
 
 
-    public VisionSubsystem(HardwareMap hMap, String name, Telemetry telemetry){
+    public VisionSubsystem(HardwareMap hMap, String name, Telemetry telemetry, int viewportid){
         glowUp = new GlowUpPipeline(alpha, beta, contrast);
         colorLocator = new ColorBlobLocatorProcessorMulti(
                 new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, new Scalar(13, 60, 60), new Scalar(50, 255, 255)),
@@ -100,20 +100,26 @@ public class VisionSubsystem extends SubsystemBase {
         }
 
         CameraName camera = hMap.get(WebcamName.class, name);
-
+        /*int viewportid = VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.VERTICAL)[0];
+        if (name.equals(VisionConstants.slideCameraName)) {
+            Log.i("Viewport", "is this working");
+            viewportid = VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.VERTICAL)[1];
+        }*/
         if (useGlowUp) {
             visionPortal = new VisionPortal.Builder()
                     .addProcessors(glowUp, colorLocator)
                     .setCameraResolution(new Size(640, 480))
                     .setCamera(camera)
-                    .enableLiveView(true)
+                    //.enableLiveView(true)
+                    .setLiveViewContainerId(viewportid)
                     .build();
         } else {
             visionPortal = new VisionPortal.Builder()
                     .addProcessors(colorLocator)
                     .setCameraResolution(new Size(640, 480))
                     .setCamera(camera)
-                    .enableLiveView(true)
+                    //.enableLiveView(true)
+                    .setLiveViewContainerId(viewportid)
                     .build();
         }
 

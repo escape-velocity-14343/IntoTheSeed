@@ -57,9 +57,7 @@ public class EZ4Piece extends Robot {
                         intake(),
                         new WaitCommand(300),
                         new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
-                                retract().andThen(
-                                        new BucketPosCommand(extension, pivot, wrist, turret)
-                                )
+                                new BucketPosCommand(extension, pivot, wrist, turret)
                         ),
                         new IntakeClawCommand(intake, IntakeConstants.openPos),
 
@@ -72,24 +70,20 @@ public class EZ4Piece extends Robot {
                         intake(),
                         new WaitCommand(300),
                         new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
-                                retract().andThen(
-                                        new BucketPosCommand(extension, pivot, wrist, turret)
-                                )
+                                new BucketPosCommand(extension, pivot, wrist, turret)
                         ),
                         new IntakeClawCommand(intake, IntakeConstants.openPos),
                         new WaitCommand(100),
 
                         new GoToPointWithDefaultCommand(
-                                new Pose2d(-44.5, 48, Rotation2d.fromDegrees(45)), gtpc
+                                new Pose2d(-44.5, 51, Rotation2d.fromDegrees(45)), gtpc
                         ).alongWith(
                                 intakeReady(45)
                         ),
                         intake(),
                         new WaitCommand(300),
                         new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
-                                retract().andThen(
-                                        new BucketPosCommand(extension, pivot, wrist, turret)
-                                )
+                                new BucketPosCommand(extension, pivot, wrist, turret)
                         ),
                         new IntakeClawCommand(intake, IntakeConstants.openPos)
 
