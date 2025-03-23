@@ -104,7 +104,7 @@ public class TeleOpps extends Robot {
 
 
         new Trigger(() -> driverPad.getButton(GamepadKeys.Button.RIGHT_BUMPER))
-                .whenActive(intake());
+                .whenActive(intake()).whenInactive(retract());
 
         new Trigger(() -> driverPad.getButton(GamepadKeys.Button.LEFT_BUMPER))
                 .whileActiveOnce(new IntakeClawCommand(intake, IntakeConstants.openPos))

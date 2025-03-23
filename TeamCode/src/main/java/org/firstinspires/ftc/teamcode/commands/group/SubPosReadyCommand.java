@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.commands.group;
 
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.IntakeSpinCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.RunIfCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
@@ -34,6 +36,7 @@ public class SubPosReadyCommand extends SequentialCommandGroup {
 
         addCommands(
                 new RunIfCommand(new RetractCommand(wrist, pivot, extension, turret, intake), notAlreadyInPosition),
+                new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 0),
                 new PivotCommand(pivot, PivotConstants.intakeReadyPos),
                 new ExtendCommand(extension, extendInches),
 //                        .withTimeout(extension.getReasonableExtensionMillis(extendInches)),

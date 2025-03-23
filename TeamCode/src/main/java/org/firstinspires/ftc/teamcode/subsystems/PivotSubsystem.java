@@ -84,6 +84,9 @@ public class PivotSubsystem extends SubsystemBase {
         if (power <= 0 && isClose(target) && target == PivotConstants.bottomLimit) {
             power = -0.05;
         }
+        if (power > 0 && currentPos < 20) {
+            power *= PivotConstants.bottomPMult;
+        }
         openloop(power);
     }
 
@@ -149,11 +152,11 @@ public class PivotSubsystem extends SubsystemBase {
 
     private double interpolate(double x) {
         double x1 = 0;
-        double y1 = PivotConstants.kGRetracted;
+        double y1 = PivotConstants.kPRetracted;
         double x2 = SlideConstants.bucketPos;
-        double y2 = PivotConstants.kGFullyExtended;
+        double y2 = PivotConstants.kPExtended;
 
-        return y1 + (x) * (y2 - y1) / (x2 - x1);
+        return y1 + x * (y2 - y1) / (x2 - x1);
     }
 
     private double interpolatedRawFeedforward(){
@@ -173,7 +176,7 @@ public class PivotSubsystem extends SubsystemBase {
         //Update encoder reading every loop
         currentPos = encoder.getAngle();
         squid.setPID(
-                PivotConstants.kPRetracted);
+                interpolatedRawFeedforward());
         pivotVelocity = (lastPos - currentPos) / timer.seconds();
         if (!manualControl) {
             tiltToPos(target);

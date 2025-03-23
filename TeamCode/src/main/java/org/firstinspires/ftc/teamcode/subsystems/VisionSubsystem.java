@@ -6,6 +6,7 @@ import android.util.Size;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.SortOrder;
 
@@ -32,6 +33,7 @@ import org.opencv.core.Scalar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
@@ -49,7 +51,7 @@ public class VisionSubsystem extends SubsystemBase {
     public static Scalar minimumYellow = new Scalar(13, 60, 60);
     public static Scalar maximumYellow = new Scalar(50, 255, 255);
 
-    public static boolean useGlowUp = true;
+    public static boolean useGlowUp = false;
 
     public static int exposureMillis = 50;
     public static int minContourArea = 200;
@@ -61,6 +63,8 @@ public class VisionSubsystem extends SubsystemBase {
     ColorBlobLocatorProcessorMulti colorLocator;
     GlowUpPipeline glowUp;
     private double pixelPos = 0;
+
+    private Vector2d samplePos = new Vector2d();
 
     Telemetry telemetry;
     VisionPortal visionPortal;
@@ -100,14 +104,14 @@ public class VisionSubsystem extends SubsystemBase {
         if (useGlowUp) {
             visionPortal = new VisionPortal.Builder()
                     .addProcessors(glowUp, colorLocator)
-                    .setCameraResolution(new Size(320, 240))
+                    .setCameraResolution(new Size(640, 480))
                     .setCamera(camera)
                     .enableLiveView(true)
                     .build();
         } else {
             visionPortal = new VisionPortal.Builder()
                     .addProcessors(colorLocator)
-                    .setCameraResolution(new Size(320, 240))
+                    .setCameraResolution(new Size(640, 480))
                     .setCamera(camera)
                     .enableLiveView(true)
                     .build();
@@ -139,8 +143,13 @@ public class VisionSubsystem extends SubsystemBase {
                 }
                 pixelPos = dist;*/
                 pixelPos = (int) (160 - blobs.get(0).getBoxFit().center.x);
+                samplePos = new Vector2d(blobs.get(0).getBoxFit().center.x, blobs.get(0).getBoxFit().center.y);
             }
         }
+    }
+
+    public Vector2d getSamplePos() {
+        return samplePos;
     }
 
 

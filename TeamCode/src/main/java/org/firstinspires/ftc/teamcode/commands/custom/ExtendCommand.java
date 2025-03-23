@@ -9,7 +9,7 @@ public class ExtendCommand extends TimeoutCommand {
      * @param target    in inches
      */
     public ExtendCommand(ExtensionSubsystem subsystem, double target) {
-        super(new ExtendCommandInternal(subsystem, target), (int) subsystem.getReasonableExtensionMillis(target));
+        super(new ExtendCommandInternal(subsystem, target), () -> (int) subsystem.getReasonableExtensionMillis(target));
     }
 
 }

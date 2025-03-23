@@ -155,7 +155,7 @@ public abstract class Robot extends LinearOpMode {
                 wristAngle,
                 SlideConstants.submersibleIntakeMaxExtension,
                 notInAnyState(FSMStates.INTAKE_READY, FSMStates.INTAKE)
-        )/*.alongWith(new InstantCommand(() -> lastIntakeWristAngle = wristAngle))*/.andThen(setStateCommand(FSMStates.INTAKE_READY));
+        ).alongWith(new InstantCommand(() -> lastIntakeWristAngle = wristAngle)).andThen(setStateCommand(FSMStates.INTAKE_READY));
     }
 
     public Command intakeReady() {

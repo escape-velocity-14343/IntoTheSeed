@@ -91,7 +91,7 @@ public class ExtensionSubsystem extends SubsystemBase {
         isExtendedTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold);
         nearBucketPositionTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold && pivotSubsystem.isClose(PivotConstants.topLimit));
 
-        underZeroTrigger.whenActive(this::resetC);
+        // underZeroTrigger.whenActive(this::resetC);
         // Stall Detection is cooked because u might as well just have the driver run bucket or
         // something to make sure it's unjammed
         // V good for award bait-
@@ -389,6 +389,10 @@ public class ExtensionSubsystem extends SubsystemBase {
                 .and(submersibleLimitTrigger.negate())
                 .get()) {
             extendInches(targetInches);
+        }
+
+        if (getCurrentInches() < 0) {
+            reset();
         }
 
         FtcDashboard.getInstance()

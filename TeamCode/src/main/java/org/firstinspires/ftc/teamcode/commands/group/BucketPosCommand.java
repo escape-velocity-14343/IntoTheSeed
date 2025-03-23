@@ -33,6 +33,7 @@ public class BucketPosCommand extends SequentialCommandGroup {
         addCommands(
                 // new ExtendCommand(extension, 1),
                 new ParallelCommandGroup(
+
                         // minus two to prevent it from overshooting
                         new PivotCommand(pivot, PivotConstants.topLimit)
                                 .interruptOn(
@@ -57,13 +58,13 @@ public class BucketPosCommand extends SequentialCommandGroup {
                                                 () ->
                                                         extension.getCurrentInches()
                                                                 > SlideConstants.bucketPos - 2)),
-                        new WaitUntilCommand(
+                        new WristCommand(wrist, 0.4).andThen(new WaitUntilCommand(
                                         () ->
                                                 extension.getCurrentInches()
                                                         > SlideConstants.bucketPos - 2)
                                 .withTimeout(1000)
                                 .andThen(new WristCommand(wrist, IntakeConstants.scoringPos)),
-                        new TurretCommand(turret, 0)),
+                        new TurretCommand(turret, 0))),
                 new InstantCommand(() -> Log.i("%2", "BucketPos End")));
     }
 

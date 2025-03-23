@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode.commands.group;
 
 import android.util.Log;
+
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
+
 import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeSpinCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
@@ -33,14 +37,17 @@ public class RetractCommand extends SequentialCommandGroup {
             IntakeSubsystem intake) {
 
         addCommands(
-                new SequentialCommandGroup(new ParallelCommandGroup(
-                        new WristCommand(wrist, IntakeConstants.foldedPos),
-                        new TurretCommand(turret, 0),
-                        new IntakeSpinCommand(intake, 0)),
-                new ExtendCommand(extend, SlideConstants.minExtension),
-                new PivotCommand(pivot, PivotConstants.neutralPos),
-                new WristCommand(wrist, IntakeConstants.foldedPos))//.withTimeout(500)
-                        .whenFinished(() -> Log.i("5", "Retract command")));
+                new SequentialCommandGroup(
+                        new ParallelCommandGroup(
+                                new IntakeControlCommand(intake, IntakeConstants.closedPos, 0),
+                                new WristCommand(wrist, IntakeConstants.foldedPos),
+                                new TurretCommand(turret, 0)
+                        ),
+                        new ExtendCommand(extend, SlideConstants.minExtension),
+                        new PivotCommand(pivot, PivotConstants.neutralPos),
+                        new WristCommand(wrist, IntakeConstants.foldedPos)
+                ).whenFinished(() -> Log.i("5", "Retract command"))
+        );
     }
 
     public static RetractCommand newWithWristPos(

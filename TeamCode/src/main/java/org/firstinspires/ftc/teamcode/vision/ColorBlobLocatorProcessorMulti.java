@@ -68,18 +68,10 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
     public boolean onlyFirstColor = false;
 
     Point[] points = {
-            new Point(0,165),
-            new Point(0,215),
-            new Point(160,220),
-            new Point(320, 210),
-            new Point(320, 180),
-            new Point(200,190),
-            new Point(190, 150),
-            new Point(190,0),
-            new Point(130, 0),
-            new Point(130, 160),
-            new Point(100, 205),
-            new Point(80, 205)
+            new Point(0,240),
+            new Point(0,480),
+            new Point(640,480),
+            new Point(640, 240),
     };
 
 
@@ -164,6 +156,7 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
 
         List<MatOfPoint> polygons = new ArrayList<>();
         polygons.add(maskShape);
+        Imgproc.fillPoly(roiMask, polygons, new Scalar(255));
         Log.i("cv test", "done with init of processor");
     }
 
@@ -221,7 +214,7 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
         Log.i("cv test", "opencv size of the mask: " + mask.size());
         Log.i("cv test", "opencv type of the roimask: " + roiMask.type());
         Log.i("cv test", "opencv size of the roimask: " + roiMask.size());*/
-        //Core.bitwise_and(mask, roiMask, mask);
+        Core.bitwise_and(mask, roiMask, mask);
 
 
         ArrayList<MatOfPoint> contours = new ArrayList<>();
@@ -330,14 +323,14 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
         }
         Path path = new Path();
 
-        /*Point[] contourPts = new Point[0];
+        Point[] contourPts = points;
 
         path.moveTo((float) (contourPts[0].x) * scaleBmpPxToCanvasPx, (float)(contourPts[0].y) * scaleBmpPxToCanvasPx);
         for (int i = 1; i < contourPts.length; i++)
         {
             path.lineTo((float) (contourPts[i].x) * scaleBmpPxToCanvasPx, (float) (contourPts[i].y) * scaleBmpPxToCanvasPx);
         }
-        path.close();*/
+        path.close();
 
         canvas.drawPath(path, contourPaint);
 
