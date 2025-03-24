@@ -24,6 +24,10 @@ public class IVKCommand extends ParallelCommandGroup {
     private BiFunction<Double, Double, Double> getTargetExtension = (x, y) -> Math.max(Math.sqrt(Math.pow(x, 2) + Math.pow(y - IVKConstants.pivotPointHeight, 2)), 0);
     private BiFunction<Double, Double, Double> getTargetAngleDegrees = (x, y) -> Math.toDegrees(Math.atan2(y - IVKConstants.pivotPointHeight, x));
 
+    // useful constants:
+    public static double intakeReadyY = 9;
+    public static double intakeY = 6;
+
     /**
      * Height is from the tile to the claw
      * Distance is from the front of the robot, to a point forwards from the bot

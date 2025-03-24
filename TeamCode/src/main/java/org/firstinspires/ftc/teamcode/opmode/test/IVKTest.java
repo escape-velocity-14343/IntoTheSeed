@@ -30,10 +30,13 @@ public class IVKTest extends LinearOpMode {
         extension = new ExtensionSubsystem(hardwareMap, pivot, voltage);
         pivot.setExtensionSupplier(extension::getCurrentInches);
 
+        cs.registerSubsystem(pivot, extension);
+
         waitForStart();
 
         while (!isStopRequested()) {
             cs.schedule(new IVKCommand(() -> x, () -> y, extension, pivot));
+            cs.run();
         }
 
         cs.reset();

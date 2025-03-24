@@ -45,6 +45,8 @@ public class ExtensionPIDTest extends LinearOpMode {
 
             telemetry.addData("current pos", extension.getCurrentPosition());
             telemetry.addData("target", targetInches);
+            telemetry.addData("current pivot pos", pivot.getCurrentPosition());
+            telemetry.addData("pivot target", targetDegrees);
             telemetry.addData("current inches", extension.getCurrentInches());
             telemetry.addData("is there", extension.isClose(targetInches));
             telemetry.update();

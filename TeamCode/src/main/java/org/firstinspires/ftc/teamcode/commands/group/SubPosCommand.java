@@ -5,6 +5,8 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 
 import java.util.function.DoubleSupplier;
+
+import org.firstinspires.ftc.teamcode.commands.custom.IVKCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
@@ -22,14 +24,12 @@ public class SubPosCommand extends SequentialCommandGroup {
             ExtensionSubsystem extension,
             WristSubsystem wrist,
             IntakeSubsystem intake,
-            PivotSubsystem pivot) {
+            PivotSubsystem pivot, double forwardExtension) {
         addCommands(
                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
-                new PivotCommand(pivot, PivotConstants.intakePos)
+                new IVKCommand(forwardExtension, IVKCommand.intakeY, extension, pivot)
         );
-        // must require extension because manual control must use it, so this ensures any other
-        // commands using extension get interrupted
-        addRequirements(extension, wrist);
+        addRequirements(wrist);
         this.extension = extension;
     }
 

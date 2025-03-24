@@ -77,6 +77,7 @@ public class DefaultGoToPointCommand extends CommandBase {
 
     @Override
     public void initialize() {
+        Log.i("GTPC", "Default GTPC scheduled properly :3");
         xPID.setTolerance(tol);
         yPID.setTolerance(tol);
         headingPID.setTolerance(hTol);

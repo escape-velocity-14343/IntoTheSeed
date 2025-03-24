@@ -129,7 +129,12 @@ public abstract class Robot extends LinearOpMode {
     }
 
     public Command intake() {
-        return new SubPosCommand(extension, wrist, intake, pivot)
+        return new SubPosCommand(extension, wrist, intake, pivot, SlideConstants.submersibleIntakeMaxExtension)
+                .andThen(setStateCommand(FSMStates.INTAKE));
+    }
+
+    public Command intake(double forwardInches) {
+        return new SubPosCommand(extension, wrist, intake, pivot, forwardInches)
                 .andThen(setStateCommand(FSMStates.INTAKE));
     }
 
@@ -143,6 +148,19 @@ public abstract class Robot extends LinearOpMode {
 
     public Command retract() {
         return new RetractCommand(wrist, pivot, extension, turret, intake).andThen(setStateCommand(FSMStates.READY));
+    }
+
+    public Command intakeReady(double turretAngle, double forwardInches) {
+        return new SubPosReadyCommand(
+                extension,
+                pivot,
+                wrist,
+                intake,
+                turret,
+                turretAngle,
+                forwardInches,
+                notInAnyState(FSMStates.INTAKE_READY, FSMStates.INTAKE)
+        ).alongWith(new InstantCommand(() -> lastIntakeWristAngle = turretAngle)).andThen(setStateCommand(FSMStates.INTAKE_READY));
     }
 
     public Command intakeReady(double turretAngle) {

@@ -34,7 +34,7 @@ public class SlideConstants {
     public static double millisPerInch = 5 * ticksPerInch;
 
     public static double highExtendInches = 1.5;
-    public static double extendedThreshold = 15;
+    public static double extendedThreshold = 10;
 
     public static double manualControlDeadband = 0.1;
 }

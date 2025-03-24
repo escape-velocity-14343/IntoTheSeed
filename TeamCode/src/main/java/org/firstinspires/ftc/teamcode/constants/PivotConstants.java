@@ -6,10 +6,10 @@ import com.acmerobotics.dashboard.config.Config;
 public class PivotConstants {
     public static double kPRetracted = 0.015;
 
-    public static double kPExtended = 0.03;
+    public static double kPExtended = 0.02;
     public static double kS = 0;
     public static double kGRetracted = 0;
-    public static double kGFullyExtended = 0;
+    public static double kGFullyExtended = 0.2;
 
     public static double bottomLimit = 0.5;
     public static double topLimit = 86;

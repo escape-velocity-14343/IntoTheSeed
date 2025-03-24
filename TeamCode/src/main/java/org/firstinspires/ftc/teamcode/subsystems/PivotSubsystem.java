@@ -69,6 +69,7 @@ public class PivotSubsystem extends SubsystemBase {
     }
 
     public void openloop(double power) {
+        //Log.v("pivot", "power: " + power);
         motor0.setPower(power * PivotConstants.direction);
         motor1.setPower(-power * PivotConstants.direction);
     }
@@ -77,7 +78,7 @@ public class PivotSubsystem extends SubsystemBase {
         manualControl = false;
         setTarget(target);
         double power =
-                squid.calculate(target, getCurrentPosition()) * voltage.getVoltageNormalized();
+                squid.calculate(target, getCurrentPosition()) * voltage.getVoltageNormalized() + getKg();
         // if (currentPos > PivotConstants.topLimit-1 && power >= 0) {
         //    power = 0.3;
         // }
@@ -87,6 +88,7 @@ public class PivotSubsystem extends SubsystemBase {
         if (power > 0 && currentPos < 20) {
             power *= PivotConstants.bottomPMult;
         }
+
         openloop(power);
     }
 
@@ -150,7 +152,7 @@ public class PivotSubsystem extends SubsystemBase {
         motor1.setPower(0);
     }
 
-    private double interpolate(double x) {
+    private double interpolateKp(double x) {
         double x1 = 0;
         double y1 = PivotConstants.kPRetracted;
         double x2 = SlideConstants.bucketPos;
@@ -159,12 +161,25 @@ public class PivotSubsystem extends SubsystemBase {
         return y1 + x * (y2 - y1) / (x2 - x1);
     }
 
+    private double interpolateKg(double x) {
+        double x1 = 0;
+        double y1 = PivotConstants.kGRetracted;
+        double x2 = SlideConstants.bucketPos;
+        double y2 = PivotConstants.kGFullyExtended;
+
+        return y1 + x * (y2 - y1) / (x2 - x1);
+    }
+
     private double interpolatedRawFeedforward(){
-        return interpolate(extensionInches.getAsDouble());
+        return interpolateKp(extensionInches.getAsDouble());
+    }
+
+    private double interpolatedRawFeedforwardkG(){
+        return interpolateKg(extensionInches.getAsDouble());
     }
 
     private double getKg(){
-        return (interpolatedRawFeedforward() * Math.sin(getCurrentPosition()));
+        return (interpolatedRawFeedforwardkG() * Math.cos(getCurrentPosition()));
     }
 
     @Override
