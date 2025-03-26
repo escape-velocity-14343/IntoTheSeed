@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmode.auto;
 
 import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
@@ -8,7 +9,15 @@ import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.IVKCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.InterruptCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.SlowExtendCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.WaitUntilStabilizedCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
 import org.firstinspires.ftc.teamcode.commands.group.BucketPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.BucketToIntakeCommand;
@@ -18,6 +27,8 @@ import org.firstinspires.ftc.teamcode.commands.group.RetractCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosCommand;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
+import org.firstinspires.ftc.teamcode.constants.PivotConstants;
+import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
 @Autonomous(name = "Ezell's 4 Sample")
@@ -40,7 +51,6 @@ public class EZ4Piece extends Robot {
         gtpc = new DefaultGoToPointCommand(mecanum, pinpoint, new Pose2d(-65, 40, new Rotation2d()));
         pinpoint.setPosition(-65, 40);
 
-        cs.schedule(gtpc);
 
         cs.schedule(
                 new SequentialCommandGroup(
@@ -48,51 +58,89 @@ public class EZ4Piece extends Robot {
                         new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
                                 new BucketPosCommand(extension, pivot, wrist, turret)
                         ),
-                        new IntakeClawCommand(intake, IntakeConstants.openPos),
                         new WaitCommand(100),
+                        new IntakeClawCommand(intake, IntakeConstants.openPos),
+                        new WaitCommand(50),
+
 
                         // intake first
                         new GoToPointWithDefaultCommand(
-                                new Pose2d(-50.5, 49, new Rotation2d()), gtpc
+                                new Pose2d(-42.5, 47.5, new Rotation2d()), gtpc
                         ).alongWith(
-                                new BucketToIntakeCommand(pivot, extension, intake, wrist, turret, 18, 0)
+                                new ExtendCommand(extension, SlideConstants.minExtension + 1),
+                                new SequentialCommandGroup(
+                                        new WaitUntilCommand(() -> extension.getCurrentInches() < 15),
+                                        new PivotCommand(pivot, 0)
+                                ),
+                                new WristCommand(wrist, IntakeConstants.groundPos),
+                                new TurretCommand(turret, 0),
+                                new IntakeControlCommand(intake, IntakeConstants.openPos, 1)
                         ),
-                        intake(18),
-                        new WaitCommand(300),
+                        //new WaitUntilCommand(() -> pivot.getPivotVelocity() < PivotConstants.maxPivotVelocity),
+                        new ParallelCommandGroup(
+                                new SlowExtendCommand(extension, 4, 0.7),
+                                new IntakeControlCommand(intake, IntakeConstants.closedPos, 1)
+                        ),
+                        new WaitCommand(100),
                         new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
                                 new BucketPosCommand(extension, pivot, wrist, turret)
                         ),
+                        new WaitCommand(100),
                         new IntakeClawCommand(intake, IntakeConstants.openPos),
+                        new WaitCommand(50),
 
                         // intake second
                         new GoToPointWithDefaultCommand(
-                                new Pose2d(-50.5, 59, new Rotation2d()), gtpc
+                                new Pose2d(-42.5, 57.5, new Rotation2d()), gtpc
                         ).alongWith(
-                                new BucketToIntakeCommand(pivot, extension, intake, wrist, turret, 18, 0)
+                                new ExtendCommand(extension, SlideConstants.minExtension + 1),
+                                new SequentialCommandGroup(
+                                        new WaitUntilCommand(() -> extension.getCurrentInches() < 15),
+                                        new PivotCommand(pivot, 0)
+                                ),
+                                new WristCommand(wrist, IntakeConstants.groundPos),
+                                new TurretCommand(turret, 0),
+                                new IntakeControlCommand(intake, IntakeConstants.openPos, 1)
                         ),
-                        intake(18),
-                        new WaitCommand(300),
+                        //new WaitUntilCommand(() -> pivot.getPivotVelocity() < PivotConstants.maxPivotVelocity),
+                        new ParallelCommandGroup(
+                                new SlowExtendCommand(extension, 4, 0.7),
+                                new IntakeControlCommand(intake, IntakeConstants.closedPos, 1)
+                        ),
+                        new WaitCommand(100),
                         new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
                                 new BucketPosCommand(extension, pivot, wrist, turret)
                         ),
-                        new IntakeClawCommand(intake, IntakeConstants.openPos),
                         new WaitCommand(100),
+                        new IntakeClawCommand(intake, IntakeConstants.openPos),
+                        new WaitCommand(50),
+
 
                         // intake third
                         new GoToPointWithDefaultCommand(
-                                new Pose2d(-44.5, 51, Rotation2d.fromDegrees(45)), gtpc
+                                new Pose2d(-39.5, 56.5, Rotation2d.fromDegrees(45)), gtpc, 0.5, 2
                         ).alongWith(
-                                new BucketToIntakeCommand(pivot, extension, intake, wrist, turret, 18, 45)
+                                new InterruptCommand(
+                                        new BucketToIntakeCommand(pivot, extension, intake, wrist, turret, 3, 45, 0),
+                                        () -> pinpoint.getPose().getY() < 60
+                                ),
+                                new BucketToIntakeCommand(pivot, extension, intake, wrist, turret, 5, 45, 0)
                         ),
-                        intake(18),
+                        new WaitUntilCommand(() -> pivot.getPivotVelocity() < PivotConstants.maxPivotVelocity),
+                        new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
+                        new IVKCommand(10, IVKCommand.intakeY - 2, extension, pivot),
                         new WaitCommand(300),
                         new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
                                 new BucketPosCommand(extension, pivot, wrist, turret)
                         ),
-                        new IntakeClawCommand(intake, IntakeConstants.openPos)
+                        new WaitCommand(100),
+                        new IntakeClawCommand(intake, IntakeConstants.openPos),
+                        new WaitCommand(100)
 
                 )
         );
+
+        cs.schedule(gtpc);
 
         while (opModeIsActive()) {
             update();

@@ -57,11 +57,11 @@ public class BucketPosCommand extends SequentialCommandGroup {
                                         .interruptOn(
                                                 () ->
                                                         extension.getCurrentInches()
-                                                                > SlideConstants.bucketPos - 2)),
+                                                                > SlideConstants.bucketPos - 7)),
                         new WristCommand(wrist, 0.4).andThen(new WaitUntilCommand(
                                         () ->
                                                 extension.getCurrentInches()
-                                                        > SlideConstants.bucketPos - 2)
+                                                        > SlideConstants.bucketPos - 10)
                                 .withTimeout(1000)
                                 .andThen(new WristCommand(wrist, IntakeConstants.scoringPos)),
                         new TurretCommand(turret, 0))),

@@ -45,6 +45,10 @@ public class IntakeSubsystem extends SubsystemBase {
         clawer.setPosition(clawPos + IntakeConstants.clawOffset);
     }
 
+    public double getClawer() {
+        return clawPos;
+    }
+
     public double getFrontV() {
         return front.getVoltage();
     }

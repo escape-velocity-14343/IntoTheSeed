@@ -69,7 +69,7 @@ public class PivotSubsystem extends SubsystemBase {
     }
 
     public void openloop(double power) {
-        //Log.v("pivot", "power: " + power);
+        // Log.v("pivot", "power: " + power);
         motor0.setPower(power * PivotConstants.direction);
         motor1.setPower(-power * PivotConstants.direction);
     }
@@ -118,10 +118,14 @@ public class PivotSubsystem extends SubsystemBase {
      * @param target in inches, use the same one as the pid target
      */
     public boolean isClose(double target) {
-        return Util.inRange(
-                target,
-                currentPos,
-                PivotConstants.tolerance); // || currentPos < PivotConstants.bottomLimit;
+        return isClose(target, PivotConstants.tolerance); // || currentPos < PivotConstants.bottomLimit;
+    }
+
+    /**
+     * @param target in inches, use the same one as the pid target
+     */
+    public boolean isClose(double target, double tolerance) {
+        return Util.inRange(target, currentPos, tolerance); // || currentPos < PivotConstants.bottomLimit;
     }
 
     /**

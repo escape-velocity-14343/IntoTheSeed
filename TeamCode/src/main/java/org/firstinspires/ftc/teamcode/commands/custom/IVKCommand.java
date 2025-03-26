@@ -26,7 +26,7 @@ public class IVKCommand extends ParallelCommandGroup {
 
     // useful constants:
     public static double intakeReadyY = 9;
-    public static double intakeY = 6;
+    public static double intakeY = 7;
 
     /**
      * Height is from the tile to the claw

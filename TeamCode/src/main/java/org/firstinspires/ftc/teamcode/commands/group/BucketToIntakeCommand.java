@@ -24,21 +24,19 @@ import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
 
 public class BucketToIntakeCommand extends SequentialCommandGroup {
 
-    public BucketToIntakeCommand(PivotSubsystem pivot, ExtensionSubsystem extension, IntakeSubsystem intake, WristSubsystem wrist, TurretSubsystem turret, double forwardInches, double turretAngle) {
+    public BucketToIntakeCommand(PivotSubsystem pivot, ExtensionSubsystem extension, IntakeSubsystem intake, WristSubsystem wrist, TurretSubsystem turret, double forwardInches, double turretAngle, double offset) {
         super(
                 new InterruptCommand(
                         new ParallelCommandGroup(
-                                new WristCommand(wrist, (IntakeConstants.foldedPos + IntakeConstants.toptakePos) / 2),
+                                new WristCommand(wrist, IntakeConstants.toptakePos),
+                                new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 0),
+                                new TurretCommand(turret, turretAngle),
                                 new ExtendCommand(extension, Math.max(Math.min(Math.hypot(forwardInches, IVKCommand.intakeReadyY - IVKConstants.pivotPointHeight), SlideConstants.extendedThreshold - 2), SlideConstants.minExtension))
-                                ), () -> extension.getCurrentInches() < SlideConstants.minExtension
+                        ),
+                        () -> extension.getCurrentInches() < SlideConstants.minExtension
                 ),
 
-                new IVKCommand(forwardInches, IVKCommand.intakeReadyY, extension, pivot),
-                new ParallelCommandGroup(
-                        new WristCommand(wrist, IntakeConstants.toptakePos),
-                        new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 0),
-                        new TurretCommand(turret, turretAngle)
-                )
+                new IVKCommand(forwardInches, IVKCommand.intakeReadyY + offset, extension, pivot).withTimeout(1000)
                 );
     }
 

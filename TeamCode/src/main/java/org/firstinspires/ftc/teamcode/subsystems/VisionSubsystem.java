@@ -10,6 +10,7 @@ import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.SortOrder;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -68,10 +69,11 @@ public class VisionSubsystem extends SubsystemBase {
 
     Telemetry telemetry;
     VisionPortal visionPortal;
-    CameraName cameraName;
+    private final WebcamName chassisCam;
+    private final WebcamName slideCam;
 
 
-    public VisionSubsystem(HardwareMap hMap, String name, Telemetry telemetry, int viewportid){
+    public VisionSubsystem(HardwareMap hMap, Telemetry telemetry) {
         glowUp = new GlowUpPipeline(alpha, beta, contrast);
         colorLocator = new ColorBlobLocatorProcessorMulti(
                 new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, new Scalar(13, 60, 60), new Scalar(50, 255, 255)),
@@ -99,7 +101,9 @@ public class VisionSubsystem extends SubsystemBase {
                 break;
         }
 
-        CameraName camera = hMap.get(WebcamName.class, name);
+        chassisCam = hMap.get(WebcamName.class, "chassisCamera");
+        slideCam = hMap.get(WebcamName.class, "slideCamera");
+        CameraName doubleCam = ClassFactory.getInstance().getCameraManager().nameForSwitchableCamera(chassisCam, slideCam);
         /*int viewportid = VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.VERTICAL)[0];
         if (name.equals(VisionConstants.slideCameraName)) {
             Log.i("Viewport", "is this working");
@@ -109,24 +113,40 @@ public class VisionSubsystem extends SubsystemBase {
             visionPortal = new VisionPortal.Builder()
                     .addProcessors(glowUp, colorLocator)
                     .setCameraResolution(new Size(640, 480))
-                    .setCamera(camera)
-                    //.enableLiveView(true)
-                    .setLiveViewContainerId(viewportid)
+                    .setCamera(doubleCam)
+                    .enableLiveView(true)
                     .build();
         } else {
             visionPortal = new VisionPortal.Builder()
                     .addProcessors(colorLocator)
                     .setCameraResolution(new Size(640, 480))
-                    .setCamera(camera)
-                    //.enableLiveView(true)
-                    .setLiveViewContainerId(viewportid)
+                    .setCamera(doubleCam)
+                    .enableLiveView(true)
                     .build();
         }
+
+        setCam(true);
 
         setEnabled(true);
         waitForSetExposure(1000, 1000);
 
         this.telemetry = telemetry;
+    }
+
+    public boolean setCam(boolean switchToChassis) {
+        if (visionPortal.getCameraState() == VisionPortal.CameraState.STREAMING) {
+            visionPortal.setActiveCamera(switchToChassis ? this.chassisCam : this.slideCam);
+            return true;
+        } else {
+            return false;
+        }
+        /*if (streaming) {
+            if (visionPortal.getCameraState() == VisionPortal.CameraState.CAMERA_DEVICE_READY) {
+                visionPortal.resumeStreaming();
+            }
+        } else if (visionPortal.getCameraState() == VisionPortal.CameraState.STREAMING) {
+            visionPortal.stopStreaming();
+        }*/
     }
 
     @Override
@@ -159,7 +179,6 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
 
-
     public void setEnabled(boolean enable) {
         visionPortal.setProcessorEnabled(colorLocator, enable);
     }
@@ -181,9 +200,11 @@ public class VisionSubsystem extends SubsystemBase {
         Log.i("camera", "exposure: " + control.getExposure(TimeUnit.MILLISECONDS));
         return control.setExposure(exposure, TimeUnit.MILLISECONDS);
     }
+
     public boolean setExposure() {
         return setExposure(exposureMillis);
     }
+
     public boolean waitForSetExposure(long timeoutMs, int maxAttempts) {
         return waitForSetExposure(timeoutMs, maxAttempts, exposureMillis);
     }
@@ -208,6 +229,7 @@ public class VisionSubsystem extends SubsystemBase {
         Log.e("camera", "Set exposure failed");
         return false;
     }
+
     public void saveFrame(String name) {
         visionPortal.saveNextFrameRaw(name);
     }

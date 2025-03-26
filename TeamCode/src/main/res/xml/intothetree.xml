@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <Robot type="FirstInspires-FTC">
-    <Webcam name="slidecamera" serialNumber="VendorProduct:vendor=0x0bda|product=0x5844|connection=1-1.3" />
-    <Webcam name="chassiscamera" serialNumber="VendorProduct:vendor=0x0bda|product=0x5844|connection=1-1.4" />
+    <Webcam name="slideCamera" serialNumber="VendorProduct:vendor=0x0bda|product=0x5844|connection=1-1.3" />
+    <Webcam name="chassisCamera" serialNumber="VendorProduct:vendor=0x0bda|product=0x5844|connection=1-1.4" />
     <LynxUsbDevice name="Control Hub Portal" serialNumber="(embedded)" parentModuleAddress="173">
         <LynxModule name="Expansion Hub 1" port="1">
             <LynxEmbeddedIMU name="imu" port="0" bus="0" />
@@ -9,12 +9,16 @@
             <goBILDA5202SeriesMotor name="tilt1" port="1" />
             <goBILDA5202SeriesMotor name="slide0" port="3" />
             <goBILDA5202SeriesMotor name="slide1" port="2" />
+            <AnalogInput name="bucketSensorLeft" port="0"/>
+            <AnalogInput name="bucketSensorRight" port="1"/>
+            <Servo name="rightPTO" port="0" />
         </LynxModule>
         <LynxModule name="Control Hub" port="173">
             <goBILDA5202SeriesMotor name="frontRight" port="1" />
             <goBILDA5202SeriesMotor name="frontLeft" port="3" />
             <goBILDA5202SeriesMotor name="backRight" port="0" />
             <goBILDA5202SeriesMotor name="backLeft" port="2" />
+            <Servo name="leftPTO" port="5" />
             <Servo name="clawer" port="2" />
             <ContinuousRotationServo name="intake" port="4" />
             <Servo name="wrist" port="0" />
@@ -25,4 +29,5 @@
             <AnalogInput name="clawSens2" port="2" />
         </LynxModule>
     </LynxUsbDevice>
+<!--    <Webcam name="slidecamera" serialNumber="6ACA505F" />-->
 </Robot>

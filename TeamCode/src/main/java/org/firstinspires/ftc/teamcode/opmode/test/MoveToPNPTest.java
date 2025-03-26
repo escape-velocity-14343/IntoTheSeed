@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmode.test;
 
 import android.util.Log;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ScheduleCommand;
@@ -25,12 +26,12 @@ import org.firstinspires.ftc.vision.VisionPortal;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+@Config
 @TeleOp(group = "test")
 public class MoveToPNPTest extends Robot {
 
     public static boolean red = true;
-    VisionSubsystem highCameraSubsystem;
-    VisionSubsystem slideCameraSubsystem;
+    VisionSubsystem cameraSubsystem;
 
     public static double cx = 338.083;
     public static double cy = 218.771;
@@ -45,6 +46,7 @@ public class MoveToPNPTest extends Robot {
     RobotPnP pnp;
 
     public static int exposure = 40;
+    public static boolean botStream = true;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -56,17 +58,21 @@ public class MoveToPNPTest extends Robot {
         } else {
             AutoConstants.alliance = AutoConstants.Alliance.BLUE;
         }
-        int[] viewportids = VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.VERTICAL);
 
-        slideCameraSubsystem = new VisionSubsystem(hardwareMap, VisionConstants.slideCameraName, telemetry, viewportids[1]);
-        highCameraSubsystem = new VisionSubsystem(hardwareMap, VisionConstants.chassisCameraName, telemetry, viewportids[0]);
+        cameraSubsystem = new VisionSubsystem(hardwareMap, telemetry);
 
+        while (!cameraSubsystem.setCam(false));
 
+        cameraSubsystem.waitForSetExposure(3000, 10000, exposure);
 
-        highCameraSubsystem.waitForSetExposure(3000, 10000, exposure);
-        slideCameraSubsystem.waitForSetExposure(3000, 10000, exposure);
+        while (!cameraSubsystem.setCam(true));
+        cameraSubsystem.waitForSetExposure(3000, 10000, exposure);
 
-        CommandScheduler.getInstance().registerSubsystem(highCameraSubsystem, slideCameraSubsystem);
+        CommandScheduler.getInstance().registerSubsystem(cameraSubsystem);
+
+        while (opModeInInit()) {
+            cameraSubsystem.setCam(botStream);
+        }
 
         waitForStart();
 
@@ -86,13 +92,15 @@ public class MoveToPNPTest extends Robot {
                         new WaitCommand(150),
 
                         new InstantCommand(() -> {
-                            Vector2d samplePos = highCameraSubsystem.getSamplePos();
+                            Vector2d samplePos = cameraSubsystem.getSamplePos();
                             sampleFCPos.set(pnp.getFieldCoordinates((int) samplePos.getX(), (int) samplePos.getY(), pinpoint.getPose()));
                         }))
 
         );
 
         while (opModeIsActive()) {
+
+
             update();
             if (timer.seconds() > 1 && !thing) {
                 thing = true;
@@ -104,7 +112,7 @@ public class MoveToPNPTest extends Robot {
                                         new Rotation2d()
                                 ), gtpc
                         ).alongWith(
-                                intakeReady(0)
+                                intakeReady(() -> 0)
                         )
                 );
                 Log.i("PNPTest", "Sample x:" + sampleFCPos.get().getX());

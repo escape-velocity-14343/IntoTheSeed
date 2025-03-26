@@ -11,14 +11,14 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.commands.custom.DefaultDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
-import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
-import org.firstinspires.ftc.teamcode.commands.group.IntakeRetractCommand;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.Util;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 @TeleOp(group = "0", name = "TeleOpp")
 @Config
@@ -63,6 +63,8 @@ public class TeleOpps extends Robot {
 
 
         waitForStart();
+        // temporary pls remove later
+        pinpoint.setPosition(-65, 40);
         while (!isStopRequested()) {
             telemetry.addData("current state", getState().toString());
             telemetry.addData("motorpos", extension.getCurrentInches());
@@ -98,23 +100,19 @@ public class TeleOpps extends Robot {
         driverPad.getGamepadButton(GamepadKeys.Button.A).whenPressed(retract());
 
         // ------- INTAKE -------
-        driverPad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(intakeReady(0));
+        driverPad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(intakeReady(() -> 0));
 
-        driverPad.getGamepadButton(GamepadKeys.Button.B).whenPressed(intakeReady(90));
+        driverPad.getGamepadButton(GamepadKeys.Button.B).whenPressed(intakeReady(() -> 90));
 
 
-        new Trigger(() -> driverPad.getButton(GamepadKeys.Button.RIGHT_BUMPER))
-                .whenActive(intake()).whenInactive(retract());
+        driverPad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(intake()).whenReleased(intakeReady());
 
-        new Trigger(() -> driverPad.getButton(GamepadKeys.Button.LEFT_BUMPER))
-                .whileActiveOnce(new IntakeClawCommand(intake, IntakeConstants.openPos))
-                .whenInactive(
-                        new ConditionalCommand(
-                                new IntakeClawCommand(intake, IntakeConstants.singleIntakePos),
-                                new IntakeClawCommand(intake, IntakeConstants.closedPos),
-                                inState(FSMStates.INTAKE)
-                        )
-                );
+        AtomicReference<Double> lastClawPos = new AtomicReference<>(0.0);
+        driverPad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
+                .whenPressed(new IntakeClawCommand(intake, IntakeConstants.openPos).alongWith(new InstantCommand(() -> lastClawPos.set(intake.getClawer()))))
+                .whenReleased(new IntakeClawCommand(intake, lastClawPos.get()));
+
+        new Trigger(() -> driverPad.gamepad.touchpad).whenActive(bucketAlign());
     }
 
     public void configureOperator() {

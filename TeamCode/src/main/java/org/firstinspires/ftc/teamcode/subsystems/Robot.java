@@ -16,7 +16,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
+import org.firstinspires.ftc.teamcode.commands.custom.BucketAlignCommand;
 import org.firstinspires.ftc.teamcode.commands.group.BucketPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.IntakePosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.LowBucketPosCommand;
@@ -37,7 +39,7 @@ public abstract class Robot extends LinearOpMode {
         OUTTAKE,
         SPECIMEN,
         FOLD,
-        AUTOSCORE
+        BASKET_ALIGN,
     }
     public enum StateProgress {
         NONE,
@@ -61,8 +63,9 @@ public abstract class Robot extends LinearOpMode {
     public PinpointSubsystem pinpoint;
 //    public VisionSubsystem visionSubsystem;
     public CachingVoltageSensor voltage;
-    public BasketSensorSubsystem basketSensor;
+    public BucketSensorSubsystem basketSensor;
     public TurretSubsystem turret;
+    public PtoSubsystem PTO;
 
     public IMU imu;
 
@@ -80,7 +83,7 @@ public abstract class Robot extends LinearOpMode {
         }
 
         voltage = new CachingVoltageSensor(hardwareMap);
-        // basketSensor = new BasketSensorSubsystem(hardwareMap);
+        basketSensor = new BucketSensorSubsystem(hardwareMap);
 
         pinpoint = new PinpointSubsystem(hardwareMap);
 
@@ -98,6 +101,7 @@ public abstract class Robot extends LinearOpMode {
         wrist = new WristSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
         turret = new TurretSubsystem(hardwareMap);
+        PTO = new PtoSubsystem(hardwareMap);
 
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(
@@ -107,6 +111,7 @@ public abstract class Robot extends LinearOpMode {
                                 RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD)));
 
         pivot.setExtensionSupplier(extension::getCurrentInches);
+        PTO.setEngaged(false);
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
     }
@@ -150,7 +155,7 @@ public abstract class Robot extends LinearOpMode {
         return new RetractCommand(wrist, pivot, extension, turret, intake).andThen(setStateCommand(FSMStates.READY));
     }
 
-    public Command intakeReady(double turretAngle, double forwardInches) {
+    public Command intakeReady(DoubleSupplier turretAngle, double forwardInches) {
         return new SubPosReadyCommand(
                 extension,
                 pivot,
@@ -160,10 +165,10 @@ public abstract class Robot extends LinearOpMode {
                 turretAngle,
                 forwardInches,
                 notInAnyState(FSMStates.INTAKE_READY, FSMStates.INTAKE)
-        ).alongWith(new InstantCommand(() -> lastIntakeWristAngle = turretAngle)).andThen(setStateCommand(FSMStates.INTAKE_READY));
+        ).alongWith(new InstantCommand(() -> lastIntakeWristAngle = turretAngle.getAsDouble())).andThen(setStateCommand(FSMStates.INTAKE_READY));
     }
 
-    public Command intakeReady(double turretAngle) {
+    public Command intakeReady(DoubleSupplier turretAngle) {
         return new SubPosReadyCommand(
                 extension,
                 pivot,
@@ -173,11 +178,15 @@ public abstract class Robot extends LinearOpMode {
                 turretAngle,
                 SlideConstants.submersibleIntakeMaxExtension,
                 notInAnyState(FSMStates.INTAKE_READY, FSMStates.INTAKE)
-        ).alongWith(new InstantCommand(() -> lastIntakeWristAngle = turretAngle)).andThen(setStateCommand(FSMStates.INTAKE_READY));
+        ).alongWith(new InstantCommand(() -> lastIntakeWristAngle = turretAngle.getAsDouble())).andThen(setStateCommand(FSMStates.INTAKE_READY));
     }
 
     public Command intakeReady() {
-        return intakeReady(lastIntakeWristAngle);
+        return intakeReady(() -> lastIntakeWristAngle);
+    }
+
+    public Command bucketAlign() {
+        return new BucketAlignCommand(mecanum, basketSensor, pinpoint).whenClose(48.0, bucketPos()).alongWith(setStateCommand(FSMStates.BASKET_ALIGN));
     }
 
     public void setState(FSMStates state) {

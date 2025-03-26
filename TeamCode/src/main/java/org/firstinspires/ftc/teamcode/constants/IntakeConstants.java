@@ -27,7 +27,7 @@ public class IntakeConstants {
     public static double closedPos = 0.9;
     public static double singleIntakePos = 0.85;
 
-    public static double clawOffset = 0.06;
+    public static double clawOffset = 0.03;
 
     // turret constants
     public static double minAngle = -130;
@@ -47,7 +47,7 @@ public class IntakeConstants {
 
     // global offset
     // 1 tooth of skip = 0.05 position
-    public static double wristOffset = -0.17;
+    public static double wristOffset = -0.1;
 
     public static double intakeSensorVoltageThres = 0.25;
 }
