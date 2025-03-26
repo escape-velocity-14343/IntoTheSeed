@@ -23,6 +23,8 @@ public class IVKCommand extends ParallelCommandGroup {
     //Control Equations
     private BiFunction<Double, Double, Double> getTargetExtension = (x, y) -> Math.max(Math.sqrt(Math.pow(x, 2) + Math.pow(y - IVKConstants.pivotPointHeight, 2)), 0);
     private BiFunction<Double, Double, Double> getTargetAngleDegrees = (x, y) -> Math.toDegrees(Math.atan2(y - IVKConstants.pivotPointHeight, x));
+//    private BiFunction<Double, Double, Double> getTargetExtension = (x, y) -> Math.max(Math.sqrt(Math.pow(x-IVKConstants.slideLength, 2) + Math.pow(y - IVKConstants.pivotPointHeight, 2)), 0) - 12;
+//    private BiFunction<Double, Double, Double> getTargetAngleDegrees = (x, y) -> Math.toDegrees(Math.atan2(y - IVKConstants.pivotPointHeight, x+12));
 
     // useful constants:
     public static double intakeReadyY = 9;
