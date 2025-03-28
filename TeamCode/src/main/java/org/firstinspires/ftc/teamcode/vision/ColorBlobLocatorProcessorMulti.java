@@ -29,6 +29,7 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor implements VisionProcessor
 {
@@ -68,10 +69,10 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
     public boolean onlyFirstColor = false;
 
     Point[] points = {
-            new Point(0,240),
+            new Point(0,0),
             new Point(0,480),
             new Point(640,480),
-            new Point(640, 240),
+            new Point(640, 0),
     };
 
 
@@ -280,6 +281,10 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
     @Override
     public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext)
     {
+        if (Objects.isNull(userContext)) {
+            return;
+        }
+
         ArrayList<Blob> blobs = (ArrayList<Blob>) userContext;
 
         contourPaint.setStrokeWidth(scaleCanvasDensity * 4);

@@ -4,7 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public class PivotConstants {
-    public static double kPRetracted = 0.015;
+    public static double kPRetracted = 0.0125;
 
     public static double kPExtended = 0.03;
     public static double kS = 0;
@@ -15,6 +15,7 @@ public class PivotConstants {
 
     public static double bottomLimit = 0.5;
     public static double topLimit = 86;
+    public static double stallTopLimit = 90;
     public static double tolerance = 1.5;
     public static double direction = -1;
     public static boolean encoderInvert = true;
@@ -31,6 +32,6 @@ public class PivotConstants {
 
     public static double manualControlDeadband = 0.1;
 
-    public static double bottomPMult = 1.5;
+    public static double bottomPMult = 1.25;
 }
 

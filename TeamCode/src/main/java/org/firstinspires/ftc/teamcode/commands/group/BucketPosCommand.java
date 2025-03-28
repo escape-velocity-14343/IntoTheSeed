@@ -35,7 +35,7 @@ public class BucketPosCommand extends SequentialCommandGroup {
                 new ParallelCommandGroup(
 
                         // minus two to prevent it from overshooting
-                        new PivotCommand(pivot, PivotConstants.topLimit)
+                        new PivotCommand(pivot, PivotConstants.stallTopLimit)
                                 .interruptOn(
                                         () ->
                                                 pivot.getPivotVelocity()
@@ -74,7 +74,7 @@ public class BucketPosCommand extends SequentialCommandGroup {
                 new ParallelCommandGroup(
                         // minus two to prevent it from overshooting
                         new WristCommand(wrist, IntakeConstants.scoringPos),
-                        new PivotCommand(pivot, PivotConstants.topLimit - 3),
+                        new PivotCommand(pivot, PivotConstants.stallTopLimit - 3),
                         new SequentialCommandGroup(
                                 new WaitUntilCommand(
                                         () ->

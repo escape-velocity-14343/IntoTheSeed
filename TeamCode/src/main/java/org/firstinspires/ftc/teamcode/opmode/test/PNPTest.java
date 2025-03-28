@@ -24,9 +24,12 @@ public class PNPTest extends LinearOpMode {
     VisionSubsystem highCameraSubsystem;
     PinpointSubsystem pinpoint;
 
-    public static double cx = 338.083;
-    public static double cy = 218.771;
-    public static double focalL = 491.437;
+    public static double cx = 338.083 / 2;
+    public static double cy = 218.771 / 2;
+    public static double focalL = 491.437 / 2;
+
+    public static double x = 0;
+    public static double y = 0;
     RobotPnP pnp;
 
     public static int exposure = 40;
@@ -60,11 +63,20 @@ public class PNPTest extends LinearOpMode {
         CommandScheduler.getInstance().registerSubsystem(pinpoint, highCameraSubsystem);
 
         waitForStart();
-        while (opModeIsActive()){
+        pinpoint.setPosition(x, y);
 
-            Vector2d samplePos = highCameraSubsystem.getSamplePos();
+        while (opModeIsActive()) {
 
-            Vector2d sampleFCPos = pnp.getFieldCoordinates((int) samplePos.getX(), (int) samplePos.getY(), pinpoint.getPose());
+            if (gamepad1.x) {
+                highCameraSubsystem.setCam(false);
+            }
+            if (gamepad1.y) {
+                highCameraSubsystem.setCam(true);
+            }
+
+            Pose2d samplePos = highCameraSubsystem.getSamplePose();
+
+            Translation2d sampleFCPos = pnp.getFieldCoordinates((int) samplePos.getX(), (int) samplePos.getY(), pinpoint.getPose());
 
             Translation2d sampleRCPos = pnp.getRobotCentricTranslation((int) samplePos.getX(), (int) samplePos.getY());
 
@@ -74,11 +86,14 @@ public class PNPTest extends LinearOpMode {
             telemetry.addData("Sample Robot Y", sampleRCPos.getY());
             telemetry.addData("Sample PX", samplePos.getX());
             telemetry.addData("Sample PY", samplePos.getY());
+            telemetry.addData("Sample Heading", samplePos.getRotation().getDegrees());
 
             telemetry.update();
 
             CommandScheduler.getInstance().run();
+
         }
+        CommandScheduler.getInstance().reset();
     }
 
 }

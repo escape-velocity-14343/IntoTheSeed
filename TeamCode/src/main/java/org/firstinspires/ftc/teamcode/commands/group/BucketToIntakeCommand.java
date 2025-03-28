@@ -37,7 +37,7 @@ public class BucketToIntakeCommand extends SequentialCommandGroup {
                 ),
 
                 new IVKCommand(forwardInches, IVKCommand.intakeReadyY + offset, extension, pivot).withTimeout(1000)
-                );
+        );
     }
 
 }

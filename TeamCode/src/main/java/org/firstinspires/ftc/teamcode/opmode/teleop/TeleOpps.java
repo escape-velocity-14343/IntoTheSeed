@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.commands.custom.DefaultDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
@@ -19,6 +20,7 @@ import org.firstinspires.ftc.teamcode.lib.Util;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.DoubleSupplier;
 
 @TeleOp(group = "0", name = "TeleOpp")
 @Config
@@ -36,25 +38,17 @@ public class TeleOpps extends Robot {
         driverPad = new GamepadEx(gamepad1);
         operatorPad = new GamepadEx(gamepad2);
 
-        if (true) {
-            CommandScheduler.getInstance().setDefaultCommand(mecanum, new DefaultDriveCommand(
-                    mecanum,
-                    () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftY() / driverPad.getLeftX()) < 0.05 ? 0 : driverPad.getLeftY()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? robotMovementMultiplier : 1),
-                    () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftX() / driverPad.getLeftY()) < 0.05 ? 0 : driverPad.getLeftX()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? robotMovementMultiplier : 1),
-                    () -> Util.halfLinearHalfCubic(driverPad.getRightX()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? robotMovementMultiplier : 1),
-                    () -> pinpoint.getPose().getRotation().getDegrees()
-            ) {
-
-            });
-        } else {
-            DefaultDriveCommand drive = new DefaultDriveCommand(mecanum,
-                    () -> Util.halfLinearHalfCubic(driverPad.getLeftY() / driverPad.getLeftX() < 0.05 ? 0 : driverPad.getLeftY()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? robotMovementMultiplier : 1),
-                    () -> Util.halfLinearHalfCubic(driverPad.getLeftX() / driverPad.getLeftY() < 0.05 ? 0 : driverPad.getLeftX()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? robotMovementMultiplier : 1),
-                    () -> Util.halfLinearHalfCubic(driverPad.getRightX()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? robotMovementMultiplier : 1),
-                    () -> 0.0);
-            CommandScheduler.getInstance().setDefaultCommand(mecanum, drive);
-        }
-
+        DoubleSupplier fieldCentricHeading = true ? () -> pinpoint.getPose().getRotation().getDegrees() : () -> 0.0;
+        DoubleSupplier xyGain = () -> inState(FSMStates.INTAKE, FSMStates.INTAKE_READY).getAsBoolean() ? 0.7 : 1;
+        DoubleSupplier tGain = () -> inState(FSMStates.INTAKE, FSMStates.INTAKE_READY).getAsBoolean() ? 0.5 : 1;
+;
+        CommandScheduler.getInstance().setDefaultCommand(mecanum, new DefaultDriveCommand(
+                mecanum,
+                () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftY() / driverPad.getLeftX()) < 0.05 ? 0 : driverPad.getLeftY()) * xyGain.getAsDouble(),
+                () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftX() / driverPad.getLeftY()) < 0.05 ? 0 : driverPad.getLeftX()) * xyGain.getAsDouble(),
+                () -> Util.halfLinearHalfCubic(driverPad.getRightX()) * tGain.getAsDouble(),
+                fieldCentricHeading
+        ));
 
 
         configureDriver();
@@ -94,7 +88,7 @@ public class TeleOpps extends Robot {
         driverPad.getGamepadButton(GamepadKeys.Button.X).whenActive(new ConditionalCommand(
                 retract().andThen(bucketPos()),
                 bucketPos(),
-                inState(FSMStates.INTAKE)
+                inState(FSMStates.INTAKE, FSMStates.INTAKE_READY)
         ));
 
         driverPad.getGamepadButton(GamepadKeys.Button.A).whenPressed(retract());
@@ -105,12 +99,15 @@ public class TeleOpps extends Robot {
         driverPad.getGamepadButton(GamepadKeys.Button.B).whenPressed(intakeReady(() -> 90));
 
 
-        driverPad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(intake()).whenReleased(intakeReady());
+        driverPad.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(intake()).whenReleased(intakeReady());
 
-        AtomicReference<Double> lastClawPos = new AtomicReference<>(0.0);
         driverPad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .whenPressed(new IntakeClawCommand(intake, IntakeConstants.openPos).alongWith(new InstantCommand(() -> lastClawPos.set(intake.getClawer()))))
-                .whenReleased(new IntakeClawCommand(intake, lastClawPos.get()));
+                .whenPressed(new IntakeControlCommand(intake, IntakeConstants.openPos, 0.25))
+                .whenReleased(new ConditionalCommand(
+                        new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 0),
+                        new IntakeControlCommand(intake, IntakeConstants.closedPos, 0),
+                        inState(FSMStates.INTAKE)
+                ));
 
         new Trigger(() -> driverPad.gamepad.touchpad).whenActive(bucketAlign());
     }

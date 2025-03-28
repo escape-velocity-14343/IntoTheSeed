@@ -38,16 +38,11 @@ public class RobotPnP {
         return new Translation2d(-gd + rx, ry-gx);
     }
 
-    public Vector2d getFieldCoordinates(int px, int py, Pose2d robotPose) {
+    public Translation2d getFieldCoordinates(int px, int py, Pose2d robotPose) {
 
         Translation2d rctrans = getRobotCentricTranslation(px, py);
 
-        Vector2d xBasis = new Vector2d(1, 0).rotateBy(robotPose.getRotation().getDegrees());
-        Vector2d yBasis = new Vector2d(0, 1).rotateBy(robotPose.getRotation().getDegrees());
-
-        Vector2d robotPos = new Vector2d(robotPose.getX(), robotPose.getY());
-
-        return robotPos.plus(xBasis.scale(rctrans.getX())).plus(yBasis.scale(rctrans.getY()));
+        return robotPose.getTranslation().plus(rctrans.rotateBy(robotPose.getRotation()));
 
     }
 

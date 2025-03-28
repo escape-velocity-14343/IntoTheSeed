@@ -201,11 +201,8 @@ public abstract class Robot extends LinearOpMode {
         return robotState;
     }
 
-    public BooleanSupplier inState(FSMStates state) {
-        return () -> getState() == state;
-    }
 
-    public BooleanSupplier inAnyState(FSMStates... state) {
+    public BooleanSupplier inState(FSMStates... state) {
         return () -> Arrays.stream(state).anyMatch((testState) -> getState() == testState);
     }
 
