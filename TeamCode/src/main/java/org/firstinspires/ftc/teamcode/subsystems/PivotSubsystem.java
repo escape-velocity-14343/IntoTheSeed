@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.function.DoubleSupplier;
+
+import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.AnalogEncoder;
@@ -31,7 +33,7 @@ public class PivotSubsystem extends SubsystemBase {
     private CachingVoltageSensor voltage;
     private DoubleSupplier extensionInches = () -> 0;
     private boolean supplierSet = false;
-    private Trigger extensionSetTrigger = new Trigger(() -> supplierSet).whileActiveContinuous(() -> Log.i("WARNING", "PIVOT EXTENSION SUPPPLIER UNSET"));
+    private Trigger extensionSetTrigger = new Trigger(() -> !supplierSet).whileActiveContinuous(() -> Log.i("WARNING", "PIVOT EXTENSION SUPPPLIER UNSET"));
     public Trigger manualControlTrigger = new Trigger(() -> manualControl);
 
     public PivotSubsystem(HardwareMap hMap, CachingVoltageSensor voltage) {
@@ -67,6 +69,7 @@ public class PivotSubsystem extends SubsystemBase {
     }
 
     public void openloop(double power) {
+        // Log.v("pivot", "power: " + power);
         motor0.setPower(power * PivotConstants.direction);
         motor1.setPower(-power * PivotConstants.direction);
     }
@@ -75,14 +78,31 @@ public class PivotSubsystem extends SubsystemBase {
         manualControl = false;
         setTarget(target);
         double power =
-                squid.calculate(target, getCurrentPosition()) * voltage.getVoltageNormalized();
+                squid.calculate(target, getCurrentPosition()) * voltage.getVoltageNormalized() + getKg();
         // if (currentPos > PivotConstants.topLimit-1 && power >= 0) {
         //    power = 0.3;
         // }
         if (power <= 0 && isClose(target) && target == PivotConstants.bottomLimit) {
             power = -0.05;
         }
+        if (power > 0 && currentPos < 20) {
+            power *= PivotConstants.bottomPMult;
+        }
+
         openloop(power);
+    }
+
+    public Command getPivotCommand(double target){
+        return new PivotCommand(this, target);
+    }
+
+    public Command getPivotCommand(DoubleSupplier target){
+        return new RunCommand(() -> setTarget(target.getAsDouble()), this);
+    }
+
+    public void setTarget(DoubleSupplier target){
+        manualControl = false;
+
     }
 
     public void setTarget(double target) {
@@ -98,10 +118,14 @@ public class PivotSubsystem extends SubsystemBase {
      * @param target in inches, use the same one as the pid target
      */
     public boolean isClose(double target) {
-        return Util.inRange(
-                target,
-                currentPos,
-                PivotConstants.tolerance); // || currentPos < PivotConstants.bottomLimit;
+        return isClose(target, PivotConstants.tolerance); // || currentPos < PivotConstants.bottomLimit;
+    }
+
+    /**
+     * @param target in inches, use the same one as the pid target
+     */
+    public boolean isClose(double target, double tolerance) {
+        return Util.inRange(target, currentPos, tolerance); // || currentPos < PivotConstants.bottomLimit;
     }
 
     /**
@@ -132,20 +156,51 @@ public class PivotSubsystem extends SubsystemBase {
         motor1.setPower(0);
     }
 
+    private double interpolateKp(double x) {
+        double x1 = 0;
+        double y1 = PivotConstants.kPRetracted;
+        double x2 = SlideConstants.bucketPos;
+        double y2 = PivotConstants.kPExtended;
+
+        return y1 + x * (y2 - y1) / (x2 - x1);
+    }
+
+    private double interpolateKg(double x) {
+        double x1 = 0;
+        double y1 = PivotConstants.kGRetracted;
+        double x2 = SlideConstants.bucketPos;
+        double y2 = PivotConstants.kGFullyExtended;
+
+        return y1 + x * (y2 - y1) / (x2 - x1);
+    }
+
+    private double interpolatedRawFeedforward(){
+        return interpolateKp(extensionInches.getAsDouble());
+    }
+
+    private double interpolatedRawFeedforwardkG(){
+        return interpolateKg(extensionInches.getAsDouble());
+    }
+
+    private double getKg(){
+        return (interpolatedRawFeedforwardkG() * Math.cos(getCurrentPosition()));
+    }
+
     @Override
     public void periodic() {
+        //Cache last position
         double lastPos = currentPos;
+        pivotVelocity = (lastPos - currentPos) / timer.seconds();
+
+        //Update encoder reading every loop
         currentPos = encoder.getAngle();
         squid.setPID(
-                PivotConstants.kPRetracted
-                                * (1 - extensionInches.getAsDouble() / SlideConstants.maxExtension)
-                        + PivotConstants.kPExtended
-                                * extensionInches.getAsDouble()
-                                / SlideConstants.maxExtension);
+                interpolatedRawFeedforward());
         pivotVelocity = (lastPos - currentPos) / timer.seconds();
         if (!manualControl) {
             tiltToPos(target);
         }
+        //Timer reset
         timer.reset();
     }
 }

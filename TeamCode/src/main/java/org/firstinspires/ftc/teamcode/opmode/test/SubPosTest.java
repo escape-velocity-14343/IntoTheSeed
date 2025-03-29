@@ -10,7 +10,6 @@ public class SubPosTest extends LinearOpMode {
     public static double extension = 0;
     public static double pivot = 0;
 
-
     @Override
     public void runOpMode() throws InterruptedException {
 

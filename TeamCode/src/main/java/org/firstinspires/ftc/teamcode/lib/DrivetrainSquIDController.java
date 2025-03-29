@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
 public class DrivetrainSquIDController {
-    public static double looptimeAdjuster = 15;
+    public static double looptimeAdjuster = 9;
 
     private ElapsedTime loopTime;
 

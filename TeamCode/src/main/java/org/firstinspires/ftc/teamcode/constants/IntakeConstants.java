@@ -6,10 +6,10 @@ import com.acmerobotics.dashboard.config.Config;
 public class IntakeConstants {
 
     // wrist constants
-    public static double foldedPos = 0.35;
+    public static double foldedPos = 0.25;
     public static double halfFoldPos = 0.47;
-    public static double groundPos = 0.56;
-    public static double scoringPos = 0.3;
+    public static double groundPos = 0.4;
+    public static double scoringPos = 0.25;
     public static double specimenScoringPos = 0.4;
     public static double scoringPosReversed = 0.75;
     public static double parkPos = 0.45;
@@ -27,7 +27,7 @@ public class IntakeConstants {
     public static double closedPos = 0.9;
     public static double singleIntakePos = 0.85;
 
-    public static double clawOffset = 0.08;
+    public static double clawOffset = 0.015;
 
     // turret constants
     public static double minAngle = -130;
@@ -47,7 +47,7 @@ public class IntakeConstants {
 
     // global offset
     // 1 tooth of skip = 0.05 position
-    public static double wristOffset = -0.125;
+    public static double wristOffset = -0.1;
 
     public static double intakeSensorVoltageThres = 0.25;
 }

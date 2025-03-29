@@ -10,7 +10,7 @@ public class IntakeControlCommand extends InstantCommand {
     double speed = 0;
 
     /**
-     * Positive is outtake, negative is intake
+     * Positive is intake, negative is outtake
      *
      * @param intake
      * @param position

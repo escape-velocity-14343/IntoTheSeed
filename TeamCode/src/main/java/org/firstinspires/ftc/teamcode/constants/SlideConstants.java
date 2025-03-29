@@ -8,9 +8,10 @@ public class SlideConstants {
     public static double kI = 0;
     public static double kD = 0;
     public static double kS = 0.13;
-    public static double ticksPerInch = 54.9;
+    public static double ticksPerInch = 54.9/1.5555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555;
     public static double maxExtension = 31;
 
+    public static double autonBucketPos = 30;
     public static double bucketPos = 31;
     public static double lowBucketPos = 11.5;
 
@@ -34,7 +35,10 @@ public class SlideConstants {
     public static double millisPerInch = 5 * ticksPerInch;
 
     public static double highExtendInches = 1.5;
-    public static double extendedThreshold = 8;
+    public static double lowExtendInches = -1;
+    public static double extendedThreshold = 3;
 
     public static double manualControlDeadband = 0.1;
+    public static boolean highExtend = false;
+    public static boolean lowExtend = false;
 }

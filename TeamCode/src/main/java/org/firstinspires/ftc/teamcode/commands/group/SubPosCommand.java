@@ -2,7 +2,11 @@ package org.firstinspires.ftc.teamcode.commands.group;
 
 import android.util.Log;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
+
 import java.util.function.DoubleSupplier;
+
+import org.firstinspires.ftc.teamcode.commands.custom.IVKCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
@@ -20,13 +24,12 @@ public class SubPosCommand extends SequentialCommandGroup {
             ExtensionSubsystem extension,
             WristSubsystem wrist,
             IntakeSubsystem intake,
-            PivotSubsystem pivot) {
+            PivotSubsystem pivot, double forwardExtension) {
         addCommands(
                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
-                new PivotCommand(pivot, PivotConstants.intakePos));
-        // must require extension because manual control must use it, so this ensures any other
-        // commands using extension get interrupted
-        addRequirements(extension, wrist);
+                new IVKCommand(forwardExtension, IVKCommand.intakeY, extension, pivot)
+        );
+        addRequirements(wrist);
         this.extension = extension;
     }
 
@@ -38,12 +41,18 @@ public class SubPosCommand extends SequentialCommandGroup {
             DoubleSupplier power) {
         addCommands(
                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
-                new PivotCommand(
-                        pivot,
-                        PivotConstants.intakeReadyPos
+//                new PivotCommand(
+//                        pivot,
+//                        PivotConstants.intakeReadyPos
+//                                - power.getAsDouble()
+//                                        * (PivotConstants.intakeReadyPos - PivotConstants.intakePos)
+//                                        / 0.55));
+                pivot.getPivotCommand(
+                        () -> Math.max(PivotConstants.intakePos+2, PivotConstants.intakeReadyPos
                                 - power.getAsDouble()
-                                        * (PivotConstants.intakeReadyPos - PivotConstants.intakePos)
-                                        / 0.55));
+                                * (PivotConstants.intakeReadyPos
+                                - PivotConstants.intakePos)
+                                / 0.55)));
         // must require extension because manual control must use it, so this ensures any other
         // commands using extension get interrupted
         addRequirements(extension, wrist);
@@ -52,7 +61,7 @@ public class SubPosCommand extends SequentialCommandGroup {
 
     @Override
     public void end(boolean interrupted) {
-        extension.setManualControl(true);
+//        extension.setManualControl(true);
         Log.i("%6", "Sub Pos Command, Interrupted: " + interrupted);
     }
 }

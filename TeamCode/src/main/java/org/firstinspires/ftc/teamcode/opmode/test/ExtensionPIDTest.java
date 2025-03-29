@@ -31,6 +31,8 @@ public class ExtensionPIDTest extends LinearOpMode {
         pivot = new PivotSubsystem(hardwareMap, voltage);
         extension = new ExtensionSubsystem(hardwareMap, pivot, voltage);
         wrist = new WristSubsystem(hardwareMap);
+        pivot.setExtensionSupplier(extension::getCurrentInches);
+
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         waitForStart();
         CommandScheduler.getInstance()
@@ -43,6 +45,8 @@ public class ExtensionPIDTest extends LinearOpMode {
 
             telemetry.addData("current pos", extension.getCurrentPosition());
             telemetry.addData("target", targetInches);
+            telemetry.addData("current pivot pos", pivot.getCurrentPosition());
+            telemetry.addData("pivot target", targetDegrees);
             telemetry.addData("current inches", extension.getCurrentInches());
             telemetry.addData("is there", extension.isClose(targetInches));
             telemetry.update();

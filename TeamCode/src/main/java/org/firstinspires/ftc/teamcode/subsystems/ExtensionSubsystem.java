@@ -39,9 +39,10 @@ public class ExtensionSubsystem extends SubsystemBase {
     public Trigger downwardsStallTrigger;
     public Trigger submersibleLimitTrigger;
     public Trigger maxExtensionLimitTrigger;
+    public Trigger nearBucketPositionTrigger;
     public Trigger forwardTargetTrigger;
     public Trigger manualControlTrigger;
-    public Trigger extendedTrigger;
+    public Trigger isExtendedTrigger;
 
     public ExtensionSubsystem(
             HardwareMap hMap, PivotSubsystem pivotSubsystem, CachingVoltageSensor voltage) {
@@ -67,10 +68,10 @@ public class ExtensionSubsystem extends SubsystemBase {
      */
     private void initialize() {
         manualControlTrigger = new Trigger(() -> manualControl);
-        forwardTargetTrigger = new Trigger(() -> forwardTarget());
+        forwardTargetTrigger = new Trigger(() -> isForwardTarget());
         underZeroTrigger = new Trigger(() -> getCurrentPosition() < 0);
         downwardsStallTrigger =
-                new Trigger(() -> getCurrentPosition() < 5).and(new Trigger(() -> backwardPower()));
+                new Trigger(() -> getCurrentPosition() < 5).and(new Trigger(() -> isBackwardPower()));
         submersibleLimitTrigger =
                 new Trigger(() -> manualControl)
                         .and(
@@ -87,9 +88,10 @@ public class ExtensionSubsystem extends SubsystemBase {
                 new Trigger(() -> getCurrentInches() >= SlideConstants.maxExtension)
                         .and(forwardTargetTrigger)
                         .whenActive(() -> Log.i("A", "Maximum Extension limit has been breached"));
-        extendedTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold);
+        isExtendedTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold);
+        nearBucketPositionTrigger = new Trigger(() -> getCurrentInches() > SlideConstants.extendedThreshold && pivotSubsystem.isClose(PivotConstants.topLimit));
 
-        underZeroTrigger.whenActive(this::reset);
+        // underZeroTrigger.whenActive(this::resetC);
         // Stall Detection is cooked because u might as well just have the driver run bucket or
         // something to make sure it's unjammed
         // V good for award bait-
@@ -104,7 +106,7 @@ public class ExtensionSubsystem extends SubsystemBase {
      *
      * @return boolean
      */
-    public boolean forwardTarget() {
+    public boolean isForwardTarget() {
         return targetInches - getCurrentInches() > 0;
     }
 
@@ -113,8 +115,8 @@ public class ExtensionSubsystem extends SubsystemBase {
      *
      * @return boolean
      */
-    public boolean backwardTarget() {
-        return !forwardTarget();
+    public boolean isBackwardTarget() {
+        return !isForwardTarget();
     }
 
     /**
@@ -122,7 +124,7 @@ public class ExtensionSubsystem extends SubsystemBase {
      *
      * @return boolean
      */
-    public boolean forwardPower() {
+    public boolean isForwardPower() {
         return motor0.getPower() > 0 && motor1.getPower() < 0;
     }
 
@@ -131,8 +133,8 @@ public class ExtensionSubsystem extends SubsystemBase {
      *
      * @return boolean
      */
-    public boolean backwardPower() {
-        return !forwardPower();
+    public boolean isBackwardPower() {
+        return !isForwardPower();
     }
 
     public DoubleSupplier getVoltageScalarSupplier() {
@@ -184,11 +186,7 @@ public class ExtensionSubsystem extends SubsystemBase {
      * @return
      */
     public Command openloopC(Double power){
-        if (manualControl){
-            return new InstantCommand(() -> openloop(power), this);
-        }
-        Log.i("WARNING", "RAN OPEN LOOP WHEN MANUAL CONTROL WAS NOT ENABLED");
-        return new InstantCommand();
+        return new InstantCommand(() -> openloop(power), this);
     }
 
     /**
@@ -202,11 +200,7 @@ public class ExtensionSubsystem extends SubsystemBase {
      * @return RunCommand Factory
      */
     public Command openloopC(DoubleSupplier power){
-        if (manualControl){
-            return new RunCommand(() -> openloopS(power), this);
-        }
-        Log.i("WARNING", "RAN OPEN LOOP WHEN MANUAL CONTROL WAS NOT ENABLED");
-        return new InstantCommand();
+        return new RunCommand(() -> openloopS(power), this);
     }
 
     /**
@@ -251,6 +245,7 @@ public class ExtensionSubsystem extends SubsystemBase {
      */
     public void setTargetInches(double inches) {
         targetInches = inches;
+        manualControl = false;
     }
 
     /**
@@ -301,6 +296,11 @@ public class ExtensionSubsystem extends SubsystemBase {
         openloop(power);
     }
 
+    /**
+     * Method for interpolating feedforward for slides, against gravity.
+     * @param x
+     * @return
+     */
     private double interpolate(double x) {
         double x1 = 0;
         double y1 = SlideConstants.FEEDFORWARD_bottom;
@@ -342,6 +342,8 @@ public class ExtensionSubsystem extends SubsystemBase {
 
     /**
      * Factory for stop()
+     *
+     * wait bruh it never ends if you don't cancel it
      *
      * @return Command
      */
@@ -389,15 +391,17 @@ public class ExtensionSubsystem extends SubsystemBase {
             extendInches(targetInches);
         }
 
+        if (getCurrentInches() < 0) {
+            reset();
+        }
+
         FtcDashboard.getInstance()
                 .getTelemetry()
                 .addData("slide position", this.getCurrentInches());
         FtcDashboard.getInstance().getTelemetry().addData("slide motor power", motor0.getPower());
-        FtcDashboard.getInstance()
-                .getTelemetry()
-                .addData("manualControl", manualControlTrigger.get());
-        FtcDashboard.getInstance()
-                .getTelemetry()
-                .addData("maxExtension", maxExtensionLimitTrigger.get());
+
+        FtcDashboard.getInstance().getTelemetry().addData("maxExtensionTrigger", maxExtensionLimitTrigger.get());
+        FtcDashboard.getInstance().getTelemetry().addData("SubmersibleLimitTrigger", submersibleLimitTrigger.get());
+        FtcDashboard.getInstance().getTelemetry().addData("manualControlTrigger", manualControlTrigger.get());
     }
 }

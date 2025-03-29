@@ -22,10 +22,10 @@ public class DefaultGoToPointCommand extends CommandBase {
 
     public DrivetrainSquIDController drivetrainSquIDController = new DrivetrainSquIDController();
 
-    public static double translationkP = 0.025;
+    public static double translationkP = 0.02;
     public static double translationkI = 0;
     public static double translationkD = 0;
-    public static double headingkP = 0.002;
+    public static double headingkP = 0.004;
     public static double headingkI = 0;
     public static double headingkD = 0;
 
@@ -77,6 +77,7 @@ public class DefaultGoToPointCommand extends CommandBase {
 
     @Override
     public void initialize() {
+        Log.i("GTPC", "Default GTPC scheduled properly :3");
         xPID.setTolerance(tol);
         yPID.setTolerance(tol);
         headingPID.setTolerance(hTol);
@@ -94,9 +95,7 @@ public class DefaultGoToPointCommand extends CommandBase {
         rotSpeedSupplier =
                 () ->
                         Util.signedSqrt(
-                                headingPID.calculate(
-                                        currentPose.getRotation().getDegrees(),
-                                        target.getRotation().getDegrees()));
+                                headingPID.calculate(0, Util.getAngularDifference(target.getRotation().getDegrees(), currentPose.getRotation().getDegrees())));
     }
 
     @Override

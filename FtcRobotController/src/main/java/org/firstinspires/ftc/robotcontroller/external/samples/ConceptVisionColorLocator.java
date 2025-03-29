@@ -140,7 +140,6 @@ public class ConceptVisionColorLocator extends LinearOpMode
         while (opModeIsActive() || opModeInInit())
         {
             telemetry.addData("preview on/off", "... Camera Stream\n");
-
             // Read the current list
             List<ColorBlobLocatorProcessor.Blob> blobs = colorLocator.getBlobs();
 
@@ -157,7 +156,7 @@ public class ConceptVisionColorLocator extends LinearOpMode
              *
              * ColorBlobLocatorProcessor.Util.filterByDensity(minDensity, maxDensity, blobs);
              *   A blob's density is an indication of how "full" the contour is.
-             *   If you put a rubber band around the contour you would get the "Convex Hull" of the contour.
+             *   If you put a rubber band around the contour you   get the "Convex Hull" of the contour.
              *   The density is the ratio of Contour-area to Convex Hull-area.
              *
              * ColorBlobLocatorProcessor.Util.filterByAspectRatio(minAspect, maxAspect, blobs);

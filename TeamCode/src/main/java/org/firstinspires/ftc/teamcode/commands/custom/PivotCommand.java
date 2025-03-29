@@ -38,6 +38,6 @@ public class PivotCommand extends CommandBase {
     @Override
     public void end(boolean wasInterrupted) {
         Log.i("%7", "Pivot reached target: " + target);
-        pivotSubsystem.stop();
+        //pivotSubsystem.stop();
     }
 }

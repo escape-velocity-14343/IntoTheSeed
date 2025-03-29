@@ -9,7 +9,7 @@ import java.util.Queue;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
-public class BasketSensorSubsystem extends SubsystemBase {
+public class BucketSensorSubsystem extends SubsystemBase {
     public static int rollingAverageSize = 3;
 
     private final AnalogInput sensorLeft;
@@ -22,9 +22,9 @@ public class BasketSensorSubsystem extends SubsystemBase {
     private double sensorLeftAverage;
     private double sensorRightAverage;
 
-    public BasketSensorSubsystem(HardwareMap hardwareMap) {
-        sensorLeft = hardwareMap.get(AnalogInput.class, "basketSensorLeft");
-        sensorRight = hardwareMap.get(AnalogInput.class, "basketSensorRight");
+    public BucketSensorSubsystem(HardwareMap hardwareMap) {
+        sensorLeft = hardwareMap.get(AnalogInput.class, "bucketSensorLeft");
+        sensorRight = hardwareMap.get(AnalogInput.class, "bucketSensorRight");
     }
 
     public void setDistanceUnit(DistanceUnit distanceUnit) {
