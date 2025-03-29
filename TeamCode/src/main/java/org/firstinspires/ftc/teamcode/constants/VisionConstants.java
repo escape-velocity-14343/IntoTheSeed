@@ -5,8 +5,8 @@ import com.acmerobotics.dashboard.config.Config;
 @Config
 public class VisionConstants {
     //1280 x 800
-    public static String slideCameraName = "slidecamera";
-    public static String chassisCameraName = "chassiscamera";
+    public static String slideCameraName = "slide";
+    public static String chassisCameraName = "chassis";
     public static int width = 1280;
     public static int height = 720;
 

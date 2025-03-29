@@ -45,7 +45,7 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         new SubPosReadyCommand(extension, pivot, wrist, intake, turret, () -> 0, SlideConstants.submersibleIntakeMaxExtension, () -> true)
                 ),
                 new WristCommand(wrist, IntakeConstants.toptakePos - 0.1),
-                new FineAlignCommand(vision, gtpc, drive, pinpoint, turret),
+                new FineAlignCommand(vision, gtpc, drive, pinpoint, turret).withTimeout(1500),
                 new WristCommand(wrist, IntakeConstants.toptakePos),
                 new WaitCommand(300),
 

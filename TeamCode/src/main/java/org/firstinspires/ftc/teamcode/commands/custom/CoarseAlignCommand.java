@@ -84,6 +84,13 @@ public class CoarseAlignCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
+        if (vision.getLargestBlob().isPresent()) {
+            if (vision.getLargestBlob().get().getContourArea() > 400){
+                Log.i("CoarseAlign", "Ended because there is sample below intake");
+                return true;
+            }
+        }
+
         return gtpc.isDone() && state == DetectionState.MOVING;
     }
 }

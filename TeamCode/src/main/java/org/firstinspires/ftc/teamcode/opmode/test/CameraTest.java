@@ -21,19 +21,19 @@ public class CameraTest extends LinearOpMode {
         int[] viewportids = VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.VERTICAL);
 
 
-        CameraName slideCam = hardwareMap.get(WebcamName.class, "slidecamera");
-        CameraName chassisCam = hardwareMap.get(WebcamName.class, "chassiscamera");
+        CameraName slideCam = hardwareMap.get(WebcamName.class, "slide");
+        CameraName chassisCam = hardwareMap.get(WebcamName.class, "chassis");
 
         VisionPortal vp1 = new VisionPortal.Builder()
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
-                .setCameraResolution(new Size(640, 480))
+                .setCameraResolution(new Size(320, 240))
                 .setCamera(slideCam)
                 .setLiveViewContainerId(viewportids[0])
                 .build();
 
         VisionPortal vp2 = new VisionPortal.Builder()
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
-                .setCameraResolution(new Size(640, 480))
+                .setCameraResolution(new Size(320, 240))
                 .setCamera(chassisCam)
                 .setLiveViewContainerId(viewportids[1])
                 .build();

@@ -80,6 +80,7 @@ public class VisionSubsystem extends SubsystemBase {
     private final WebcamName chassisCam;
     private final WebcamName slideCam;
     private double angle = 0;
+    Optional<ColorBlobLocatorProcessor.Blob> largestBlob = Optional.empty();
 
 
     public VisionSubsystem(HardwareMap hMap, Telemetry telemetry) {
@@ -116,9 +117,12 @@ public class VisionSubsystem extends SubsystemBase {
             case RED:
                 colorLocator.addColors(new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, minimumRed1, maximumRed1));
                 colorLocator.addColors(new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, minimumRed2, maximumRed2));
+                closeLocator.addColors(new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, minimumRed1, maximumRed1));
+                closeLocator.addColors(new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, minimumRed2, maximumRed2));
                 break;
             case BLUE:
                 colorLocator.addColors(new ColorRange(ColorSpace.HSV, minimumBlue, maximumBlue));
+                closeLocator.addColors(new ColorRange(ColorSpace.HSV, minimumBlue, maximumBlue));
                 break;
         }
 
@@ -204,9 +208,11 @@ public class VisionSubsystem extends SubsystemBase {
             ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, 20000, blobs);
             double dist = 10000;
             ColorBlobLocatorProcessor.Util.sortByArea(SortOrder.DESCENDING, blobs);
-
+            largestBlob = Optional.empty();
 
             if (!blobs.isEmpty()) {
+                largestBlob = Optional.of(blobs.get(0));
+
                 double[] weights = new double[blobs.size()];
 
                 // weight by size (10%)
@@ -257,6 +263,10 @@ public class VisionSubsystem extends SubsystemBase {
                 samplePos = null;
             }
         }
+    }
+
+    public Optional<ColorBlobLocatorProcessor.Blob> getLargestBlob(){
+        return largestBlob;
     }
 
     public Vector2d getSamplePos() {

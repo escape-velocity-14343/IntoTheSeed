@@ -44,6 +44,7 @@ public class EZ7Piece extends Robot {
 
     @Override
     public void runOpMode() {
+        AutoConstants.alliance = AutoConstants.Alliance.BLUE;
 
         initialize();
         pinpoint.reset();
