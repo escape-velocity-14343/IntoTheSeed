@@ -37,7 +37,7 @@ public class ChassisCameraTest extends LinearOpMode {
         else{
             AutoConstants.alliance = AutoConstants.Alliance.BLUE;
         }
-        int[] viewportids = VisionPortal.makeMultiPortalView(1, VisionPortal.MultiPortalLayout.VERTICAL);
+//        int[] viewportids = VisionPortal.makeMultiPortalView(1, VisionPortal.MultiPortalLayout.VERTICAL);
         highCameraSubsystem = new VisionSubsystem(hardwareMap, telemetry);
         highCameraSubsystem.setCam(true);
 
