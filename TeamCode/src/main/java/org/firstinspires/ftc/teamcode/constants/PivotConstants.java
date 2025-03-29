@@ -23,7 +23,7 @@ public class PivotConstants {
     public static double outtakeExtendDegrees = 45;
     public static double retractDegrees = bottomLimit;
 
-    public static double neutralPos = bottomLimit;
+    public static double neutralPos = 25;
     public static double intakeReadyPos = 15;
     public static double intakePos = 10;
 

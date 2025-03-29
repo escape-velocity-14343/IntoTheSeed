@@ -27,7 +27,7 @@ public class IVKCommand extends ParallelCommandGroup {
 //    private BiFunction<Double, Double, Double> getTargetAngleDegrees = (x, y) -> Math.toDegrees(Math.atan2(y - IVKConstants.pivotPointHeight, x+12));
 
     // useful constants:
-    public static double intakeReadyY = 9;
+    public static double intakeReadyY = 10;
     public static double intakeY = 7;
 
     /**
@@ -42,7 +42,7 @@ public class IVKCommand extends ParallelCommandGroup {
         addCommands(
                 extensionSubsystem.getExtendCommand(getTargetExtension.apply(x, y)),
                 pivotSubsystem.getPivotCommand(getTargetAngleDegrees.apply(x, y))
-        );
+                );
     }
 
     public IVKCommand(DoubleSupplier x, DoubleSupplier y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem){

@@ -28,6 +28,7 @@ public class PinpointTest extends Robot {
                                 RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD)));
         pinpoint.reset();
         pinpoint.resetYaw();
+
         CommandScheduler.getInstance().setDefaultCommand(mecanum, new DefaultDriveCommand(
                 mecanum,
                 () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftY() / driverPad.getLeftX()) < 0.05 ? 0 : driverPad.getLeftY()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? 1 : 1),
@@ -37,6 +38,7 @@ public class PinpointTest extends Robot {
 
 
         waitForStart();
+        pinpoint.setPosition(-65, 40);
 
         while (opModeIsActive()) {
             update();

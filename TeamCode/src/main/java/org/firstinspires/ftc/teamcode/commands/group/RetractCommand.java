@@ -50,7 +50,7 @@ public class RetractCommand extends SequentialCommandGroup {
                                 new TurretCommand(turret, 0)
                         ),
                         new ExtendCommand(extend, SlideConstants.minExtension),
-                        new PivotCommand(pivot, PivotConstants.neutralPos).alongWith(
+                        new PivotCommand(pivot, PivotConstants.bottomLimit).alongWith(
                                 new WristCommand(wrist, IntakeConstants.foldedPos)
                         )
                 ).whenFinished(() -> Log.i("5", "Retract command"))

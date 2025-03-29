@@ -11,7 +11,6 @@ import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
-import org.firstinspires.ftc.teamcode.constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
@@ -50,8 +49,11 @@ public class BucketPosCommand extends SequentialCommandGroup {
                                 new ExtendCommand(
                                                 extension,
                                                 SlideConstants.bucketPos
-                                                        + (DriveConstants.highExtend
+                                                        + (SlideConstants.highExtend
                                                                 ? SlideConstants.highExtendInches
+                                                                : 0)
+                                                        + (SlideConstants.lowExtend
+                                                                ? SlideConstants.lowExtendInches
                                                                 : 0))
                                         .withTimeout(1000)
                                         .interruptOn(
@@ -67,6 +69,8 @@ public class BucketPosCommand extends SequentialCommandGroup {
                         new TurretCommand(turret, 0))),
                 new InstantCommand(() -> Log.i("%2", "BucketPos End")));
     }
+
+
 
     public static BucketPosCommand newWithWristPos(
             ExtensionSubsystem extension, PivotSubsystem pivot, WristSubsystem wrist) {

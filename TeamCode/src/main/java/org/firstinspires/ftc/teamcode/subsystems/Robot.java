@@ -25,7 +25,6 @@ import org.firstinspires.ftc.teamcode.commands.group.LowBucketPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.RetractCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosReadyCommand;
-import org.firstinspires.ftc.teamcode.constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.CachingVoltageSensor;
 
@@ -75,7 +74,7 @@ public abstract class Robot extends LinearOpMode {
     private double lastIntakeWristAngle;
 
     public void initialize() {
-        DriveConstants.highExtend = false;
+        SlideConstants.highExtend = false;
 
         hubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule hub : hubs) {
