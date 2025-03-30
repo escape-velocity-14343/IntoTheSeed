@@ -141,7 +141,7 @@ public class EZ7Piece extends Robot {
                         new GoToPointWithDefaultCommand(
                                 new Pose2d(-42, 59, Rotation2d.fromDegrees(29)), gtpc, 0.5, 2
                         ).alongWith(
-                                new ExtendCommand(extension, SlideConstants.minExtension + 3),
+                                new SlowExtendCommand(extension, SlideConstants.minExtension + 3, AutoConstants.spikeExtensionSpeed),
                                 new SequentialCommandGroup(
                                         new WaitUntilCommand(() -> extension.getCurrentInches() < 15),
                                         new PivotCommand(pivot, 0)
