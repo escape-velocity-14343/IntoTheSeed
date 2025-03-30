@@ -59,6 +59,7 @@ public class GoToPointWithDefaultCommand extends CommandBase {
 
     @Override
     public void end(boolean wasInterrupted) {
+        gtpc.setTolerances(3, 4);
         Log.i(
                 "%1",
                 "gtp finished "
@@ -71,7 +72,6 @@ public class GoToPointWithDefaultCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        gtpc.setTolerances(3, 4);
         return gtpc.isDone();
     }
 }

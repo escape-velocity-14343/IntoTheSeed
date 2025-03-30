@@ -139,25 +139,24 @@ public class EZ7Piece extends Robot {
                         // intake third
                         // The thing is that you have to make sure you don't slam your intake on the ground and pop it
                         new GoToPointWithDefaultCommand(
-                                new Pose2d(-39, 56, Rotation2d.fromDegrees(43)), gtpc, 0.5, 2
+                                new Pose2d(-42, 59, Rotation2d.fromDegrees(29)), gtpc, 0.5, 2
                         ).alongWith(
-                                new BucketToIntakeCommand(pivot, extension, intake, wrist, turret, 9, 45, -1)
+                                new ExtendCommand(extension, SlideConstants.minExtension + 3),
+                                new SequentialCommandGroup(
+                                        new WaitUntilCommand(() -> extension.getCurrentInches() < 15),
+                                        new PivotCommand(pivot, 0)
+                                ),
+                                new WristCommand(wrist, IntakeConstants.groundPos),
+                                new TurretCommand(turret, 0),
+                                new IntakeControlCommand(intake, (2 * IntakeConstants.openPos + IntakeConstants.singleIntakePos) / 3, 1)
                         ),
-                        new WristCommand(wrist, IntakeConstants.toptakePos),
-                        new TimeoutCommand(
-                                new IVKCommand(10, IVKCommand.intakeReadyY, extension, pivot),
-                                1000),
-                        new WaitUntilCommand(() -> pivot.getPivotVelocity() < PivotConstants.maxPivotVelocity).deadlineWith(new WaitCommand(1500)),
-                        new TimeoutCommand(
-                                new IVKCommand(10, IVKCommand.intakeY+1, extension, pivot),
-                                1000),
-                        new TimeoutCommand(
-                                new IVKCommand(10, IVKCommand.intakeY, extension, pivot),
-                                1000),
-                        new TimeoutCommand(
-                                new IVKCommand(10, IVKCommand.intakeY-2, extension, pivot),
-                                1000),
-                        new WaitCommand(200),
+                        new ParallelCommandGroup(
+                                new TimeoutCommand(new SlowExtendCommand(extension, AutoConstants.spikeExtensionLength, AutoConstants.spikeExtensionSpeed), 1000),
+                                new WaitUntilCommand(() -> extension.getCurrentInches() > AutoConstants.spikeExtensionLength - 1
+                                ).andThen(
+                                        new IntakeControlCommand(intake, IntakeConstants.closedPos, 1)
+                                )
+                        ),
                         new GoToPointWithDefaultCommand(AutoConstants.cycleScorePos, gtpc).alongWith(
                                 new BucketPosCommand(extension, pivot, wrist, turret, true)
                         ),

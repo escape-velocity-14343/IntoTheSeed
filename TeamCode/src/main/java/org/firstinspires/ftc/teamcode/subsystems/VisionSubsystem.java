@@ -112,6 +112,7 @@ public class VisionSubsystem extends SubsystemBase {
 
         // add yellow colors (same for all alliances)
         colorLocator.addColors(new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, minimumYellow, maximumYellow));
+        closeLocator.addColors(new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, minimumYellow, maximumYellow));
 
         switch (AutoConstants.alliance) {
             case RED:

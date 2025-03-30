@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commands.group;
 
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.geometry.Pose2d;
@@ -26,6 +27,7 @@ import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
+import org.firstinspires.ftc.teamcode.lib.SampleMovementOptimizer;
 import org.firstinspires.ftc.teamcode.lib.SamplePoseStorage;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
@@ -36,15 +38,19 @@ import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
 
+import java.sql.Time;
+
 public class AutoSubCycle extends SequentialCommandGroup {
 
     public AutoSubCycle(VisionSubsystem vision, PivotSubsystem pivot, ExtensionSubsystem extension, SamplePoseStorage storage, DefaultGoToPointCommand gtpc, MecanumDriveSubsystem drive, PinpointSubsystem pinpoint, IntakeSubsystem intake, WristSubsystem wrist, TurretSubsystem turret) {
 
         super(
-                new InstantCommand(() -> vision.setCam(true)),
+                new InstantCommand(() -> vision.setCam(false)),
                 new SequentialCommandGroup(
+                        new GoToPointWithDefaultCommand(() -> SampleMovementOptimizer.getIntermediatePoint(storage.getCoarsePosition(), -15.0, 40, 25), gtpc),
+                        new GoToPointWithDefaultCommand(() -> SampleMovementOptimizer.getClosestPoint(storage.getCoarsePosition(), -15.0, 40, 25), gtpc)
 
-                        new RunIfCommand(
+                        /*new RunIfCommand(
                                 new InterruptCommand(new GoToPointWithDefaultCommand(
                                         () -> {
                                             Translation2d firstToSecond = storage.getCoarsePosition().minus(new Pose2d(-15.0, 40.0, new Rotation2d())).getTranslation();
@@ -60,13 +66,15 @@ public class AutoSubCycle extends SequentialCommandGroup {
                                     double angleToSecond = Math.atan2(secondTrans.getY(), secondTrans.getX());
                                     return Math.abs(angleToSecond) > Math.abs(angleToFirst);
                                 }),
-                        new GoToPointWithDefaultCommand(storage::getCoarsePositionOffset, gtpc),
-                        new InstantCommand(() -> vision.setCam(false))
+                        new GoToPointWithDefaultCommand(storage::getCoarsePositionOffset, gtpc),*/
                 ).alongWith(
-                        new InterruptCommand(new ExtendCommand(extension, 0.0), () -> extension.getCurrentInches() < 15.0).andThen(
+                        new ParallelCommandGroup(
+                            new InterruptCommand(new ExtendCommand(extension, 0.0), () -> extension.getCurrentInches() < 15.0),
+                                new WristCommand(wrist, IntakeConstants.groundPos)
+                        ).andThen(
                                 new InterruptCommand(new PivotCommand(pivot, PivotConstants.bottomLimit), () -> pivot.getCurrentPosition() < 45.0),
                                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 0),
-                                new IVKCommand(28.0, IVKCommand.intakeReadyY, extension, pivot).alongWith(
+                                new IVKCommand(20.0, IVKCommand.intakeReadyY, extension, pivot).alongWith(
                                         new TurretCommand(turret, 0.0)
                                 ).alongWith(
                                         // flip down wrist to a ready position
@@ -83,7 +91,7 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 new GoToPointWithDefaultCommand(storage::getFinePosition, gtpc, 0.5, 2),
 
                 new TimeoutCommand(
-                        new SubPosCommand(extension, wrist, intake, pivot, 28.0), 300
+                        new SubPosCommand(extension, wrist, intake, pivot, 20.0), 300
                 ),
                 new WaitCommand(400),
                 new SequentialCommandGroup(
@@ -97,7 +105,7 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         ).andThen(
                                 new BucketPosCommand(extension, pivot, wrist, turret)
                         ),
-                        new StoreCoarsePositionCommand(vision, storage, pinpoint)
+                        new TimeoutCommand(new StoreCoarsePositionCommand(vision, storage, pinpoint), 500)
                 ),
                 new IntakeClawCommand(intake, IntakeConstants.openPos),
                 new WaitCommand(100)

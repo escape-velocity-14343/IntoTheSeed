@@ -9,7 +9,7 @@ import com.arcrobotics.ftclib.geometry.Rotation2d;
 public class AutoConstants {
 
     public static Pose2d scorePos = new Pose2d(-60.5, 59.5, Rotation2d.fromDegrees(-45));
-    public static Pose2d cycleScorePos = new Pose2d(-58.5, 58.5, Rotation2d.fromDegrees(-30));
+    public static Pose2d cycleScorePos = new Pose2d(-59, 59, Rotation2d.fromDegrees(-30));
     public static Pose2d scorePosOffset = new Pose2d(-62,58.5, Rotation2d.fromDegrees(-45));
 
     public static double subBarrierY = 24;
