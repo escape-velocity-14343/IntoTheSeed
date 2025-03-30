@@ -18,7 +18,7 @@ public class VisionConstants {
     public static double yOffset = 120;
     public static double xOffset = 250;
     public static double velocityEnd = 0.001;
-    public static double maxPower = 0.3;
+    public static double maxPower = 0.2;
 
     public static double visionEndThreshold = 10;
 

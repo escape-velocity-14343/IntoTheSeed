@@ -21,6 +21,7 @@ public class PivotConstants {
     public static boolean encoderInvert = true;
     public static double encoderOffset = 170.2;
     public static double outtakeExtendDegrees = 45;
+    public static double autoOuttakeExtendDegrees = 30;
     public static double retractDegrees = bottomLimit;
 
     public static double neutralPos = 25;

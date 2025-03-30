@@ -9,6 +9,7 @@ import com.arcrobotics.ftclib.geometry.Rotation2d;
 public class AutoConstants {
 
     public static Pose2d scorePos = new Pose2d(-60.5, 59.5, Rotation2d.fromDegrees(-45));
+    public static Pose2d cycleScorePos = new Pose2d(-58.5, 58.5, Rotation2d.fromDegrees(-30));
     public static Pose2d scorePosOffset = new Pose2d(-62,58.5, Rotation2d.fromDegrees(-45));
 
     public static double subBarrierY = 24;
@@ -18,7 +19,7 @@ public class AutoConstants {
     // velocity necessary to skip to next point
     public static double stallVelocity = 0.5;
     public static double spikeExtensionSpeed = 0.5;
-    public static double spikeExtensionLength = 10;
+    public static double spikeExtensionLength = 8;
 
     // Milliseconds
     public static long outtakeTimeout = 1300;

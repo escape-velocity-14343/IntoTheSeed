@@ -33,6 +33,7 @@ import org.firstinspires.ftc.teamcode.constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
+import org.firstinspires.ftc.teamcode.lib.SamplePoseStorage;
 import org.firstinspires.ftc.teamcode.opmode.test.PNPTest;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
@@ -52,6 +53,8 @@ public class EZ7Piece extends Robot {
         intake.setClawer(IntakeConstants.closedPos);
 
         VisionSubsystem vision = new VisionSubsystem(hardwareMap, telemetry);
+        SamplePoseStorage storage = new SamplePoseStorage();
+        storage.setCoarsePosition(new Pose2d(-5.0, 5.0, new Rotation2d()));
         vision.waitForSetExposure(3000, 10000, PNPTest.exposure);
         while (!vision.setCam(true)) ;
 
@@ -79,14 +82,14 @@ public class EZ7Piece extends Robot {
                         new GoToPointWithDefaultCommand(
                                 new Pose2d(-46, 47.5, new Rotation2d()), gtpc
                         ).alongWith(
-                                new ExtendCommand(extension, SlideConstants.minExtension + 1),
+                                new ExtendCommand(extension, SlideConstants.minExtension + 3),
                                 new SequentialCommandGroup(
                                         new WaitUntilCommand(() -> extension.getCurrentInches() < 15),
                                         new PivotCommand(pivot, 0)
                                 ),
                                 new WristCommand(wrist, IntakeConstants.groundPos),
                                 new TurretCommand(turret, 0),
-                                new IntakeControlCommand(intake, IntakeConstants.openPos, 1)
+                                new IntakeControlCommand(intake, (2 * IntakeConstants.openPos + IntakeConstants.singleIntakePos) / 3, 1)
                         ),
                         //new WaitUntilCommand(() -> pivot.getPivotVelocity() < PivotConstants.maxPivotVelocity),
                         new ParallelCommandGroup(
@@ -96,8 +99,8 @@ public class EZ7Piece extends Robot {
                                         new IntakeControlCommand(intake, IntakeConstants.closedPos, 1)
                                 )
                         ),
-                        new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
-                                new BucketPosCommand(extension, pivot, wrist, turret)
+                        new GoToPointWithDefaultCommand(AutoConstants.cycleScorePos, gtpc).alongWith(
+                                new BucketPosCommand(extension, pivot, wrist, turret, true)
                         ),
                         new VoltagePause(voltage, 1),
                         new IntakeClawCommand(intake, IntakeConstants.openPos),
@@ -107,14 +110,14 @@ public class EZ7Piece extends Robot {
                         new GoToPointWithDefaultCommand(
                                 new Pose2d(-46, 57.5, new Rotation2d()), gtpc
                         ).alongWith(
-                                new ExtendCommand(extension, SlideConstants.minExtension + 1),
+                                new ExtendCommand(extension, SlideConstants.minExtension + 3),
                                 new SequentialCommandGroup(
                                         new WaitUntilCommand(() -> extension.getCurrentInches() < 15),
                                         new PivotCommand(pivot, 0)
                                 ),
                                 new WristCommand(wrist, IntakeConstants.groundPos),
                                 new TurretCommand(turret, 0),
-                                new IntakeControlCommand(intake, IntakeConstants.openPos, 1)
+                                new IntakeControlCommand(intake, (2 * IntakeConstants.openPos + IntakeConstants.singleIntakePos) / 3, 1)
                         ),
                         new ParallelCommandGroup(
                                 new SlowExtendCommand(extension, AutoConstants.spikeExtensionLength, AutoConstants.spikeExtensionSpeed),
@@ -123,8 +126,8 @@ public class EZ7Piece extends Robot {
                                         new IntakeControlCommand(intake, IntakeConstants.closedPos, 1)
                                 )
                         ),
-                        new GoToPointWithDefaultCommand(AutoConstants.scorePosOffset, gtpc).alongWith(
-                                new BucketPosCommand(extension, pivot, wrist, turret)
+                        new GoToPointWithDefaultCommand(AutoConstants.cycleScorePos, gtpc).alongWith(
+                                new BucketPosCommand(extension, pivot, wrist, turret, true)
                         ),
                         new VoltagePause(voltage, 1),
                         new IntakeClawCommand(intake, IntakeConstants.openPos),
@@ -155,15 +158,15 @@ public class EZ7Piece extends Robot {
                                 new IVKCommand(10, IVKCommand.intakeY-2, extension, pivot),
                                 1000),
                         new WaitCommand(200),
-                        new GoToPointWithDefaultCommand(AutoConstants.scorePosOffset, gtpc).alongWith(
-                                new BucketPosCommand(extension, pivot, wrist, turret)
+                        new GoToPointWithDefaultCommand(AutoConstants.cycleScorePos, gtpc).alongWith(
+                                new BucketPosCommand(extension, pivot, wrist, turret, true)
                         ),
                         new VoltagePause(voltage, 1),
                         new IntakeClawCommand(intake, IntakeConstants.openPos),
                         new VoltagePause(voltage),
-                        new AutoSubCycle(vision, pivot, extension, gtpc, mecanum, pinpoint, intake, wrist, turret),
-                        new AutoSubCycle(vision, pivot, extension, gtpc, mecanum, pinpoint, intake, wrist, turret),
-                        new AutoSubCycle(vision, pivot, extension, gtpc, mecanum, pinpoint, intake, wrist, turret)
+                        new AutoSubCycle(vision, pivot, extension, storage, gtpc, mecanum, pinpoint, intake, wrist, turret),
+                        new AutoSubCycle(vision, pivot, extension, storage, gtpc, mecanum, pinpoint, intake, wrist, turret),
+                        new AutoSubCycle(vision, pivot, extension, storage, gtpc, mecanum, pinpoint, intake, wrist, turret)
                 )
         );
 

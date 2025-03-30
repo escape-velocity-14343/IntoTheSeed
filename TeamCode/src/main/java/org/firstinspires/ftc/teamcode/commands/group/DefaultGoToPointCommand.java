@@ -22,7 +22,7 @@ public class DefaultGoToPointCommand extends CommandBase {
 
     public DrivetrainSquIDController drivetrainSquIDController = new DrivetrainSquIDController();
 
-    public static double translationkP = 0.02;
+    public static double translationkP = 0.035;
     public static double translationkI = 0;
     public static double translationkD = 0;
     public static double headingkP = 0.004;
@@ -140,7 +140,7 @@ public class DefaultGoToPointCommand extends CommandBase {
         double hMove = -rotSpeedSupplier.getAsDouble() * voltageScalar;
 
         if (toggle) {
-            drive.driveFieldCentric(-xMove, -yMove * 1.2, hMove);
+            drive.driveFieldCentricCompensated(-xMove, -yMove, hMove);
         }
 
         // velocity end

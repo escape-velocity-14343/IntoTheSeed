@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
 public class DrivetrainSquIDController {
-    public static double looptimeAdjuster = 9;
+    public static double looptimeAdjuster = 0.55;
 
     private ElapsedTime loopTime;
 
@@ -26,9 +26,9 @@ public class DrivetrainSquIDController {
 
     public Pose2d calculate(Pose2d targetPose, Pose2d currentPose, Pose2d currentVelocity) {
         double currentVelMag = currentVelocity.getTranslation().getNorm();
-        // compensate for pinpoint trolling
-        double deltaSeconds = loopTime.seconds();
-        currentVelMag *= deltaSeconds;
+        // compensate for pinpoint trolling - FIXED
+        /*double deltaSeconds = loopTime.seconds();
+        currentVelMag /= deltaSeconds;*/
 
         double velAngle = Math.atan2(currentVelocity.getY(), currentVelocity.getX());
 
@@ -54,6 +54,6 @@ public class DrivetrainSquIDController {
     private static double getDistanceFromVelocity(double velocity) {
         velocity *= looptimeAdjuster;
         // equation from regression
-        return 0.00286 * velocity * velocity + 0.304 * velocity - 0.837;
+        return 0.00805 * velocity * velocity + 0.125 * velocity - 0.0606;
     }
 }

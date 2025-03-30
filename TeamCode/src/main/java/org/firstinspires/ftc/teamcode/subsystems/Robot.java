@@ -120,7 +120,7 @@ public abstract class Robot extends LinearOpMode {
             hub.clearBulkCache();
         }
         CommandScheduler.getInstance().run();
-        telemetry.update();
+       // telemetry.update();
     }
 
     public void end() {

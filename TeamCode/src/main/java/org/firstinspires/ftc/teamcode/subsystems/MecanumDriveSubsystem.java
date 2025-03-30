@@ -4,6 +4,8 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.teamcode.constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.lib.CachingVoltageSensor;
 import org.firstinspires.ftc.teamcode.lib.Localizer;
 
@@ -84,6 +86,34 @@ public class MecanumDriveSubsystem extends SubsystemBase {
 
     public void driveFieldCentric(double x, double y, double rx) {
         driveFieldCentric(x, y, rx, odo.getPose().getRotation().getDegrees());
+    }
+
+    public void driveFieldCentricCompensated(double x, double y, double rx) {
+        rx = -rx;
+
+        double headingRads = -Math.toRadians(odo.getPose().getRotation().getDegrees());
+
+        double rotX = y * Math.cos(headingRads) + x * Math.sin(headingRads);
+
+        rotX *= DriveConstants.strafeMultiplier;
+
+        double rotY = y * Math.sin(headingRads) - x * Math.cos(headingRads);
+
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        double frontLeftPower = (rotY + rotX + rx) / denominator;
+        double backLeftPower = (rotY - rotX + rx) / denominator;
+        double frontRightPower = (rotY - rotX - rx) / denominator;
+        double backRightPower = (rotY + rotX - rx) / denominator;
+        if (!(Double.valueOf(frontLeftPower).isNaN()
+                || Double.valueOf(backLeftPower).isNaN()
+                || Double.valueOf(frontRightPower).isNaN()
+                || Double.valueOf(backRightPower).isNaN())) {
+
+            fl.setPower(frontLeftPower);
+            bl.setPower(backLeftPower);
+            fr.setPower(frontRightPower);
+            br.setPower(backRightPower);
+        }
     }
 
     public double getAutoVoltageMult() {

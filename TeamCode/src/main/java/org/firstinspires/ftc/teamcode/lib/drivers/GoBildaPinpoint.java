@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchSimple;
 import com.qualcomm.robotcore.hardware.configuration.annotations.DeviceProperties;
 import com.qualcomm.robotcore.hardware.configuration.annotations.I2cDeviceType;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.TypeConversion;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -70,6 +71,9 @@ public class GoBildaPinpoint extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> 
 
     // i2c address of the device
     public static final byte DEFAULT_ADDRESS = 0x31;
+
+    private Pose2D velocity = new Pose2D(DistanceUnit.MM, 0, 0, AngleUnit.DEGREES, 0);
+    private ElapsedTime loop = new ElapsedTime();
 
     public GoBildaPinpoint(I2cDeviceSynchSimple deviceClient, boolean deviceClientIsOwned) {
         super(deviceClient, deviceClientIsOwned);
@@ -267,6 +271,8 @@ public class GoBildaPinpoint extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> 
      */
     public void update() {
         try {
+            velocity = new Pose2D(DistanceUnit.MM, xPosition, yPosition, AngleUnit.RADIANS, hOrientation);
+
             byte[] bArr = deviceClient.read(Register.BULK_READ.bVal, 40);
             deviceStatus = byteArrayToInt(Arrays.copyOfRange(bArr, 0, 4), ByteOrder.LITTLE_ENDIAN);
             loopTime = byteArrayToInt(Arrays.copyOfRange(bArr, 4, 8), ByteOrder.LITTLE_ENDIAN);
@@ -278,6 +284,11 @@ public class GoBildaPinpoint extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> 
             xVelocity = byteArrayToFloat(Arrays.copyOfRange(bArr, 28, 32), ByteOrder.LITTLE_ENDIAN);
             yVelocity = byteArrayToFloat(Arrays.copyOfRange(bArr, 32, 36), ByteOrder.LITTLE_ENDIAN);
             hVelocity = byteArrayToFloat(Arrays.copyOfRange(bArr, 36, 40), ByteOrder.LITTLE_ENDIAN);
+            double seconds = loop.seconds();
+            velocity = new Pose2D(DistanceUnit.MM, (xPosition - velocity.getX(DistanceUnit.MM)) / seconds, (yPosition - velocity.getY(DistanceUnit.MM)) / seconds,
+                    AngleUnit.RADIANS, velocity.getHeading(AngleUnit.RADIANS) - hOrientation);
+            loop.reset();
+
         } catch (Exception e) {
             // fix for I2C_STUCK_IN_STOP error - not part of default driver!
             Log.w("Pinpoint", "Pinpoint read failed (NACK). Using stale data.");
@@ -619,6 +630,9 @@ public class GoBildaPinpoint extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> 
      * @return a Pose2D containing the estimated velocity of the robot, velocity is unit per second
      */
     public Pose2D getVelocity() {
-        return new Pose2D(DistanceUnit.MM, xVelocity, yVelocity, AngleUnit.RADIANS, hVelocity);
+        // estimated from 2 poses internal to driver but it works better
+        return velocity;
+
+        //return new Pose2D(DistanceUnit.MM, xVelocity, yVelocity, AngleUnit.RADIANS, hVelocity);
     }
 }
