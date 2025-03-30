@@ -15,13 +15,15 @@ public class VoltagePause extends WaitCommand {
      * @param voltageSensor
      */
     public VoltagePause(CachingVoltageSensor voltageSensor){
-        super((long) ((voltageSensor.getVoltage()-AutoConstants.baseVoltage)*200 + 200));
+//        super((long) ((voltageSensor.getVoltage()-AutoConstants.baseVoltage)*0 + 0));
+        super(0);
     }
 
     /**
      * overload for front to back stability
      */
     public VoltagePause(CachingVoltageSensor voltageSensor, int meaninglessValue){
-        super((long) ((voltageSensor.getVoltage()-AutoConstants.baseVoltage)*50 + 100));
+//        super((long) ((voltageSensor.getVoltage()-AutoConstants.baseVoltage)*0 + 0));
+        super(0);
     }
 }

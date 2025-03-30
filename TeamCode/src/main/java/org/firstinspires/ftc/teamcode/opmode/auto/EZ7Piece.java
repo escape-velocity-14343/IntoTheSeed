@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmode.auto;
 
+import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
@@ -28,6 +30,7 @@ import org.firstinspires.ftc.teamcode.commands.group.BucketToIntakeCommand;
 import org.firstinspires.ftc.teamcode.commands.group.DefaultGoToPointCommand;
 import org.firstinspires.ftc.teamcode.commands.group.GoToPointWithDefaultCommand;
 import org.firstinspires.ftc.teamcode.commands.group.IntakePosCommand;
+import org.firstinspires.ftc.teamcode.commands.group.RetractCommand;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
@@ -49,7 +52,7 @@ public class EZ7Piece extends Robot {
 
         initialize();
         pinpoint.reset();
-        wrist.setWrist(IntakeConstants.foldedPos);
+        wrist.setWrist(IntakeConstants.scoringPosReversed);
         intake.setClawer(IntakeConstants.closedPos);
 
         VisionSubsystem vision = new VisionSubsystem(hardwareMap, telemetry);
@@ -57,6 +60,8 @@ public class EZ7Piece extends Robot {
         storage.setCoarsePosition(new Pose2d(-5.0, 5.0, new Rotation2d()));
         vision.waitForSetExposure(3000, 10000, PNPTest.exposure);
         while (!vision.setCam(true)) ;
+
+        CommandScheduler.getInstance().onCommandInitialize((command) -> {telemetry.addData("Command Running", command.getName());});
 
         waitForStart();
 
@@ -80,8 +85,8 @@ public class EZ7Piece extends Robot {
 
                         // intake first
                         new GoToPointWithDefaultCommand(
-                                new Pose2d(-46, 47.5, new Rotation2d()), gtpc
-                        ).alongWith(
+                                new Pose2d(-46, 47.5, new Rotation2d()), gtpc)
+                                .alongWith(
                                 new ExtendCommand(extension, SlideConstants.minExtension + 3),
                                 new SequentialCommandGroup(
                                         new WaitUntilCommand(() -> extension.getCurrentInches() < 15),
@@ -99,7 +104,7 @@ public class EZ7Piece extends Robot {
                                         new IntakeControlCommand(intake, IntakeConstants.closedPos, 1)
                                 )
                         ),
-                        new GoToPointWithDefaultCommand(AutoConstants.cycleScorePos, gtpc).alongWith(
+                        new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
                                 new BucketPosCommand(extension, pivot, wrist, turret, true)
                         ),
                         new VoltagePause(voltage, 1),
@@ -108,8 +113,7 @@ public class EZ7Piece extends Robot {
 
                         // intake second
                         new GoToPointWithDefaultCommand(
-                                new Pose2d(-46, 57.5, new Rotation2d()), gtpc
-                        ).alongWith(
+                                new Pose2d(-46, 57.5, new Rotation2d()), gtpc).alongWith(
                                 new ExtendCommand(extension, SlideConstants.minExtension + 3),
                                 new SequentialCommandGroup(
                                         new WaitUntilCommand(() -> extension.getCurrentInches() < 15),
@@ -126,7 +130,7 @@ public class EZ7Piece extends Robot {
                                         new IntakeControlCommand(intake, IntakeConstants.closedPos, 1)
                                 )
                         ),
-                        new GoToPointWithDefaultCommand(AutoConstants.cycleScorePos, gtpc).alongWith(
+                        new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
                                 new BucketPosCommand(extension, pivot, wrist, turret, true)
                         ),
                         new VoltagePause(voltage, 1),
@@ -138,10 +142,17 @@ public class EZ7Piece extends Robot {
 
                         // intake third
                         // The thing is that you have to make sure you don't slam your intake on the ground and pop it
+                        new GoToPointWithDefaultCommand(new Pose2d(-51, 63.5, Rotation2d.fromDegrees(0)), gtpc, 0.5, 2)
+                                .withTimeout(1500)
+                                .alongWith(
+                                        RetractCommand.newWithWristPos(wrist, pivot, extension, IntakeConstants.groundPos),
+                                        new TurretCommand(turret, 0),
+                                        new IntakeClawCommand(intake, IntakeConstants.singleIntakePos)
+                                ),
                         new GoToPointWithDefaultCommand(
-                                new Pose2d(-42, 59, Rotation2d.fromDegrees(29)), gtpc, 0.5, 2
+                                new Pose2d(-50, 62, Rotation2d.fromDegrees(10.5)), gtpc, 0.5, 2
                         ).alongWith(
-                                new SlowExtendCommand(extension, SlideConstants.minExtension + 3, AutoConstants.spikeExtensionSpeed),
+                                new SlowExtendCommand(extension, 14, AutoConstants.spikeExtensionSpeed),
                                 new SequentialCommandGroup(
                                         new WaitUntilCommand(() -> extension.getCurrentInches() < 15),
                                         new PivotCommand(pivot, 0)
@@ -152,12 +163,15 @@ public class EZ7Piece extends Robot {
                         ),
                         new ParallelCommandGroup(
                                 new TimeoutCommand(new SlowExtendCommand(extension, AutoConstants.spikeExtensionLength, AutoConstants.spikeExtensionSpeed), 1000),
-                                new WaitUntilCommand(() -> extension.getCurrentInches() > AutoConstants.spikeExtensionLength - 1
+                                new WaitUntilCommand(() -> extension.getCurrentInches() > 14 - 1
                                 ).andThen(
                                         new IntakeControlCommand(intake, IntakeConstants.closedPos, 1)
                                 )
                         ),
-                        new GoToPointWithDefaultCommand(AutoConstants.cycleScorePos, gtpc).alongWith(
+                        new GoToPointWithDefaultCommand(
+//                                AutoConstants.cycleScorePos, gtpc)
+                                AutoConstants.scorePos, gtpc)
+                                .alongWith(
                                 new BucketPosCommand(extension, pivot, wrist, turret, true)
                         ),
                         new VoltagePause(voltage, 1),
