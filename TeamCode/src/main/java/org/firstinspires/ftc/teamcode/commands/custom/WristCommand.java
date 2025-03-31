@@ -11,7 +11,13 @@ public class WristCommand extends CommandBase {
     WristSubsystem wrist;
     double target = 0;
     ElapsedTime timer = new ElapsedTime();
-    double timeNeeded = 0.8; // seconds
+    //0.115sec/60° @ 6.0V
+    //0.1 is 60
+    //0.3 is 180
+    //0.6 is 360
+    //0.69s for 360 degrees
+    //0.69/0.6s for each position unit
+    double timeNeeded = 0.4; // seconds
 
     public WristCommand(WristSubsystem wrist, double target) {
         this.wrist = wrist;

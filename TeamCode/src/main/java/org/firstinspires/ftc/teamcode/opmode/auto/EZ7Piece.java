@@ -81,7 +81,6 @@ public class EZ7Piece extends Robot {
 
         cs.schedule(
                 new SequentialCommandGroup(
-                        new InstantCommand(() -> SlideConstants.lowExtend = true),
                         // score preload
                         new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
                                 new DunkCommand(extension, pivot, wrist, turret, intake)
@@ -166,7 +165,6 @@ public class EZ7Piece extends Robot {
             update();
         }
 
-        SlideConstants.lowExtend = false;
         end();
     }
 }
