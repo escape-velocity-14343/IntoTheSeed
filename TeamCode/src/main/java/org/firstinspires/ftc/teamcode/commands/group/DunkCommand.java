@@ -37,10 +37,16 @@ public class DunkCommand extends SequentialCommandGroup {
             IntakeSubsystem intake) {
         addCommands(
                 new WristCommand(wrist, IntakeConstants.groundPos),
+                new TurretCommand(turret, 0),
+                // minus two to prevent it from overshooting
+                new PivotCommand(pivot, PivotConstants.stallTopLimit)
+                        .interruptOn(
+                                () ->
+                                        pivot.getPivotVelocity()
+                                                < AutoConstants.autoscoreMaxPivotVel
+                                                && pivot.getCurrentPosition()
+                                                > PivotConstants.topLimit - 4),
                 new ParallelCommandGroup(
-                        new TurretCommand(turret, 0),
-                        // minus two to prevent it from overshooting
-                        new PivotCommand(pivot, PivotConstants.stallTopLimit),
                         new ExtendCommand(
                                 extension,
                                 SlideConstants.bucketPos
@@ -52,8 +58,9 @@ public class DunkCommand extends SequentialCommandGroup {
                                         : 0))
                                 .withTimeout(2000),
                         new WaitUntilCommand(
-                                () -> extension.getCurrentInches() > SlideConstants.bucketPos-1
-                        ).andThen(new WristCommand(wrist, IntakeConstants.scoringPos))),
+                            () -> extension.getCurrentInches() > SlideConstants.safeForDunk
+                        ).andThen(new WristCommand(wrist, IntakeConstants.scoringPos))
+                ),
                 new IntakeClawCommand(intake, IntakeConstants.openPos),
                 new InstantCommand(() -> Log.i("%2", "Dunk End")));
     }

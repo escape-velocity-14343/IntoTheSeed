@@ -9,7 +9,7 @@ public class IntakeConstants {
     // It takes 0.4 seconds from scoring pos reversed to scoring Pos
     public static double foldedPos = 0.25;
     public static double groundPos = 0.4;
-    public static double scoringPos = 0.18;
+    public static double scoringPos = 0.1;
     public static double specimenScoringPos = 0.4;
     public static double scoringPosReversed = 0.50;
     public static double specimenReadyPos = 0.63;
@@ -18,7 +18,7 @@ public class IntakeConstants {
     public static double wristTolerance = 0.1;
 
     // wrist command constants
-    public static double timeMultiplier = 0.69/0.6;
+    public static double timeMultiplier = 0.6;
 
     // claw constants
     // fronttake
