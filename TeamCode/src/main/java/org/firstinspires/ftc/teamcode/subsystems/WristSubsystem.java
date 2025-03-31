@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
+import org.firstinspires.ftc.teamcode.constants.SlideConstants;
+import org.firstinspires.ftc.teamcode.lib.Util;
 
 @Config
 public class WristSubsystem extends SubsystemBase {
@@ -27,5 +29,9 @@ public class WristSubsystem extends SubsystemBase {
     // TODO: if we use analog thing make it return actual position
     public double getPosition() {
         return wrist.getPosition();
+    }
+
+    public boolean isClose(double target) {
+        return Util.inRange(target, getPosition(), SlideConstants.tolerance);
     }
 }

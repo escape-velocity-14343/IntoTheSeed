@@ -4,14 +4,14 @@ import android.util.Log;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
+import org.firstinspires.ftc.teamcode.lib.Util;
 import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
 
 public class WristCommand extends CommandBase {
-
     WristSubsystem wrist;
     double target = 0;
     ElapsedTime timer = new ElapsedTime();
-    double timeNeeded = 0.5; // seconds
+    double timeNeeded = 0.8; // seconds
 
     public WristCommand(WristSubsystem wrist, double target) {
         this.wrist = wrist;
@@ -28,7 +28,7 @@ public class WristCommand extends CommandBase {
 
     @Override
     public void end(boolean wasInterrupted) {
-        Log.i("%3", "Wrist set to " + target);
+        Log.i("%3", "Wrist set to " + target +" it took: " + timer.seconds());
     }
 
     @Override

@@ -20,6 +20,7 @@ public class PivotCommand extends CommandBase {
 
     @Override
     public void initialize() {
+        Log.i("%7", "Set pivot target: " + target);
         pivotSubsystem.setTarget(target);
     }
 

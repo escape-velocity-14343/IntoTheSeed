@@ -6,17 +6,19 @@ import com.acmerobotics.dashboard.config.Config;
 public class IntakeConstants {
 
     // wrist constants
+    // It takes 0.4 seconds from scoring pos reversed to scoring Pos
     public static double foldedPos = 0.25;
     public static double groundPos = 0.4;
     public static double scoringPos = 0.1;
     public static double specimenScoringPos = 0.4;
-    public static double scoringPosReversed = 0.60;
+    public static double scoringPosReversed = 0.50;
     public static double specimenReadyPos = 0.63;
     public static double intakeReadyPos = 0.8;
     public static double toptakePos = 0.55;
+    public static double wristTolerance = 0.1;
 
     // wrist command constants
-    public static double timeMultiplier = 0.27;
+    public static double timeMultiplier = 0.6;
 
     // claw constants
     // fronttake

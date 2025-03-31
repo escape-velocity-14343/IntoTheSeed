@@ -1,0 +1,67 @@
+package org.firstinspires.ftc.teamcode.commands.group;
+
+import android.util.Log;
+
+import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
+
+import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.WaitUntilStabilizedCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
+import org.firstinspires.ftc.teamcode.constants.AutoConstants;
+import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
+import org.firstinspires.ftc.teamcode.constants.PivotConstants;
+import org.firstinspires.ftc.teamcode.constants.SlideConstants;
+import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.PivotSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
+
+public class DunkCommand extends SequentialCommandGroup {
+    private DunkCommand(Command... commands) {
+        super(commands);
+    }
+
+    public DunkCommand(
+            ExtensionSubsystem extension,
+            PivotSubsystem pivot,
+            WristSubsystem wrist,
+            TurretSubsystem turret,
+            IntakeSubsystem intake) {
+        addCommands(
+                new WristCommand(wrist, IntakeConstants.groundPos),
+                new TurretCommand(turret, 0),
+                // minus two to prevent it from overshooting
+                new PivotCommand(pivot, PivotConstants.stallTopLimit)
+                        .interruptOn(
+                                () ->
+                                        pivot.getPivotVelocity()
+                                                < AutoConstants.autoscoreMaxPivotVel
+                                                && pivot.getCurrentPosition()
+                                                > PivotConstants.topLimit - 4),
+                new ParallelCommandGroup(
+                        new ExtendCommand(
+                                extension,
+                                SlideConstants.bucketPos
+                                        + (SlideConstants.highExtend
+                                        ? SlideConstants.highExtendInches
+                                        : 0)
+                                        + (SlideConstants.lowExtend
+                                        ? SlideConstants.lowExtendInches
+                                        : 0))
+                                .withTimeout(2000),
+                        new WaitUntilCommand(
+                            () -> extension.getCurrentInches() > SlideConstants.safeForDunk
+                        ).andThen(new WristCommand(wrist, IntakeConstants.scoringPos))
+                ),
+                new IntakeClawCommand(intake, IntakeConstants.openPos),
+                new InstantCommand(() -> Log.i("%2", "Dunk End")));
+    }
+}

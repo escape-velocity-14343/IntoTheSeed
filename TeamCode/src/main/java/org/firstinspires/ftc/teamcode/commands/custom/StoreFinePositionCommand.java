@@ -57,10 +57,10 @@ public class StoreFinePositionCommand extends CommandBase {
         }
 
         SlidePnP pnp = new SlidePnP(cx, cy, focalL);
-        SlidePnP.ry = Math.sin(Math.toRadians(pivot.getCurrentPosition())) * extend.getCurrentInches() + IVKConstants.pivotPointHeight;
-        Log.v("FineAlign", "RY: " + SlidePnP.ry);
+        SlidePnP.rz = Math.sin(Math.toRadians(pivot.getCurrentPosition())) * extend.getCurrentInches() + IVKConstants.pivotPointHeight;
+        Log.v("FineAlign", "RZ: " + SlidePnP.rz);
         SlidePnP.rp = Math.toRadians(-90 + pivot.getCurrentPosition());
-        Translation2d fieldSamp = pnp.getFieldCoordinates((int) samplePos.getX(), (int) samplePos.getY(), pinpoint.getPose());
+        Translation2d fieldSamp = pnp.getFieldCoordinates((int) samplePos.getY(), (int) -samplePos.getX(), pinpoint.getPose());
         Log.i("FineAlign", "Sample X: " + fieldSamp.getX());
         Log.i("FineAlign", "Sample Y: " + fieldSamp.getY());
 
