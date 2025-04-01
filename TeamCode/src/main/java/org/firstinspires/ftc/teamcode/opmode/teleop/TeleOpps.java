@@ -103,7 +103,7 @@ public class TeleOpps extends Robot {
         new Trigger(() -> driverPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5).whenActive(new InstantCommand(() -> extendInches = SlideConstants.submersibleIntakeMidExtension));
         new Trigger(() -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5).whenActive(new InstantCommand(() -> extendInches = SlideConstants.submersibleIntakeMaxExtension));
 
-        driverPad.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(intake(() -> extendInches)).whenReleased(intakeReady(() -> extendInches));
+        driverPad.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(intake(() -> extendInches)).whenReleased(intakeReady(() -> lastIntakeWristAngle, () -> extendInches));
 
         driverPad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
                 .whenPressed(new IntakeControlCommand(intake, IntakeConstants.openPos, 0))

@@ -27,7 +27,7 @@ public class IntakeConstants {
     public static double closedPos = 0.95;
     public static double singleIntakePos = 0.875;
 
-    public static double clawOffset = 0.015;
+    public static double clawOffset = 0;
 
     // turret constants
     public static double minAngle = -130;

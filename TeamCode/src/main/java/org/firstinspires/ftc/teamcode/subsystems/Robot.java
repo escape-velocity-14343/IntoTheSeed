@@ -71,7 +71,7 @@ public abstract class Robot extends LinearOpMode {
     public ElapsedTime timer = new ElapsedTime();
     public CommandScheduler cs = CommandScheduler.getInstance();
 
-    private double lastIntakeWristAngle;
+    protected double lastIntakeWristAngle;
 
     public void initialize() {
         SlideConstants.highExtend = false;
@@ -138,11 +138,6 @@ public abstract class Robot extends LinearOpMode {
     }
 
     public Command intake(DoubleSupplier forwardInches) {
-        return new SubPosCommand(extension, wrist, intake, pivot, forwardInches)
-                .andThen(setStateCommand(FSMStates.INTAKE));
-    }
-
-    public Command intake(double forwardInches) {
         return new SubPosCommand(extension, wrist, intake, pivot, forwardInches)
                 .andThen(setStateCommand(FSMStates.INTAKE));
     }
