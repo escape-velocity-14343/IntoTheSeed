@@ -8,13 +8,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
-import org.firstinspires.ftc.teamcode.constants.VisionConstants;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
-import org.firstinspires.ftc.vision.VisionPortal;
 
 @TeleOp
 @Config
-public class ChassisCameraTest extends LinearOpMode {
+public class SlideCameraTest extends LinearOpMode {
     public static boolean red = true;
     VisionSubsystem highCameraSubsystem;
 
@@ -41,7 +39,7 @@ public class ChassisCameraTest extends LinearOpMode {
         highCameraSubsystem = new VisionSubsystem(hardwareMap, telemetry);
 
         highCameraSubsystem.waitForSetExposure(3000, 10000, exposure);
-        highCameraSubsystem.setCam(true);
+        highCameraSubsystem.setCam(false);
         highCameraSubsystem.setUseGlowUp(true);
 
         waitForStart();

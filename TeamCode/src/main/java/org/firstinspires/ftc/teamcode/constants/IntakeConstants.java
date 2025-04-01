@@ -24,7 +24,7 @@ public class IntakeConstants {
     // claw constants
     // fronttake
     public static double openPos = 0.675;
-    public static double closedPos = 0.95;
+    public static double closedPos = 0.92; //holy fuck are we stalling ts
     public static double singleIntakePos = 0.875;
 
     public static double clawOffset = 0;

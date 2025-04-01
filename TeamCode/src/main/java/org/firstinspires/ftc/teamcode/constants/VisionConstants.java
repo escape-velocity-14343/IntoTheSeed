@@ -7,8 +7,10 @@ public class VisionConstants {
     //1280 x 800
     public static String slideCameraName = "slide";
     public static String chassisCameraName = "chassis";
-    public static int width = 1280;
-    public static int height = 720;
+    //QVGA
+    public static int width = 320;
+    public static int height = 240;
+    public static int minHeight = 100;
 
     public static double cx = 338.083 / 2;
     public static double cy = 218.771 / 2;

@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.lib;
 
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
+import com.arcrobotics.ftclib.geometry.Transform2d;
+import com.arcrobotics.ftclib.geometry.Translation2d;
 
 public class SamplePoseStorage {
 
@@ -28,6 +30,10 @@ public class SamplePoseStorage {
 
     public Pose2d getFinePosition() {
         return finePosition;
+    }
+
+    public Pose2d getOffsetFinePosition(){
+        return finePosition.plus(new Transform2d(new Translation2d(0, 10), new Rotation2d()));
     }
 
     public void setFinePosition(Pose2d finePosition) {

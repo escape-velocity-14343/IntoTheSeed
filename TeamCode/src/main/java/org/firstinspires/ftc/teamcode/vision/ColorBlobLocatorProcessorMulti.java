@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.vision;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.Log;
@@ -10,6 +11,7 @@ import androidx.annotation.ColorInt;
 import com.qualcomm.robotcore.util.SortOrder;
 
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
+import org.firstinspires.ftc.teamcode.constants.VisionConstants;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
 import org.firstinspires.ftc.vision.opencv.ColorSpace;
@@ -68,17 +70,17 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
 
     public boolean onlyFirstColor = false;
 
-    Point[] points = {
-            new Point(0,0),
-            new Point(0,480),
-            new Point(640,480),
-            new Point(640, 0),
-    };
-
+//    Point[] points = {
+//            new Point(0,0),
+//            new Point(0, VisionConstants.height),
+//            new Point(VisionConstants.width, VisionConstants.height),
+//            new Point(VisionConstants.width, 0),
+//    };
+    Point[] points;
 
     public ColorBlobLocatorProcessorMulti(ColorRange colorRange, ImageRegion roiImg, ContourMode contourMode,
                                    int erodeSize, int dilateSize, boolean drawContours, int blurSize,
-                                   @ColorInt int boundingBoxColor, @ColorInt int roiColor, @ColorInt int contourColor)
+                                   @ColorInt int boundingBoxColor, @ColorInt int roiColor, @ColorInt int contourColor, Point[] points)
     {
         this.colorRange = colorRange;
 
@@ -87,6 +89,7 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
         this.boundingBoxColor = boundingBoxColor;
         this.roiColor = roiColor;
         this.contourColor = contourColor;
+        this.points = points;
 
         if (blurSize > 0)
         {
@@ -140,7 +143,6 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
         contourPaint.setColor(contourColor);
     }
 
-
     @Override
     public void init(int width, int height, CameraCalibration calibration)
     {
@@ -151,13 +153,13 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
         roi = roiImg.asOpenCvRect(width, height);
         roiMask = new Mat(height, width, 0);
         Log.i("cv test", "gotten to creation of roimask of processor");
-
         maskShape = new MatOfPoint();
         maskShape.fromArray(points);
 
         List<MatOfPoint> polygons = new ArrayList<>();
         polygons.add(maskShape);
         Imgproc.fillPoly(roiMask, polygons, new Scalar(255));
+
         Log.i("cv test", "done with init of processor");
     }
 
@@ -339,10 +341,14 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
 
         canvas.drawPath(path, contourPaint);
 
-        //canvas.drawLine(gfxRect.left, gfxRect.top, gfxRect.right, gfxRect.top, roiPaint);
-        //canvas.drawLine(gfxRect.right, gfxRect.top, gfxRect.right, gfxRect.bottom, roiPaint);
-        //canvas.drawLine(gfxRect.right, gfxRect.bottom, gfxRect.left, gfxRect.bottom, roiPaint);
-        //canvas.drawLine(gfxRect.left, gfxRect.bottom, gfxRect.left, gfxRect.top, roiPaint);
+        for (Point point : points){
+            canvas.drawCircle((float)point.x * scaleBmpPxToCanvasPx, (float)point.y * scaleBmpPxToCanvasPx, 5, new Paint(135));
+        }
+
+//        canvas.drawLine(gfxRect.left, gfxRect.top, gfxRect.right, gfxRect.top, roiPaint);
+//        canvas.drawLine(gfxRect.right, gfxRect.top, gfxRect.right, gfxRect.bottom, roiPaint);
+//        canvas.drawLine(gfxRect.right, gfxRect.bottom, gfxRect.left, gfxRect.bottom, roiPaint);
+//        canvas.drawLine(gfxRect.left, gfxRect.bottom, gfxRect.left, gfxRect.top, roiPaint);
     }
 
     private android.graphics.Rect makeGraphicsRect(Rect rect, float scaleBmpPxToCanvasPx)
@@ -398,8 +404,7 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
         Collections.addAll(colors, colorRanges);
     }
 
-    class BlobImpl extends Blob
-    {
+    class BlobImpl extends Blob {
         private MatOfPoint contour;
         private Point[] contourPts;
         private int area = -1;
@@ -407,22 +412,18 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
         private double aspectRatio = -1;
         private RotatedRect rect;
 
-        BlobImpl(MatOfPoint contour)
-        {
+        BlobImpl(MatOfPoint contour) {
             this.contour = contour;
         }
 
         @Override
-        public MatOfPoint getContour()
-        {
+        public MatOfPoint getContour() {
             return contour;
         }
 
         @Override
-        public Point[] getContourPoints()
-        {
-            if (contourPts == null)
-            {
+        public Point[] getContourPoints() {
+            if (contourPts == null) {
                 contourPts = contour.toArray();
             }
 
@@ -430,10 +431,8 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
         }
 
         @Override
-        public int getContourArea()
-        {
-            if (area < 0)
-            {
+        public int getContourArea() {
+            if (area < 0) {
                 area = Math.max(1, (int) Imgproc.contourArea(contour));  //  Fix zero area issue
             }
 
@@ -441,12 +440,10 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
         }
 
         @Override
-        public double getDensity()
-        {
+        public double getDensity() {
             Point[] contourPts = getContourPoints();
 
-            if (density < 0)
-            {
+            if (density < 0) {
                 // Compute the convex hull of the contour
                 MatOfInt hullMatOfInt = new MatOfInt();
                 Imgproc.convexHull(contour, hullMatOfInt);
@@ -458,12 +455,11 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
                 Point[] hullPoints = new Point[hullMatOfInt.rows()];
                 List<Integer> hullContourIdxList = hullMatOfInt.toList();
 
-                for (int i = 0; i < hullContourIdxList.size(); i++)
-                {
+                for (int i = 0; i < hullContourIdxList.size(); i++) {
                     hullPoints[i] = contourPts[hullContourIdxList.get(i)];
                 }
 
-                double hullArea = Math.max(1.0,Imgproc.contourArea(new MatOfPoint(hullPoints)));  //  Fix zero area issue
+                double hullArea = Math.max(1.0, Imgproc.contourArea(new MatOfPoint(hullPoints)));  //  Fix zero area issue
 
                 density = getContourArea() / hullArea;
             }
@@ -471,13 +467,11 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
         }
 
         @Override
-        public double getAspectRatio()
-        {
-            if (aspectRatio < 0)
-            {
+        public double getAspectRatio() {
+            if (aspectRatio < 0) {
                 RotatedRect r = getBoxFit();
 
-                double longSize  = Math.max(1, Math.max(r.size.width, r.size.height));
+                double longSize = Math.max(1, Math.max(r.size.width, r.size.height));
                 double shortSize = Math.max(1, Math.min(r.size.width, r.size.height));
 
                 aspectRatio = longSize / shortSize;
@@ -487,10 +481,8 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
         }
 
         @Override
-        public RotatedRect getBoxFit()
-        {
-            if (rect == null)
-            {
+        public RotatedRect getBoxFit() {
+            if (rect == null) {
                 rect = Imgproc.minAreaRect(new MatOfPoint2f(getContourPoints()));
             }
             return rect;

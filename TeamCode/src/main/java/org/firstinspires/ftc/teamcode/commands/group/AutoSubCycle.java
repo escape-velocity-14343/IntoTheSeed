@@ -74,7 +74,7 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         ).andThen(
                                 new InterruptCommand(new PivotCommand(pivot, PivotConstants.bottomLimit), () -> pivot.getCurrentPosition() < 45.0),
                                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 0),
-                                new IVKCommand(20.0, IVKCommand.intakeReadyY, extension, pivot).alongWith(
+                                new IVKCommand(SlideConstants.submersibleIntakeMinExtension, IVKCommand.intakeReadyY, extension, pivot).alongWith(
                                         new TurretCommand(turret, 0.0)
                                 ).alongWith(
                                         // flip down wrist to a ready position
@@ -88,7 +88,7 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 //new WristCommand(wrist, IntakeConstants.toptakePos),
                 //new WaitCommand(300),
                 new TimeoutCommand(new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret), 200),
-                new GoToPointWithDefaultCommand(storage::getFinePosition, gtpc, 0.5, 2),
+                new GoToPointWithDefaultCommand(storage::getOffsetFinePosition, gtpc, 0.5, 2),
 
                 new TimeoutCommand(
                         new SubPosCommand(extension, wrist, intake, pivot, 20.0), 300

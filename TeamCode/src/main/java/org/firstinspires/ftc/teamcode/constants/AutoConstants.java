@@ -24,7 +24,7 @@ public class AutoConstants {
     public static double spike3ExtensionLength = 14;
 
     public static double clawCloseDistance = 1;
-    public static double extendedWhilePivotOffset = 5;
+    public static double extendedWhilePivotOffset = 6;
 
     // Milliseconds
     public static long outtakeTimeout = 1300;

@@ -59,13 +59,12 @@ public class VisionSubsystem extends SubsystemBase {
     public static Scalar minimumYellow = new Scalar(13, 40, 80);
     public static Scalar maximumYellow = new Scalar(50, 255, 255);
 
-    public static boolean useGlowUp = false;
+    public boolean useGlowUp = false;
 
     public static int exposureMillis = 50;
     public static int minContourArea = 200;
     public static double alpha = 1; //gain scalar
     public static double beta = 0; //brightness offset
-    public static int contrast = 40; //default is 40
 
 
     ColorBlobLocatorProcessorMulti colorLocator, closeLocator;
@@ -84,7 +83,7 @@ public class VisionSubsystem extends SubsystemBase {
 
 
     public VisionSubsystem(HardwareMap hMap, Telemetry telemetry) {
-        glowUp = new GlowUpPipeline(alpha, beta, contrast);
+        glowUp = new GlowUpPipeline();
         colorLocator = new ColorBlobLocatorProcessorMulti(
                 new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, new Scalar(13, 60, 60), new Scalar(50, 255, 255)),
                 ImageRegion.asImageCoordinates(0, 0, VisionConstants.width, VisionConstants.height),
@@ -95,11 +94,17 @@ public class VisionSubsystem extends SubsystemBase {
                 -1,
                 Color.rgb(255, 120, 31),
                 Color.rgb(255, 255, 255),
-                Color.rgb(3, 227, 252)
+                Color.rgb(3, 227, 252),
+                new Point[]{
+                        new Point(0, VisionConstants.minHeight),
+                        new Point(VisionConstants.width, VisionConstants.minHeight),
+                        new Point(VisionConstants.width, VisionConstants.height),
+                        new Point(0, VisionConstants.height)
+                }
         );
         closeLocator = new ColorBlobLocatorProcessorMulti(
                 new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, new Scalar(13, 60, 60), new Scalar(50, 255, 255)),
-                ImageRegion.entireFrame(),
+                ImageRegion.asImageCoordinates(0, 0, VisionConstants.width, VisionConstants.height),
                 ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY,
                 6,
                 2,
@@ -107,8 +112,15 @@ public class VisionSubsystem extends SubsystemBase {
                 -1,
                 Color.rgb(255, 120, 31),
                 Color.rgb(255, 255, 255),
-                Color.rgb(3, 227, 252)
+                Color.rgb(3, 227, 252),
+                new Point[]{
+                        new Point(0, 0),
+                        new Point(VisionConstants.width-60, 0),
+                        new Point(VisionConstants.width-60, VisionConstants.height),
+                        new Point(0, VisionConstants.height)
+                }
         );
+
 
         // add yellow colors (same for all alliances)
         colorLocator.addColors(new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, minimumYellow, maximumYellow));
@@ -179,6 +191,9 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        telemetry.addData("Is color process", visionPortal.getProcessorEnabled(colorLocator));
+        telemetry.addData("Is close process", visionPortal.getProcessorEnabled(closeLocator));
+
         pixelPos = 0;
 
         if (visionPortal.getProcessorEnabled(colorLocator)) {
@@ -338,5 +353,9 @@ public class VisionSubsystem extends SubsystemBase {
 
     public void saveFrame(String name) {
         visionPortal.saveNextFrameRaw(name);
+    }
+
+    public void setUseGlowUp(boolean state){
+        useGlowUp = state;
     }
 }
