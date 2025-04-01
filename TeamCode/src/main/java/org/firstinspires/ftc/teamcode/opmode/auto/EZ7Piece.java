@@ -61,7 +61,7 @@ public class EZ7Piece extends Robot {
 
         VisionSubsystem vision = new VisionSubsystem(hardwareMap, telemetry);
         SamplePoseStorage storage = new SamplePoseStorage();
-        storage.setCoarsePosition(new Pose2d(-5.0, 5.0, new Rotation2d()));
+        storage.setCoarsePosition(new Pose2d(-15.0, 8.0, new Rotation2d()));
         vision.waitForSetExposure(3000, 10000, PNPTest.exposure);
         while (!vision.setCam(true)) ;
 

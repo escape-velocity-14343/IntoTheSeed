@@ -5,6 +5,8 @@ import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Vector2d;
 
+import org.firstinspires.ftc.teamcode.constants.AutoConstants;
+
 public class SampleMovementOptimizer {
 
     /**
@@ -26,7 +28,11 @@ public class SampleMovementOptimizer {
 
     public static Pose2d getIntermediatePoint(Pose2d samplePos, double intermediateX, double intermediateYOffset, double sampleRadius) {
         Pose2d end = SampleMovementOptimizer.getClosestPoint(samplePos, intermediateX, intermediateYOffset, sampleRadius);
-        return new Pose2d(intermediateX, Math.max(38.0, samplePos.getY() + intermediateYOffset), end.getRotation());
+        Vector2d intermediate = new Vector2d(intermediateX, Math.max(38.0, samplePos.getY() + intermediateYOffset));
+        Vector2d scorePos = new Vector2d(AutoConstants.scorePos.getX(), AutoConstants.scorePos.getY());
+        Vector2d pathVec = intermediate.minus(scorePos);
+        pathVec = pathVec.plus(pathVec.normalize().scale(20.0)).plus(scorePos);
+        return new Pose2d(pathVec.getX(), pathVec.getY(), new Rotation2d(pathVec.angle()));
     }
 
 }
