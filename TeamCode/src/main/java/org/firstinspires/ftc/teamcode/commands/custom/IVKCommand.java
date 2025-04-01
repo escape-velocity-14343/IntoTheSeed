@@ -47,8 +47,8 @@ public class IVKCommand extends ParallelCommandGroup {
 
     public IVKCommand(DoubleSupplier x, DoubleSupplier y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem){
         addCommands(
-                extensionSubsystem.getExtendCommand(getTargetExtension.apply(x.getAsDouble(), y.getAsDouble())),
-                pivotSubsystem.getPivotCommand(getTargetAngleDegrees.apply(x.getAsDouble(), y.getAsDouble())),
+                extensionSubsystem.getExtendCommand(() -> getTargetExtension.apply(x.getAsDouble(), y.getAsDouble())),
+                pivotSubsystem.getPivotCommand(() -> getTargetAngleDegrees.apply(x.getAsDouble(), y.getAsDouble())),
                 new InstantCommand(() -> System.out.println(getTargetExtension.apply(x.getAsDouble(), y.getAsDouble()))),
                 new InstantCommand(() -> System.out.println(getTargetAngleDegrees.apply(x.getAsDouble(), y.getAsDouble())))
         );

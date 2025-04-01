@@ -28,6 +28,8 @@ public class TeleOpps extends Robot {
     public static double manualMultiplier = 0.7;
     public static double robotMovementMultiplier = 1.0;
 
+    double extendInches = SlideConstants.submersibleIntakeMidExtension;
+
     protected GamepadEx driverPad;
     protected GamepadEx operatorPad;
 
@@ -41,7 +43,7 @@ public class TeleOpps extends Robot {
         DoubleSupplier fieldCentricHeading = true ? () -> pinpoint.getPose().getRotation().getDegrees() : () -> 0.0;
         DoubleSupplier xyGain = () -> currentlyInState(FSMStates.INTAKE, FSMStates.INTAKE_READY) ? 0.7 : 1;
         DoubleSupplier tGain = () -> currentlyInState(FSMStates.INTAKE, FSMStates.INTAKE_READY) ? 0.3 : 1;
-;
+        ;
         CommandScheduler.getInstance().setDefaultCommand(mecanum, new DefaultDriveCommand(
                 mecanum,
                 () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftY() / driverPad.getLeftX()) < 0.05 ? 0 : driverPad.getLeftY()) * xyGain.getAsDouble(),
@@ -94,15 +96,17 @@ public class TeleOpps extends Robot {
         driverPad.getGamepadButton(GamepadKeys.Button.A).whenPressed(retract());
 
         // ------- INTAKE -------
-        driverPad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(intakeReady(() -> 0));
+        driverPad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(intakeReady(() -> 0, () -> extendInches));
 
-        driverPad.getGamepadButton(GamepadKeys.Button.B).whenPressed(intakeReady(() -> 90));
+        driverPad.getGamepadButton(GamepadKeys.Button.B).whenPressed(intakeReady(() -> 90, () -> extendInches));
 
+        new Trigger(() -> driverPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5).whenActive(new InstantCommand(() -> extendInches = SlideConstants.submersibleIntakeMidExtension));
+        new Trigger(() -> driverPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5).whenActive(new InstantCommand(() -> extendInches = SlideConstants.submersibleIntakeMaxExtension));
 
-        driverPad.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(intake()).whenReleased(intakeReady());
+        driverPad.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(intake(() -> extendInches)).whenReleased(intakeReady(() -> extendInches));
 
         driverPad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .whenPressed(new IntakeControlCommand(intake, IntakeConstants.openPos, 0.1))
+                .whenPressed(new IntakeControlCommand(intake, IntakeConstants.openPos, 0))
                 .whenReleased(new ConditionalCommand(
                         new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 0),
                         new IntakeControlCommand(intake, IntakeConstants.closedPos, 0),

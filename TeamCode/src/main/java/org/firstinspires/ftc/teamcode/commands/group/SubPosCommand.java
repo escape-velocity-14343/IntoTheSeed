@@ -24,10 +24,16 @@ public class SubPosCommand extends SequentialCommandGroup {
             ExtensionSubsystem extension,
             WristSubsystem wrist,
             IntakeSubsystem intake,
-            PivotSubsystem pivot, double forwardExtension) {
+            PivotSubsystem pivot,
+            double forwardExtension) {
         addCommands(
                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
-                new IVKCommand(forwardExtension, IVKCommand.intakeY, extension, pivot)
+                new IVKCommand(forwardExtension, IVKCommand.intakeY, extension, pivot) {
+                    @Override
+                    public boolean isFinished() {
+                        return true;
+                    }
+                }
         );
         addRequirements(wrist);
         this.extension = extension;
@@ -38,24 +44,17 @@ public class SubPosCommand extends SequentialCommandGroup {
             WristSubsystem wrist,
             IntakeSubsystem intake,
             PivotSubsystem pivot,
-            DoubleSupplier power) {
+            DoubleSupplier forwardExtension) {
         addCommands(
                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
-//                new PivotCommand(
-//                        pivot,
-//                        PivotConstants.intakeReadyPos
-//                                - power.getAsDouble()
-//                                        * (PivotConstants.intakeReadyPos - PivotConstants.intakePos)
-//                                        / 0.55));
-                pivot.getPivotCommand(
-                        () -> Math.max(PivotConstants.intakePos+2, PivotConstants.intakeReadyPos
-                                - power.getAsDouble()
-                                * (PivotConstants.intakeReadyPos
-                                - PivotConstants.intakePos)
-                                / 0.55)));
-        // must require extension because manual control must use it, so this ensures any other
-        // commands using extension get interrupted
-        addRequirements(extension, wrist);
+                new IVKCommand(forwardExtension, () -> IVKCommand.intakeY, extension, pivot) {
+                    @Override
+                    public boolean isFinished() {
+                        return true;
+                    }
+                }
+        );
+        addRequirements(wrist);
         this.extension = extension;
     }
 
