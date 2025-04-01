@@ -36,7 +36,7 @@ public class LowBucketPosCommand extends SequentialCommandGroup {
                                                         > PivotConstants.outtakeExtendDegrees),
                                 new ExtendCommand(extension, SlideConstants.lowBucketPos)
                                         .withTimeout(1000))),
-                new WristCommand(wrist, IntakeConstants.scoringPos),
+                new WristCommand(wrist, IntakeConstants.dunkScoringPos),
                 new InstantCommand(() -> Log.i("2", "BucketPos End")));
     }
 
@@ -45,7 +45,7 @@ public class LowBucketPosCommand extends SequentialCommandGroup {
         return new LowBucketPosCommand(
                 new ParallelCommandGroup(
                         // minus two to prevent it from overshooting
-                        new WristCommand(wrist, IntakeConstants.scoringPos),
+                        new WristCommand(wrist, IntakeConstants.dunkScoringPos),
                         new PivotCommand(pivot, PivotConstants.topLimit - 3),
                         new SequentialCommandGroup(
                                 new WaitUntilCommand(
@@ -54,7 +54,7 @@ public class LowBucketPosCommand extends SequentialCommandGroup {
                                                         > PivotConstants.outtakeExtendDegrees),
                                 new ExtendCommand(extension, SlideConstants.lowBucketPos)
                                         .withTimeout(1000))),
-                new WristCommand(wrist, IntakeConstants.scoringPos),
+                new WristCommand(wrist, IntakeConstants.dunkScoringPos),
                 new InstantCommand(() -> Log.i("2", "BucketPos End")));
     }
 }

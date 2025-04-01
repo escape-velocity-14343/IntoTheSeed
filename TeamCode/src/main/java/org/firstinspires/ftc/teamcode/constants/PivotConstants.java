@@ -6,7 +6,7 @@ import com.acmerobotics.dashboard.config.Config;
 public class PivotConstants {
     public static double kPRetracted = 0.0125;
 
-    public static double kPExtended = 0.03;
+    public static double kPExtended = 0.06;
     public static double kS = 0;
     public static double kGRetracted = 0;
     public static double kGFullyExtended = 0.1;

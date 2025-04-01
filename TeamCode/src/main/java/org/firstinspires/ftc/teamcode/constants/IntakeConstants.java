@@ -9,7 +9,8 @@ public class IntakeConstants {
     // It takes 0.4 seconds from scoring pos reversed to scoring Pos
     public static double foldedPos = 0.25;
     public static double groundPos = 0.4;
-    public static double scoringPos = 0.1;
+    public static double dunkScoringPos = 0.1;
+    public static double scoringPos = 0.25;
     public static double specimenScoringPos = 0.4;
     public static double scoringPosReversed = 0.50;
     public static double specimenReadyPos = 0.63;
@@ -23,8 +24,8 @@ public class IntakeConstants {
     // claw constants
     // fronttake
     public static double openPos = 0.6;
-    public static double closedPos = 0.9;
-    public static double singleIntakePos = 0.85;
+    public static double closedPos = 0.675;
+    public static double singleIntakePos = 0.875;
 
     public static double clawOffset = 0.015;
 

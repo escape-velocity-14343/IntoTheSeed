@@ -39,8 +39,8 @@ public class TeleOpps extends Robot {
         operatorPad = new GamepadEx(gamepad2);
 
         DoubleSupplier fieldCentricHeading = true ? () -> pinpoint.getPose().getRotation().getDegrees() : () -> 0.0;
-        DoubleSupplier xyGain = () -> inState(FSMStates.INTAKE, FSMStates.INTAKE_READY).getAsBoolean() ? 0.7 : 1;
-        DoubleSupplier tGain = () -> inState(FSMStates.INTAKE, FSMStates.INTAKE_READY).getAsBoolean() ? 0.5 : 1;
+        DoubleSupplier xyGain = () -> currentlyInState(FSMStates.INTAKE, FSMStates.INTAKE_READY) ? 0.7 : 1;
+        DoubleSupplier tGain = () -> currentlyInState(FSMStates.INTAKE, FSMStates.INTAKE_READY) ? 0.3 : 1;
 ;
         CommandScheduler.getInstance().setDefaultCommand(mecanum, new DefaultDriveCommand(
                 mecanum,
@@ -58,7 +58,7 @@ public class TeleOpps extends Robot {
 
         waitForStart();
         // temporary pls remove later
-        pinpoint.setPosition(-65, 40);
+        //pinpoint.setPosition(-65, 40);
         while (!isStopRequested()) {
             telemetry.addData("current state", getState().toString());
             telemetry.addData("motorpos", extension.getCurrentInches());
@@ -102,7 +102,7 @@ public class TeleOpps extends Robot {
         driverPad.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(intake()).whenReleased(intakeReady());
 
         driverPad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .whenPressed(new IntakeControlCommand(intake, IntakeConstants.openPos, 0.25))
+                .whenPressed(new IntakeControlCommand(intake, IntakeConstants.openPos, 0.1))
                 .whenReleased(new ConditionalCommand(
                         new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 0),
                         new IntakeControlCommand(intake, IntakeConstants.closedPos, 0),

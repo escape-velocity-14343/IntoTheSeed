@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
-import org.firstinspires.ftc.teamcode.commands.custom.WaitUntilStabilizedCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
@@ -59,7 +58,7 @@ public class DunkCommand extends SequentialCommandGroup {
                                 .withTimeout(2000),
                         new WaitUntilCommand(
                             () -> extension.getCurrentInches() > SlideConstants.safeForDunk
-                        ).andThen(new WristCommand(wrist, IntakeConstants.scoringPos))
+                        ).andThen(new WristCommand(wrist, IntakeConstants.dunkScoringPos))
                 ),
                 new IntakeClawCommand(intake, IntakeConstants.openPos),
                 new InstantCommand(() -> Log.i("%2", "Dunk End")));

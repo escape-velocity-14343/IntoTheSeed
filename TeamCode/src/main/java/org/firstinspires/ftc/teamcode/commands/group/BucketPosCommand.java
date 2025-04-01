@@ -65,7 +65,7 @@ public class BucketPosCommand extends SequentialCommandGroup {
                                                 extension.getCurrentInches()
                                                         > SlideConstants.safeForDunk)
                                         .withTimeout(1000)
-                                        .andThen(new WristCommand(wrist, IntakeConstants.scoringPos)),
+                                        .andThen(new WristCommand(wrist, auto ? IntakeConstants.dunkScoringPos : IntakeConstants.scoringPos)),
                                 new TurretCommand(turret, 0))),
                 new InstantCommand(() -> Log.i("%2", "BucketPos End")));
     }
@@ -85,7 +85,7 @@ public class BucketPosCommand extends SequentialCommandGroup {
         return new BucketPosCommand(
                 new ParallelCommandGroup(
                         // minus two to prevent it from overshooting
-                        new WristCommand(wrist, IntakeConstants.scoringPos),
+                        new WristCommand(wrist, IntakeConstants.dunkScoringPos),
                         new PivotCommand(pivot, PivotConstants.stallTopLimit - 3),
                         new SequentialCommandGroup(
                                 new WaitUntilCommand(
@@ -94,7 +94,7 @@ public class BucketPosCommand extends SequentialCommandGroup {
                                                         > PivotConstants.outtakeExtendDegrees),
                                 new ExtendCommand(extension, SlideConstants.bucketPos)
                                         .withTimeout(1000))),
-                new WristCommand(wrist, IntakeConstants.scoringPos),
+                new WristCommand(wrist, IntakeConstants.dunkScoringPos),
                 new InstantCommand(() -> Log.i("%2", "BucketPos End")));
     }
 }
