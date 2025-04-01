@@ -47,8 +47,8 @@ public class AutoSubCycle extends SequentialCommandGroup {
         super(
                 new InstantCommand(() -> vision.setCam(false)),
                 new SequentialCommandGroup(
-                        new GoToPointWithDefaultCommand(() -> SampleMovementOptimizer.getIntermediatePoint(storage.getCoarsePosition(), -15.0, 40, 25), gtpc),
-                        new GoToPointWithDefaultCommand(() -> SampleMovementOptimizer.getClosestPoint(storage.getCoarsePosition(), -15.0, 40, 25), gtpc)
+                        new GoToPointWithDefaultCommand(() -> SampleMovementOptimizer.getIntermediatePoint(storage.getCoarsePosition(), -20.0, 40, 25), gtpc, 24.0, 20.0),
+                        new GoToPointWithDefaultCommand(() -> SampleMovementOptimizer.getClosestPoint(storage.getCoarsePosition(), -20.0, 40, 25), gtpc)
 
                         /*new RunIfCommand(
                                 new InterruptCommand(new GoToPointWithDefaultCommand(
