@@ -44,7 +44,12 @@ public class SubPosReadyCommand extends SequentialCommandGroup {
         addCommands(
                 new RunIfCommand(new RetractCommand(wrist, pivot, extension, turret, intake), notAlreadyInPosition),
                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 0),
-                new IVKCommand(forwardInches, () -> IVKCommand.intakeReadyY, extension, pivot).alongWith(
+                new IVKCommand(forwardInches, () -> IVKCommand.intakeReadyY, extension, pivot) {
+                    @Override
+                    public boolean isFinished() {
+                        return true;
+                    }
+                }.alongWith(
                         new TurretCommand(turret, angle)
                 ).alongWith(
                         // flip down wrist to a ready position

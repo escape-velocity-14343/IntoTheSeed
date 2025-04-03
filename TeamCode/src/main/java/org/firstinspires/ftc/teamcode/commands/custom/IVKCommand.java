@@ -20,37 +20,42 @@ import java.util.function.BiFunction;
 import java.util.function.DoubleSupplier;
 
 public class IVKCommand extends ParallelCommandGroup {
-    //Control Equations
-    private BiFunction<Double, Double, Double> getTargetExtension = (x, y) -> Math.max(Math.sqrt(Math.pow(x, 2) + Math.pow(y - IVKConstants.pivotPointHeight, 2)), 0);
-    private BiFunction<Double, Double, Double> getTargetAngleDegrees = (x, y) -> Math.toDegrees(Math.atan2(y - IVKConstants.pivotPointHeight, x));
-//    private BiFunction<Double, Double, Double> getTargetExtension = (x, y) -> Math.max(Math.sqrt(Math.pow(x-IVKConstants.slideLength, 2) + Math.pow(y - IVKConstants.pivotPointHeight, 2)), 0) - 12;
-//    private BiFunction<Double, Double, Double> getTargetAngleDegrees = (x, y) -> Math.toDegrees(Math.atan2(y - IVKConstants.pivotPointHeight, x+12));
-
-    // useful constants:
     public static double intakeReadyY = 10;
     public static double intakeY = 7;
 
     /**
+     * <p>
      * Height is from the tile to the claw
      * Distance is from the front of the robot, to a point forwards from the bot
-     *
+     * </p>
+     * <p>
      * Units are in inches
-     *
+     * </p>
+     * <p>
      * Schedule intake position command before this, to prevent samples from getting hit
+     * </p>
      */
-    public IVKCommand(double x, double y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem){
+    public IVKCommand(double x, double y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem) {
         addCommands(
-                extensionSubsystem.getExtendCommand(getTargetExtension.apply(x, y)),
-                pivotSubsystem.getPivotCommand(getTargetAngleDegrees.apply(x, y))
-                );
+                extensionSubsystem.getExtendCommand(getTargetExtension(x, y)),
+                pivotSubsystem.getPivotCommand(getTargetAngleDegrees(x, y))
+        );
     }
 
-    public IVKCommand(DoubleSupplier x, DoubleSupplier y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem){
+    public IVKCommand(DoubleSupplier x, DoubleSupplier y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem) {
         addCommands(
-                extensionSubsystem.getExtendCommand(() -> getTargetExtension.apply(x.getAsDouble(), y.getAsDouble())),
-                pivotSubsystem.getPivotCommand(() -> getTargetAngleDegrees.apply(x.getAsDouble(), y.getAsDouble())),
-                new InstantCommand(() -> System.out.println(getTargetExtension.apply(x.getAsDouble(), y.getAsDouble()))),
-                new InstantCommand(() -> System.out.println(getTargetAngleDegrees.apply(x.getAsDouble(), y.getAsDouble())))
+                extensionSubsystem.getExtendCommand(() -> getTargetExtension(x.getAsDouble(), y.getAsDouble())),
+                pivotSubsystem.getPivotCommand(() -> getTargetAngleDegrees(x.getAsDouble(), y.getAsDouble())),
+                new InstantCommand(() -> System.out.println(getTargetExtension(x.getAsDouble(), y.getAsDouble()))),
+                new InstantCommand(() -> System.out.println(getTargetAngleDegrees(x.getAsDouble(), y.getAsDouble())))
         );
+    }
+
+    private double getTargetExtension(double x, double y) {
+        return Math.max(Math.sqrt(Math.pow(x, 2) + Math.pow(y - IVKConstants.pivotPointHeight, 2)), 0);
+    }
+
+    private double getTargetAngleDegrees(double x, double y) {
+        return Math.toDegrees(Math.atan2(y - IVKConstants.pivotPointHeight, x));
     }
 }
