@@ -47,12 +47,22 @@ public class SubPosCommand extends SequentialCommandGroup {
             DoubleSupplier forwardExtension) {
         addCommands(
                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
-                new IVKCommand(forwardExtension, () -> IVKCommand.intakeY, extension, pivot) {
-                    @Override
-                    public boolean isFinished() {
-                        return true;
-                    }
-                }
+                new IVKCommand(forwardExtension, () -> IVKCommand.intakeY, extension, pivot)
+        );
+        addRequirements(wrist);
+        this.extension = extension;
+    }
+
+    public SubPosCommand(
+            ExtensionSubsystem extension,
+            WristSubsystem wrist,
+            IntakeSubsystem intake,
+            PivotSubsystem pivot,
+            Double forwardExtension,
+            Double intakeY) {
+        addCommands(
+                new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
+                new IVKCommand(forwardExtension, intakeY, extension, pivot)
         );
         addRequirements(wrist);
         this.extension = extension;

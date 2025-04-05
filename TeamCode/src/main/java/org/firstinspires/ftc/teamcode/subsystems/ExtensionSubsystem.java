@@ -268,6 +268,15 @@ public class ExtensionSubsystem extends SubsystemBase {
     }
 
     /**
+     * Run Command factory for extend command, that never ends.
+     * @param target
+     * @return Command
+     */
+    public Command getExtendCommandInstant(DoubleSupplier target){
+        return new InstantCommand(() -> this.setTargetInches(target.getAsDouble()), this);
+    }
+
+    /**
      * Internal Factory Method
      *
      * @param inches

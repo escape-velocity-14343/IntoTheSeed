@@ -12,7 +12,7 @@ public class AutoConstants {
     public static Pose2d cycleScorePos = new Pose2d(-59, 59, Rotation2d.fromDegrees(-30));
     public static Pose2d scorePosOffset = new Pose2d(-62,58.5, Rotation2d.fromDegrees(-45));
 
-    public static double subBarrierY = 24;
+    public static double subBarrierY = 18.5;
 
     public static double autoscoreMaxVel = 8.5;
 

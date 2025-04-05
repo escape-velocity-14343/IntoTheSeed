@@ -130,6 +130,23 @@ public class PinpointSubsystem extends SubsystemBase implements Localizer {
                         pose.getHeading(AngleUnit.DEGREES));
     }
 
+    public void setHeading(double x, double y, double headingDegrees){
+        pinpoint.setPosition(
+                new Pose2D(
+                        DistanceUnit.INCH,
+                        x,
+                        y,
+                        AngleUnit.DEGREES,
+                        headingDegrees));
+        lastGoodPose =
+                new Pose2D(
+                        DistanceUnit.INCH,
+                        x,
+                        y,
+                        AngleUnit.DEGREES,
+                        headingDegrees);
+    }
+
     public boolean isDoneCalibration() {
 
         return pinpoint.getDeviceStatus() == GoBildaPinpoint.DeviceStatus.READY;

@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.lib.path.spline;
 
 import com.arcrobotics.ftclib.geometry.Vector2d;
 
+import java.util.Objects;
+
 /**
  * Standard spline interface - defines a smoothly continuous parametric function R -> R^2.
  */
@@ -124,7 +126,8 @@ public interface Spline {
         double yd1 = velo.getY();
         double xd2 = accel.getX();
         double yd2 = accel.getY();
-        return Math.pow(xd1*xd1+yd1*yd1, 1.5)/(xd1*yd2-xd2*yd1);
+        double curvature = Math.pow(xd1*xd1+yd1*yd1, 1.5)/(xd1*yd2-xd2*yd1);
+        return Double.isNaN(curvature) || Double.isInfinite(curvature) ? 0.0 : curvature;
     }
 
 }

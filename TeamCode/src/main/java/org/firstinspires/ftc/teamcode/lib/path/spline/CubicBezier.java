@@ -43,7 +43,7 @@ public class CubicBezier extends SplineBase {
                         .scale(3*Math.pow(1-t, 2))
 
                 .plus(controlpoints.get(2).minus(controlpoints.get(1))
-                        .scale(6*(1-t)))
+                        .scale(6*(1-t)*t))
 
                 .plus(controlpoints.get(3).minus(controlpoints.get(2))
                         .scale(3*Math.pow(t, 2)));
@@ -51,7 +51,7 @@ public class CubicBezier extends SplineBase {
     }
 
     public Vector2d getAcceleration(double t) {
-        t = constrain(t);
+        t = constrainNormalized(t);
         return controlpoints.get(2)
                 .plus(controlpoints.get(1).scale(-2))
                 .plus(controlpoints.get(0))

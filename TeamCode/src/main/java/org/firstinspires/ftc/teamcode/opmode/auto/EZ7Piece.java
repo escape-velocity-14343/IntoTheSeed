@@ -28,6 +28,8 @@ import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
 import org.firstinspires.ftc.teamcode.commands.group.AutoSubCycle;
 import org.firstinspires.ftc.teamcode.commands.group.BucketPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.BucketToIntakeCommand;
+import org.firstinspires.ftc.teamcode.commands.group.DefaultDualMoveCommand;
+import org.firstinspires.ftc.teamcode.commands.group.DefaultGVFCommand;
 import org.firstinspires.ftc.teamcode.commands.group.DefaultGoToPointCommand;
 import org.firstinspires.ftc.teamcode.commands.group.DunkCommand;
 import org.firstinspires.ftc.teamcode.commands.group.GoToPointWithDefaultCommand;
@@ -39,6 +41,7 @@ import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.SamplePoseStorage;
+import org.firstinspires.ftc.teamcode.lib.path.spline.CubicBezier;
 import org.firstinspires.ftc.teamcode.opmode.test.PNPTest;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
@@ -48,6 +51,8 @@ import java.util.Set;
 @Autonomous(name = "Ezell's 6 Sample")
 public class EZ7Piece extends Robot {
     DefaultGoToPointCommand gtpc;
+    DefaultGVFCommand gvfc;
+    DefaultDualMoveCommand dmc;
 
     @Override
     public void runOpMode() {
@@ -55,25 +60,26 @@ public class EZ7Piece extends Robot {
 
         initialize();
         pinpoint.reset();
+        cs.registerSubsystem();
 
         wrist.setWrist(IntakeConstants.scoringPosReversed);
         intake.setClawer(IntakeConstants.closedPos);
 
-        VisionSubsystem vision = new VisionSubsystem(hardwareMap, telemetry);
         SamplePoseStorage storage = new SamplePoseStorage();
         storage.setCoarsePosition(new Pose2d(-15.0, 8.0, new Rotation2d()));
         vision.waitForSetExposure(3000, 10000, PNPTest.exposure);
-        while (!vision.setCam(true)) ;
-
-        CommandScheduler.getInstance().onCommandInitialize((command) -> {
-            telemetry.addData("Command Running", command.getName());
-        });
+        while (!vision.setCam(true));
 
         waitForStart();
 
         imu.resetYaw();
         extension.reset();
         gtpc = new DefaultGoToPointCommand(mecanum, pinpoint, new Pose2d(-65, 40, new Rotation2d()));
+        gvfc = new DefaultGVFCommand(mecanum, pinpoint, new CubicBezier(0, 0, 0, 0, 0, 0, 0, 0));
+
+        dmc = new DefaultDualMoveCommand(mecanum, pinpoint, gtpc, gvfc);
+        dmc.setState(DefaultDualMoveCommand.MoveState.P2P);
+
         pivot.setTarget(PivotConstants.topLimit);
 
         pinpoint.setPosition(-65, 40);
@@ -86,6 +92,7 @@ public class EZ7Piece extends Robot {
                         new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
                                 new DunkCommand(extension, pivot, wrist, turret, intake)
                         ),
+                        new WristCommand(wrist, IntakeConstants.groundPos),
 
                         // intake first
                         new GoToPointWithDefaultCommand(
@@ -108,6 +115,7 @@ public class EZ7Piece extends Robot {
                         new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
                                 new DunkCommand(extension, pivot, wrist, turret, intake)
                         ),
+                        new WristCommand(wrist, IntakeConstants.groundPos),
 
                         // intake second
                         new GoToPointWithDefaultCommand(
@@ -128,6 +136,7 @@ public class EZ7Piece extends Robot {
                         new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
                                 new DunkCommand(extension, pivot, wrist, turret, intake)
                         ),
+                        new WristCommand(wrist, IntakeConstants.groundPos),
 
 
                         // intake third
@@ -154,13 +163,14 @@ public class EZ7Piece extends Robot {
                         new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
                                 new DunkCommand(extension, pivot, wrist, turret, intake)
                         ),
-                        new AutoSubCycle(vision, pivot, extension, storage, gtpc, mecanum, pinpoint, intake, wrist, turret),
-                        new AutoSubCycle(vision, pivot, extension, storage, gtpc, mecanum, pinpoint, intake, wrist, turret),
-                        new AutoSubCycle(vision, pivot, extension, storage, gtpc, mecanum, pinpoint, intake, wrist, turret)
+                        new WristCommand(wrist, IntakeConstants.groundPos),
+                        new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target),
+                        new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target),
+                        new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target)
                 )
         );
 
-        cs.schedule(gtpc);
+        cs.schedule(dmc);
 
         while (opModeIsActive()) {
             update();

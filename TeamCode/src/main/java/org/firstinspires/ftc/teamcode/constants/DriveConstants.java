@@ -18,8 +18,8 @@ public class DriveConstants {
     public static double ptoRightDisengagedPos = 0.6;
 
 
-    public static double ptoLeftEngagedPos = 0.35;
-    public static double ptoLeftDisengagedPos = 0.6;
+    public static double ptoLeftEngagedPos = 1.0;
+    public static double ptoLeftDisengagedPos = 0.7;
 
     public static double strafeMultiplier = 0.75;
 }

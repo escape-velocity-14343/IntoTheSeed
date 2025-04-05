@@ -191,8 +191,8 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        telemetry.addData("Is color process", visionPortal.getProcessorEnabled(colorLocator));
-        telemetry.addData("Is close process", visionPortal.getProcessorEnabled(closeLocator));
+        //telemetry.addData("Is color process", visionPortal.getProcessorEnabled(colorLocator));
+        //telemetry.addData("Is close process", visionPortal.getProcessorEnabled(closeLocator));
 
         pixelPos = 0;
 
@@ -203,8 +203,6 @@ public class VisionSubsystem extends SubsystemBase {
             List<ColorBlobLocatorProcessor.Blob> blobs = colorLocator.getBlobs();
 
             ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, 20000, blobs);
-            int dist = 10000;
-            ColorBlobLocatorProcessor.Util.sortByArea(SortOrder.DESCENDING, blobs);
 
             if (!blobs.isEmpty()) {
                 for (int i = 0; i < Math.min(blobs.size(), 3); i++) {
@@ -358,4 +356,48 @@ public class VisionSubsystem extends SubsystemBase {
     public void setUseGlowUp(boolean state){
         useGlowUp = state;
     }
+
+    public Optional<sample> getClosestChassis() {
+        if (visionPortal.getProcessorEnabled(colorLocator)) {
+            List<ColorBlobLocatorProcessor.Blob> blobs = colorLocator.getBlobs();
+
+            ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, 20000, blobs);
+
+            if (!blobs.isEmpty()) {
+                Optional<sample> selected = Optional.empty();
+                Double closestDistance = Double.MAX_VALUE;
+                for (ColorBlobLocatorProcessor.Blob blob : blobs) {
+                    Point center = blob.getBoxFit().center;
+                    Vector2d target = VisionConstants.target;
+                    Double norm = Math.sqrt(Math.pow(center.x - target.getX(), 2) + Math.pow(center.y - target.getY(), 2));
+
+                    if (closestDistance > norm){
+                        closestDistance = norm;
+                        if (blob.getBoxFit().size.width < blob.getBoxFit().size.height) {
+                            selected = Optional.of(new sample(blob.getBoxFit().angle-90, center.x, center.y));
+                        }
+                        else{
+                            selected = Optional.of(new sample(blob.getBoxFit().angle, center.x, center.y));
+                        }
+                    }
+                }
+                return selected;
+            }
+        }
+        return Optional.empty();
+    }
+
+    public static class sample{
+        public double angle = 0;
+        public double x = 0;
+        public double y = 0;
+
+        public sample(double angle, double x, double y){
+            this.angle = angle;
+            this.x = x;
+            this.y = y;
+        }
+    }
 }
+
+

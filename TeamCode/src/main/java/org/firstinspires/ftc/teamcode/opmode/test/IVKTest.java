@@ -35,7 +35,7 @@ public class IVKTest extends LinearOpMode {
         waitForStart();
 
         while (!isStopRequested()) {
-            cs.schedule(new IVKCommand(() -> x, () -> y, extension, pivot));
+            cs.schedule(new IVKCommand(() -> x, () -> y, extension, pivot, 1));
             cs.run();
         }
 

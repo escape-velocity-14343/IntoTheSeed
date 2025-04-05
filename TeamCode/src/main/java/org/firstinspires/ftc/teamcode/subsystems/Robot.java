@@ -65,13 +65,16 @@ public abstract class Robot extends LinearOpMode {
     public BucketSensorSubsystem basketSensor;
     public TurretSubsystem turret;
     public PtoSubsystem PTO;
+    public VisionSubsystem vision;
+    public TargetingSubsystem target;
+
 
     public IMU imu;
 
     public ElapsedTime timer = new ElapsedTime();
     public CommandScheduler cs = CommandScheduler.getInstance();
 
-    protected double lastIntakeWristAngle;
+    protected double lastTurretAngle;
 
     public void initialize() {
         SlideConstants.highExtend = false;
@@ -111,6 +114,10 @@ public abstract class Robot extends LinearOpMode {
 
         pivot.setExtensionSupplier(extension::getCurrentInches);
         PTO.setEngaged(false);
+        vision = new VisionSubsystem(hardwareMap, telemetry);
+        target = new TargetingSubsystem(vision, pinpoint, telemetry);
+
+        cs.registerSubsystem(basketSensor, pinpoint, mecanum, pivot, extension, wrist, intake, turret, PTO, vision, target);
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
     }
@@ -164,7 +171,7 @@ public abstract class Robot extends LinearOpMode {
                 turretAngle,
                 forwardInches,
                 notInAnyState(FSMStates.INTAKE_READY, FSMStates.INTAKE)
-        ).alongWith(new InstantCommand(() -> lastIntakeWristAngle = turretAngle.getAsDouble())).andThen(setStateCommand(FSMStates.INTAKE_READY));
+        ).alongWith(new InstantCommand(() -> lastTurretAngle = turretAngle.getAsDouble())).andThen(setStateCommand(FSMStates.INTAKE_READY));
     }
 
     public Command intakeReady(DoubleSupplier turretAngle) {
@@ -177,11 +184,11 @@ public abstract class Robot extends LinearOpMode {
                 turretAngle,
                 SlideConstants.submersibleIntakeMaxExtension,
                 notInAnyState(FSMStates.INTAKE_READY, FSMStates.INTAKE)
-        ).alongWith(new InstantCommand(() -> lastIntakeWristAngle = turretAngle.getAsDouble())).andThen(setStateCommand(FSMStates.INTAKE_READY));
+        ).alongWith(new InstantCommand(() -> lastTurretAngle = turretAngle.getAsDouble())).andThen(setStateCommand(FSMStates.INTAKE_READY));
     }
 
     public Command intakeReady() {
-        return intakeReady(() -> lastIntakeWristAngle);
+        return intakeReady(() -> lastTurretAngle);
     }
 
     public Command bucketAlign() {

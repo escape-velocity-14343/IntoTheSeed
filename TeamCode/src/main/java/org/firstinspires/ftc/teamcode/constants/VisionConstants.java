@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.constants;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.geometry.Vector2d;
 
 @Config
 public class VisionConstants {
@@ -10,7 +11,7 @@ public class VisionConstants {
     //QVGA
     public static int width = 320;
     public static int height = 240;
-    public static int minHeight = 100;
+    public static int minHeight = 160;
 
     public static double cx = 338.083 / 2;
     public static double cy = 218.771 / 2;
@@ -33,4 +34,8 @@ public class VisionConstants {
     // 640 840
 
     public static int defaultWhiteBalance = 3000;
+
+    public static double chassisX = 160;
+    public static double chassisY = 150;
+    public static Vector2d target = new Vector2d(chassisX, chassisY);
 }

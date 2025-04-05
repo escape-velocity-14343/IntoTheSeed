@@ -16,6 +16,8 @@ public class GVFTest extends Robot {
     @Override
     public void runOpMode() {
         initialize();
+        pinpoint.reset();
+        pinpoint.resetYaw();
 
         waitForStart();
 
@@ -26,7 +28,7 @@ public class GVFTest extends Robot {
 
         cs.schedule(
                 new GVFWithDefaultCommand(gvfc, new CubicBezier(0, 0,
-                        10, 0, 2, 8, 14, 8)).whenFinished(
+                        10, -10, 50, -20, 50, -30)).whenFinished(
                         () -> telemetry.addData("gvfc", "yayyyyy")
                 )
         );

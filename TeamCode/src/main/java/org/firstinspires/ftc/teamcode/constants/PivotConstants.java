@@ -4,12 +4,16 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public class PivotConstants {
-    public static double kPRetracted = 0.0125;
+    public static double maxVelocity = 4;
+    public static double maxAcceleration = 4;
 
+    public static double kPRetracted = -0.05;
     public static double kPExtended = 0.06;
     public static double kS = 0;
+    public static double kD = -0.2;
     public static double kGRetracted = 0;
-    public static double kGFullyExtended = 0.1;
+    public static double debugGain = 0;
+    public static double kGFullyExtended = 0;
 
     public static double maxPivotVelocity = 1.0;
 

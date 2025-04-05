@@ -7,6 +7,7 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.command.button.Trigger;
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -28,7 +29,7 @@ public class PivotSubsystem extends SubsystemBase {
     private ElapsedTime timer = new ElapsedTime();
     private double target = 0;
     private boolean manualControl = false;
-    private SquIDController squid = new SquIDController();
+    private PIDController pid = new PIDController(PivotConstants.kPRetracted, 0, PivotConstants.kD);
     AnalogEncoder encoder;
     private CachingVoltageSensor voltage;
     private DoubleSupplier extensionInches = () -> 0;
@@ -47,7 +48,6 @@ public class PivotSubsystem extends SubsystemBase {
 
         this.voltage = voltage;
 
-        squid.setPID(PivotConstants.kPRetracted);
         timer.reset();
     }
 
@@ -78,7 +78,11 @@ public class PivotSubsystem extends SubsystemBase {
         manualControl = false;
         setTarget(target);
         double power =
-                squid.calculate(target, getCurrentPosition()) * voltage.getVoltageNormalized() + getKg();
+                pid.calculate(target, getCurrentPosition()) + getKg();
+
+        if (isNear(target, 0.5)){
+            power = 0;
+        }
         // if (currentPos > PivotConstants.topLimit-1 && power >= 0) {
         //    power = 0.3;
         // }
@@ -92,12 +96,20 @@ public class PivotSubsystem extends SubsystemBase {
         openloop(power);
     }
 
+    public boolean isNear(double target, double tolerance){
+        return Math.abs(target-getCurrentPosition()) < tolerance;
+    }
+
     public Command getPivotCommand(double target){
         return new PivotCommand(this, target);
     }
 
     public Command getPivotCommand(DoubleSupplier target){
         return new RunCommand(() -> setTarget(target.getAsDouble()), this);
+    }
+
+    public Command getPivotCommandInstant(DoubleSupplier target){
+        return new InstantCommand(() -> setTarget(target.getAsDouble()), this);
     }
 
     public void setTarget(DoubleSupplier target){
@@ -194,8 +206,6 @@ public class PivotSubsystem extends SubsystemBase {
 
         //Update encoder reading every loop
         currentPos = encoder.getAngle();
-        squid.setPID(
-                interpolatedRawFeedforward());
         pivotVelocity = (lastPos - currentPos) / timer.seconds();
         if (!manualControl) {
             tiltToPos(target);

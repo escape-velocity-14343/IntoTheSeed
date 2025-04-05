@@ -1,25 +1,16 @@
 package org.firstinspires.ftc.teamcode.commands.custom;
 
-import androidx.core.math.MathUtils;
-
-import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.geometry.Transform2d;
-import com.qualcomm.robotcore.robocol.Command;
 
-import org.firstinspires.ftc.robotcore.external.Func;
-import org.firstinspires.ftc.robotcore.external.Function;
 import org.firstinspires.ftc.teamcode.constants.IVKConstants;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.PivotSubsystem;
 
-import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.DoubleSupplier;
 
-public class IVKCommand extends ParallelCommandGroup {
+public class SequentialIVKCommand extends SequentialCommandGroup {
     // useful constants:
     public static double intakeReadyY = 10;
     public static double intakeY = 7;
@@ -32,17 +23,17 @@ public class IVKCommand extends ParallelCommandGroup {
      * <p>
      * Schedule intake position command before this, to prevent samples from getting hit
      */
-    public IVKCommand(double x, double y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem) {
+    public SequentialIVKCommand(double x, double y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem) {
         addCommands(
-                extensionSubsystem.getExtendCommand(getTargetExtension(x, y)),
-                pivotSubsystem.getPivotCommand(getTargetAngleDegrees(x, y))
+                pivotSubsystem.getPivotCommand(getTargetAngleDegrees(x, y)),
+                extensionSubsystem.getExtendCommand(getTargetExtension(x, y))
         );
     }
 
-    public IVKCommand(DoubleSupplier x, DoubleSupplier y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem) {
+    public SequentialIVKCommand(DoubleSupplier x, DoubleSupplier y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem) {
         addCommands(
-                extensionSubsystem.getExtendCommand(() -> getTargetExtension(x.getAsDouble(), y.getAsDouble())),
                 pivotSubsystem.getPivotCommand(() -> getTargetAngleDegrees(x.getAsDouble(), y.getAsDouble())),
+                extensionSubsystem.getExtendCommand(() -> getTargetExtension(x.getAsDouble(), y.getAsDouble())),
                 new InstantCommand(() -> System.out.println(getTargetExtension(x.getAsDouble(), y.getAsDouble()))),
                 new InstantCommand(() -> System.out.println(getTargetAngleDegrees(x.getAsDouble(), y.getAsDouble())))
         );
@@ -56,26 +47,26 @@ public class IVKCommand extends ParallelCommandGroup {
      * @param extensionSubsystem
      * @param pivotSubsystem
      */
-    public IVKCommand(double x, double y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem, int a) {
+    public SequentialIVKCommand(double x, double y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem, int a) {
         addCommands(
-                extensionSubsystem.getExtendCommand(getTargetExtension(x + IVKConstants.ivkCenterOffset, y)),
-                pivotSubsystem.getPivotCommand(getTargetAngleDegrees(x + IVKConstants.ivkCenterOffset, y))
+                pivotSubsystem.getPivotCommand(getTargetAngleDegrees(x + IVKConstants.ivkCenterOffset, y)),
+                extensionSubsystem.getExtendCommand(getTargetExtension(x + IVKConstants.ivkCenterOffset, y))
         );
     }
 
-    public IVKCommand(DoubleSupplier x, DoubleSupplier y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem, int a) {
+    public SequentialIVKCommand(DoubleSupplier x, DoubleSupplier y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem, int a) {
         addCommands(
-                extensionSubsystem.getExtendCommand(() -> getTargetExtension(x.getAsDouble() + IVKConstants.ivkCenterOffset, y.getAsDouble())),
                 pivotSubsystem.getPivotCommand(() -> getTargetAngleDegrees(x.getAsDouble() + IVKConstants.ivkCenterOffset, y.getAsDouble())),
+                extensionSubsystem.getExtendCommand(() -> getTargetExtension(x.getAsDouble() + IVKConstants.ivkCenterOffset, y.getAsDouble())),
                 new InstantCommand(() -> System.out.println(getTargetExtension(x.getAsDouble() + IVKConstants.ivkCenterOffset, y.getAsDouble()))),
                 new InstantCommand(() -> System.out.println(getTargetAngleDegrees(x.getAsDouble() + IVKConstants.ivkCenterOffset, y.getAsDouble())))
         );
     }
 
-    public IVKCommand(DoubleSupplier x, DoubleSupplier y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem, String a) {
+    public SequentialIVKCommand(DoubleSupplier x, DoubleSupplier y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem, String a) {
         addCommands(
-                extensionSubsystem.getExtendCommand(getTargetExtension(x.getAsDouble() + IVKConstants.ivkCenterOffset, y.getAsDouble())),
                 pivotSubsystem.getPivotCommand(getTargetAngleDegrees(x.getAsDouble() + IVKConstants.ivkCenterOffset, y.getAsDouble())),
+                extensionSubsystem.getExtendCommand(getTargetExtension(x.getAsDouble() + IVKConstants.ivkCenterOffset, y.getAsDouble())),
                 new InstantCommand(() -> System.out.println(getTargetExtension(x.getAsDouble() + IVKConstants.ivkCenterOffset, y.getAsDouble()))),
                 new InstantCommand(() -> System.out.println(getTargetAngleDegrees(x.getAsDouble() + IVKConstants.ivkCenterOffset, y.getAsDouble())))
         );
