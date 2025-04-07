@@ -13,6 +13,7 @@ public class BucketRelocalizeCommand extends CommandBase {
     public static double correctionFactor = 0.956701;
     public static double offsetX = 7.75;
     public static double offsetY = 10.75;
+    public static double relocalizationThreshold = 10.0;
     BucketSensorSubsystem bucketSensor;
     PinpointSubsystem pinpoint;
 
@@ -28,8 +29,12 @@ public class BucketRelocalizeCommand extends CommandBase {
         double headingCorrectionFactor = Math.cos(theta + Math.PI / 4.0);
         double xInches = bucketSensor.getSensorLeft() / correctionFactor * headingCorrectionFactor - 72 + offsetX;
         double yInches = 72 - bucketSensor.getSensorRight() / correctionFactor * headingCorrectionFactor - offsetY;
-        pinpoint.setPosition(xInches, yInches);
-        Log.i("bucket relocalize", String.format("relocalized to %s %s", xInches, yInches));
+        if (headingCorrectionFactor > Math.cos(Math.toRadians(relocalizationThreshold))) {
+            pinpoint.setPosition(xInches, yInches);
+            Log.i("bucket relocalize", String.format("relocalized to %s %s", xInches, yInches));
+        } else {
+            Log.i("bucket relocalize", "Didn't relocalize since heading was too far off");
+        }
     }
 
     @Override

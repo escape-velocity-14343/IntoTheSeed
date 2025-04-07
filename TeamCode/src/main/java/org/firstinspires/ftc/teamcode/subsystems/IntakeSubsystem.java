@@ -23,7 +23,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public IntakeSubsystem(HardwareMap hardwareMap) {
         intake = hardwareMap.crservo.get("intake");
         clawer = hardwareMap.servo.get("clawer");
-        front = hardwareMap.analogInput.get("clawSens1");
+        //front = hardwareMap.analogInput.get("clawSens1");
         clawer.setDirection(Servo.Direction.REVERSE);
 //        intake.setDirection(DcMotorSimple.Direction.REVERSE);
         lastResetTime = new ElapsedTime();

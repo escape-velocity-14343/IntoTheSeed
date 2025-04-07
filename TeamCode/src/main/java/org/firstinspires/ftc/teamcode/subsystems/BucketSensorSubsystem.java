@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.lib.Util;
 
 @Config
 public class BucketSensorSubsystem extends SubsystemBase {
-    public static int rollingAverageSize = 3;
+    public static int rollingAverageSize = 5;
 
     private final AnalogInput sensorLeft;
     private final AnalogInput sensorRight;
@@ -55,13 +55,13 @@ public class BucketSensorSubsystem extends SubsystemBase {
             sensorLeftData.remove();
         }
 
-        sensorLeftAverage = Util.average(sensorLeftData);
+        sensorLeftAverage = Util.median(sensorLeftData);
 
         sensorRightData.add(sensorRight.getVoltage());
         if (sensorRightData.size() > rollingAverageSize) {
             sensorRightData.remove();
         }
 
-        sensorRightAverage = Util.average(sensorRightData);
+        sensorRightAverage = Util.median(sensorRightData);
     }
 }

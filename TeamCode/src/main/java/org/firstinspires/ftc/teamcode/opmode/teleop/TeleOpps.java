@@ -84,7 +84,7 @@ public class TeleOpps extends Robot {
             telemetry.addData("time", timer.milliseconds());
             telemetry.addData("hi", CommandScheduler.getInstance().getDefaultCommand(mecanum));
             telemetry.addData("intake flipped?", reverseClaw.get());
-            telemetry.addData("intake front voltage", intake.getFrontV());
+            //telemetry.addData("intake front voltage", intake.getFrontV());
             telemetry.addData("pose x", pinpoint.getPose().getX());
             telemetry.addData("pose y", pinpoint.getPose().getY());
             telemetry.addData("pose heading", pinpoint.getPose().getRotation().getDegrees());

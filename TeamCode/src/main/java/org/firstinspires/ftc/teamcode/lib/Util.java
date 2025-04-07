@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import java.security.InvalidParameterException;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Util {
     public static boolean inRange(double a, double b, double thres) {
@@ -94,11 +95,31 @@ public class Util {
                 || Math.abs(gp.right_stick_y) > threshold;
     }
 
-    public static double average(Collection<Double> values) {
+    public static double mean(Collection<Double> values) {
         double total = 0.0;
         for (double value : values) {
             total += value;
         }
         return total / values.size();
+    }
+
+    public static double median(Collection<Double> values) {
+        if (values.isEmpty()) {
+            return 0.0;
+        }
+        if (values.size() == 1) {
+            return values.toArray(new Double[0])[0];
+        }
+        List<Double> sortedValues = values.stream().sorted().collect(Collectors.toList());
+        double middleValue = sortedValues.size() / 2.0 - 0.5;
+        double floorMiddleValue = Math.floor(middleValue);
+        if (floorMiddleValue != middleValue) {
+            int intMiddleValue = (int)floorMiddleValue;
+            double a = sortedValues.get(intMiddleValue);
+            double b = sortedValues.get(intMiddleValue + 1);
+            return (a + b) * 0.5;
+        }
+
+        return sortedValues.get((int) middleValue);
     }
 }
