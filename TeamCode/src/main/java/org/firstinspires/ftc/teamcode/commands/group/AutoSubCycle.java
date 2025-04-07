@@ -1,20 +1,31 @@
 package org.firstinspires.ftc.teamcode.commands.group;
 
+import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.geometry.Pose2d;
-import com.arcrobotics.ftclib.geometry.Rotation2d;
 
-import org.firstinspires.ftc.teamcode.commands.custom.PreaimCommand;
-import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.DrivetrainBrakeCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.IVKCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.InterruptCommand;
-import org.firstinspires.ftc.teamcode.commands.custom.ReloadCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.SequentialIVKCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.StoreCoarsePositionCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.StoreFinePositionCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TimeoutCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.WaitUntilStabilizedCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.IVKConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
+import org.firstinspires.ftc.teamcode.constants.PivotConstants;
+import org.firstinspires.ftc.teamcode.constants.SlideConstants;
+import org.firstinspires.ftc.teamcode.lib.SampleMovementOptimizer;
 import org.firstinspires.ftc.teamcode.lib.SamplePoseStorage;
 import org.firstinspires.ftc.teamcode.lib.path.spline.CubicBezier;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
@@ -32,71 +43,101 @@ public class AutoSubCycle extends SequentialCommandGroup {
     public AutoSubCycle(VisionSubsystem vision, PivotSubsystem pivot, ExtensionSubsystem extension, SamplePoseStorage storage, DefaultDualMoveCommand dmc, MecanumDriveSubsystem drive, PinpointSubsystem pinpoint, IntakeSubsystem intake, WristSubsystem wrist, TurretSubsystem turret, TargetingSubsystem target) {
 
         super(
-                new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
+                // drive to sub
                 dmc.setGVF(),
-                new GVFWithDefaultCommand(dmc.getGvfc(), new CubicBezier(AutoConstants.cycleScorePos.getX(), AutoConstants.cycleScorePos.getY(),
-                        -40, 48,
-                        -8, 40,
-                        -8, 18)).alongWith(new RetractCommand(wrist, pivot, extension, turret, intake)),
-                new ReloadCommand(target),
-                dmc.setP2P(),
-                new PreaimCommand(dmc.getGtpc(), pivot, extension, intake, wrist, turret, target, pinpoint),
-                new TimeoutCommand(
-                        new SubPosCommand(extension, wrist, intake, pivot, target.getIVKY(), IVKConstants.intakeY), 700
+                new InterruptCommand(
+                        new GVFWithDefaultCommand(dmc.getGvfc(), 3.0, 10.0, () -> {
+
+                            Pose2d intermediate = SampleMovementOptimizer.getIntermediatePoint(storage.getCoarsePosition(), -18.0, 30.0, 25.0);
+                            Pose2d end = SampleMovementOptimizer.getClosestPoint(storage.getCoarsePosition(), -18.0, 30.0, 25.0);
+
+                            return new CubicBezier[]{new CubicBezier(AutoConstants.cycleScorePos.getX(), AutoConstants.cycleScorePos.getY(),
+                                    -42, 53,
+                                    intermediate.getX(), intermediate.getY(),
+                                    end.getX(), end.getY())};
+                        }
+                        ),
+
+                        () -> pivot.isDone() && vision.getPossibilityForSampleExistingInThisGivenMomentOfTimeAndSpace()
+                ).alongWith(
+                        new ParallelCommandGroup(
+                                new InterruptCommand(new ExtendCommand(extension, 0.0), () -> extension.getCurrentInches() < SlideConstants.pivotDownExtension),
+                                new WristCommand(wrist, IntakeConstants.groundPos - 0.115),
+                                new InstantCommand(() -> vision.setCam(false)),
+                                new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1)
+                        ).andThen(
+                                new InterruptCommand(
+                                        new PivotCommand(pivot, PivotConstants.bottomLimit),
+                                        () -> pivot.getCurrentPosition() < 45.0
+                                ).alongWith(
+                                        new TurretCommand(turret, 0.0),
+                                        new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 0)
+                                ),
+                                new IVKCommand(SlideConstants.submersibleIntakeMidExtension, IVKCommand.intakeReadyY, extension, pivot)
+                        )
+
                 ),
-                new WaitCommand(400),
+
+                // stabilize
+                new DrivetrainBrakeCommand(dmc),
+                new WaitUntilStabilizedCommand(pinpoint).alongWith(
+                        new WristCommand(wrist, IntakeConstants.toptakePos - 0.1)
+                ),
+                new InstantCommand(drive::clearBrake),
+                dmc.setP2P(),
+                new InstantCommand(() -> dmc.getGtpc().setTarget(pinpoint.getPose())),
+
+                // target and go to sample
+                new TimeoutCommand(
+                        new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
+                        400
+                ),
+                new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(
+                        new ExtendCommand(extension, storage::getNewExtension)
+                ),
+                new TimeoutCommand(
+                        new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
+                        400
+                ),
+                new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(
+                        new ExtendCommand(extension, storage::getNewExtension),
+                        new WristCommand(wrist, IntakeConstants.toptakePos)
+                ),
+                //new WaitUntilStabilizedCommand(pinpoint),
+                new InstantCommand(() -> vision.setCam(true)),
+
+                // intake
+                new TimeoutCommand(
+                        new SubPosCommand(extension, wrist, intake, pivot, () -> Math.cos(Math.toRadians(pivot.getCurrentPosition())) * extension.getCurrentInches()), 200
+                ),
+                new WaitCommand(200),
+
+                // go to score
                 dmc.setGVF(),
-                new GVFWithDefaultCommand(dmc.getGvfc(), new CubicBezier(-8, 18,
-                        -8, 30,
-                        -40, 48,
-                        AutoConstants.cycleScorePos.getX(), AutoConstants.cycleScorePos.getY())
+                new InterruptCommand(
+                        new GVFWithDefaultCommand(dmc.getGvfc(), 5, 10, () -> new CubicBezier[]{new CubicBezier(pinpoint.getPose().getX(), pinpoint.getPose().getY(),
+                                -24, 40,
+                                -42, 53,
+                                AutoConstants.cycleScorePos.getX(), AutoConstants.cycleScorePos.getY())}
+                        ).reverseHeading(),
+                        () -> AutoConstants.cycleScorePos.minus(pinpoint.getPose()).getTranslation().getNorm() < 5.0
                 ).alongWith(
                         new InterruptCommand(
                                 new RetractCommand(wrist, pivot, extension, turret, intake),
-                                () -> pinpoint.getPose().minus(AutoConstants.cycleScorePos).getTranslation().getNorm() < 64.0
+                                () -> pinpoint.getPose().getY() - extension.getCurrentInches() > 16
                         ).andThen(
-                                new BucketPosCommand(extension, pivot, wrist, turret)
+                                new BucketPosCommand(extension, pivot, wrist, turret, true)
                         ),
-                        new TimeoutCommand(new StoreCoarsePositionCommand(vision, storage, pinpoint), 500)
+                        new TimeoutCommand(new StoreCoarsePositionCommand(vision, storage, pinpoint), 200)
                 ),
-                dmc.setP2P(),
-                new IntakeClawCommand(intake, IntakeConstants.openPos),
-                new WaitCommand(100)
+                new IntakeControlCommand(intake, IntakeConstants.openPos, 0).alongWith(
+                        new WristCommand(wrist, IntakeConstants.scoringPos)
+                ),
+                new WaitCommand(100),
+                dmc.setP2P()
         );
 
     }
 
-
-    public AutoSubCycle(VisionSubsystem vision, PivotSubsystem pivot, ExtensionSubsystem extension, SamplePoseStorage storage, DefaultGoToPointCommand gtpc, MecanumDriveSubsystem drive, PinpointSubsystem pinpoint, IntakeSubsystem intake, WristSubsystem wrist, TurretSubsystem turret, TargetingSubsystem target) {
-
-        super(
-                new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
-                new GoToPointWithDefaultCommand(new Pose2d(-12, 48, Rotation2d.fromDegrees(-90)), gtpc)
-                        .alongWith(new RetractCommand(wrist, pivot, extension, turret, intake)),
-                new GoToPointWithDefaultCommand(new Pose2d(-8, 18, Rotation2d.fromDegrees(-90)), gtpc),
-                new ReloadCommand(target),
-                new PreaimCommand(gtpc, pivot, extension, intake, wrist, turret, target, pinpoint),
-                new TimeoutCommand(
-                        new SubPosCommand(extension, wrist, intake, pivot, target.getIVKY(), IVKConstants.intakeY), 700
-                ),
-                new WaitCommand(400),
-                new SequentialCommandGroup(
-                        new InterruptCommand(new GoToPointWithDefaultCommand(new Pose2d(-10.0, 48.0, Rotation2d.fromDegrees(-20)), gtpc),
-                                () -> pinpoint.getPose().getY() > 30.0),
-                        new GoToPointWithDefaultCommand(AutoConstants.cycleScorePos, gtpc)
-                ).alongWith(
-                        new InterruptCommand(
-                                new RetractCommand(wrist, pivot, extension, turret, intake),
-                                () -> pinpoint.getPose().minus(AutoConstants.cycleScorePos).getTranslation().getNorm() < 64.0
-                        ).andThen(
-                                new BucketPosCommand(extension, pivot, wrist, turret)
-                        ),
-                        new TimeoutCommand(new StoreCoarsePositionCommand(vision, storage, pinpoint), 500)
-                ),
-                new IntakeClawCommand(intake, IntakeConstants.openPos),
-                new WaitCommand(100)
-        );
-
-    }
 
 }

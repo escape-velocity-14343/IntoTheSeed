@@ -1,30 +1,19 @@
 package org.firstinspires.ftc.teamcode.opmode.test;
 
-import android.util.Log;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.ScheduleCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
-import com.arcrobotics.ftclib.geometry.Pose2d;
-import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
-import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.commands.custom.CoarseAlignCommand;
 import org.firstinspires.ftc.teamcode.commands.group.DefaultGoToPointCommand;
-import org.firstinspires.ftc.teamcode.commands.group.GoToPointWithDefaultCommand;
-import org.firstinspires.ftc.teamcode.commands.group.SubPosReadyCommand;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
-import org.firstinspires.ftc.teamcode.constants.VisionConstants;
 import org.firstinspires.ftc.teamcode.lib.RobotPnP;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
-import org.firstinspires.ftc.vision.VisionPortal;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class MoveToPNPTest extends Robot {
 
     public static boolean red = true;
-    VisionSubsystem cameraSubsystem;
+    VisionSubsystem vision;
 
     public static double cx = 338.083;
     public static double cy = 218.771;
@@ -61,19 +50,19 @@ public class MoveToPNPTest extends Robot {
             AutoConstants.alliance = AutoConstants.Alliance.BLUE;
         }
 
-        cameraSubsystem = new VisionSubsystem(hardwareMap, telemetry);
+        // vision = new VisionSubsystem(hardwareMap, telemetry);
 
-        while (cameraSubsystem.setCam(false));
+        while (vision.setCam(false));
 
-        cameraSubsystem.waitForSetExposure(3000, 10000, exposure);
+        vision.waitForSetExposure(3000, 10000, exposure);
 
-        while (cameraSubsystem.setCam(true));
-        cameraSubsystem.waitForSetExposure(3000, 10000, exposure);
+        while (vision.setCam(true));
+        vision.waitForSetExposure(3000, 10000, exposure);
 
-        CommandScheduler.getInstance().registerSubsystem(cameraSubsystem);
+        CommandScheduler.getInstance().registerSubsystem(vision);
 
         while (opModeInInit()) {
-            cameraSubsystem.setCam(botStream);
+            vision.setCam(botStream);
         }
 
         waitForStart();
@@ -92,8 +81,8 @@ public class MoveToPNPTest extends Robot {
         cs.schedule(
                 new SequentialCommandGroup(
                         new WaitCommand(150),
-                        new CoarseAlignCommand(gtpc, cameraSubsystem, pinpoint).alongWith(
-                                intakeReady(() -> 0)
+                        new CoarseAlignCommand(gtpc, vision, pinpoint).alongWith(
+                                topIntakeReady(() -> 0)
                         )
                         /*(new InstantCommand(() -> {
                             Vector2d samplePos = cameraSubsystem.getSamplePos();

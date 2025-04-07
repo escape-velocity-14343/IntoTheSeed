@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commands.group;
 
 import android.util.Log;
 
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 
@@ -16,6 +17,8 @@ public class GVFWithDefaultCommand extends CommandBase {
     private DefaultGVFCommand gtpc;
     private Spline[] splines;
     private Supplier<Spline[]> splineSupplier;
+
+    private boolean reverseHeading = false;
 
     public GVFWithDefaultCommand(DefaultGVFCommand gtpc, Spline... splines) {
         this.splines = splines;
@@ -39,11 +42,16 @@ public class GVFWithDefaultCommand extends CommandBase {
         gtpc.setTolerances(tol, hTol);
     }
 
+    public Command reverseHeading() {
+        this.reverseHeading = true;
+        return this;
+    }
+
     public void initialize() {
         if (Objects.nonNull(splineSupplier)) {
             splines = splineSupplier.get();
         }
-        gtpc.setSplines(splines);
+        gtpc.setSplines(reverseHeading, splines);
     }
 
     @Override

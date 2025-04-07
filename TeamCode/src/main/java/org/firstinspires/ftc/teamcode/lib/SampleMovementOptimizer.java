@@ -13,20 +13,17 @@ public class SampleMovementOptimizer {
      */
     public static Pose2d getClosestPoint(Pose2d samplePos, double intermediateX, double intermediateYOffset, double sampleRadius) {
         Vector2d sampleVec = new Vector2d(samplePos.getX(), samplePos.getY());
-        Vector2d intermediateVec = new Vector2d(intermediateX, Math.max(38.0, sampleVec.getY() + intermediateYOffset));
-
-        // Compute direction from intermediate to sample
+        Vector2d intermediateVec = new Vector2d(intermediateX, Math.max(0.0, sampleVec.getY() + intermediateYOffset));
         Vector2d edge = sampleVec.minus(intermediateVec);
-        if (edge.magnitude() < sampleRadius) {
-            // If already inside the sample's safe zone, return the original intermediate position
-            return new Pose2d(intermediateVec.getX(), intermediateVec.getY(), new Rotation2d(0));
+        double distance = edge.magnitude() - sampleRadius;
+
+        if (distance < 0) {
+            return getClosestPoint(samplePos, intermediateX, intermediateYOffset + 10, sampleRadius);
         }
 
-        Vector2d safeOffset = edge.normalize().times(edge.magnitude() - sampleRadius);
-        Vector2d closestPoint = intermediateVec.plus(safeOffset);
-        double angle = Math.atan2(edge.getY(), edge.getX()); // Corrected rotation angle computation
-
-        return new Pose2d(closestPoint.getX(), closestPoint.getY(), new Rotation2d(angle));
+        Vector2d point = intermediateVec.plus(edge.normalize().scale(distance));
+        double angle = point.minus(intermediateVec).angle();
+        return new Pose2d(point.getX(), point.getY(), new Rotation2d(angle));
     }
 
     /**
@@ -37,10 +34,10 @@ public class SampleMovementOptimizer {
         Pose2d closestPoint = getClosestPoint(samplePos, intermediateX, intermediateYOffset, sampleRadius);
         Vector2d closestVec = new Vector2d(closestPoint.getX(), closestPoint.getY());
         Vector2d scoreVec = new Vector2d(AutoConstants.scorePos.getX(), AutoConstants.scorePos.getY());
+        Vector2d intermediateVec = new Vector2d(intermediateX, Math.max(0.0, samplePos.getY() + intermediateYOffset));
 
-        // Compute the vector from scoring position to the closest point
-        Vector2d pathVec = closestVec.minus(scoreVec).normalize().times(20.0).plus(scoreVec);
+        Vector2d pathVec = intermediateVec.minus(scoreVec);
 
-        return new Pose2d(pathVec.getX(), pathVec.getY(), new Rotation2d(Math.atan2(pathVec.getY() - scoreVec.getY(), pathVec.getX() - scoreVec.getX())));
+        return new Pose2d(intermediateVec.getX(), intermediateVec.getY(), new Rotation2d(pathVec.angle()));
     }
 }

@@ -3,14 +3,14 @@ package org.firstinspires.ftc.teamcode.commands.group;
 import android.util.Log;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
-import com.arcrobotics.ftclib.controller.PIDController;
+import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
-import org.firstinspires.ftc.teamcode.lib.DrivetrainSquIDController;
 import org.firstinspires.ftc.teamcode.lib.Util;
 import org.firstinspires.ftc.teamcode.lib.path.follower.GVFFollower;
 import org.firstinspires.ftc.teamcode.lib.path.spline.Spline;
@@ -18,8 +18,6 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.PinpointSubsystem;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.function.DoubleSupplier;
 
 @Config
 public class DefaultGVFCommand extends CommandBase {
@@ -32,12 +30,15 @@ public class DefaultGVFCommand extends CommandBase {
     PinpointSubsystem pinpoint;
 
     private boolean toggle = true;
+    private double distanceToEnd = 0.0;
 
     private ElapsedTime timer = new ElapsedTime();
     private ElapsedTime zeroVelocityTimer = new ElapsedTime();
 
     private boolean isZeroVelocity = false;
     private boolean hasBeenZeroVelocity = false;
+    private final ArrayList<DistanceAndCommand> whenCloseCommands = new ArrayList<>();
+    private double endingDistance = -1.0;
 
     Pose2d target;
     Pose2d currentPose;
@@ -85,6 +86,14 @@ public class DefaultGVFCommand extends CommandBase {
         double xDist = target.getX() - currentPose.getX();
         double yDist = target.getY() - currentPose.getY();
         Log.v("GVF", "xDist: " + xDist + ", yDist: " + yDist);
+        distanceToEnd = Math.sqrt(xDist * xDist + yDist * yDist);
+
+        for (DistanceAndCommand whenCloseCommand : whenCloseCommands) {
+            if (distanceToEnd < whenCloseCommand.distance) {
+                CommandScheduler.getInstance().schedule(whenCloseCommand.command);
+                whenCloseCommands.remove(whenCloseCommand);
+            }
+        }
 
         Pose2d move = gvf.update(currentPose, pinpoint.getVelocity());
 
@@ -126,7 +135,7 @@ public class DefaultGVFCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return false;
+        return endingDistance > 0 && distanceToEnd < endingDistance;
     }
 
     @Override
@@ -151,16 +160,25 @@ public class DefaultGVFCommand extends CommandBase {
         }
 
         return ((currentPose.getTranslation().getDistance(target.getTranslation())
-                                        < tol)
-                                && (Util.inRange(
-                                        target.getRotation().getDegrees(),
-                                        currentPose.getRotation().getDegrees(),
-                                        hTol)))
+                < tol)
+                && (Util.inRange(
+                target.getRotation().getDegrees(),
+                currentPose.getRotation().getDegrees(),
+                hTol)))
                 || (hasBeenZeroVelocity);
     }
 
     public void setSplines(Spline... splines) {
         this.gvf.setSplines(splines);
+
+        isZeroVelocity = false;
+        zeroVelocityTimer.reset();
+        hasBeenZeroVelocity = false;
+        timer.reset();
+    }
+
+    public void setSplines(boolean reverseHeading, Spline... splines) {
+        this.gvf.setSplines(reverseHeading, splines);
 
         isZeroVelocity = false;
         zeroVelocityTimer.reset();
@@ -188,8 +206,33 @@ public class DefaultGVFCommand extends CommandBase {
         return currentPose.getTranslation();
     }
 
-    public void setTolerances(double tol, double Htol) {
+    public void setTolerances(double tol, double hTol) {
         this.tol = tol;
-        this.hTol = Htol;
+        this.hTol = hTol;
+    }
+
+    public DefaultGVFCommand whenClose(Command command, double distance) {
+        whenCloseCommands.add(new DistanceAndCommand(command, distance));
+        return this;
+    }
+
+    public DefaultGVFCommand setTangentOffset(double offset) {
+        gvf.setTangentOffset(offset);
+        return this;
+    }
+
+    public DefaultGVFCommand endWhenClose(double distance) {
+        endingDistance = distance;
+        return this;
+    }
+
+    private class DistanceAndCommand {
+        public Command command;
+        public double distance;
+
+        public DistanceAndCommand(Command command, double distance) {
+            this.command = command;
+            this.distance = distance;
+        }
     }
 }

@@ -28,6 +28,7 @@ public class SlideConstants {
     public static double submersibleIntakeMinExtension = 10;
     public static double submersibleIntakeMidExtension = 20;
     public static double submersibleIntakeMaxExtension = 27;
+    public static double submersibleIntakeGroundMaxExtension = 22;
 
     public static double specimenRaisePosition = 0;
     public static double specimenHighRaisePosition = 13;
@@ -39,6 +40,7 @@ public class SlideConstants {
     public static double lowExtendInches = -1;
     public static double extendedThreshold = 3;
     // It takes 0.4 seconds from scoring pos reversed to scoring Pos
+    public static double pivotDownExtension = 15;
 
     public static double safeForDunk = 26;
 

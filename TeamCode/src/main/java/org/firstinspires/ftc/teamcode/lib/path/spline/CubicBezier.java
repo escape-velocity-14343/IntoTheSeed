@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.geometry.Vector2d;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 public class CubicBezier extends SplineBase {
@@ -63,5 +64,9 @@ public class CubicBezier extends SplineBase {
                                         .plus(controlpoints.get(1))
                                         .scale(6*(t)));
 
+    }
+
+    public List<Vector2d> getControlPoints() {
+        return controlpoints;
     }
 }

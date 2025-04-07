@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 public class IntakeSubsystem extends SubsystemBase {
     private CRServo intake;
     private Servo clawer;
-    private AnalogInput front, back;
+    private AnalogInput front;
     private double speed = 0;
     private double clawPos = IntakeConstants.closedPos;
 
@@ -23,8 +23,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public IntakeSubsystem(HardwareMap hardwareMap) {
         intake = hardwareMap.crservo.get("intake");
         clawer = hardwareMap.servo.get("clawer");
-        back = hardwareMap.analogInput.get("clawSens1");
-        front = hardwareMap.analogInput.get("clawSens2");
+        front = hardwareMap.analogInput.get("clawSens1");
         clawer.setDirection(Servo.Direction.REVERSE);
 //        intake.setDirection(DcMotorSimple.Direction.REVERSE);
         lastResetTime = new ElapsedTime();
@@ -51,10 +50,6 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public double getFrontV() {
         return front.getVoltage();
-    }
-
-    public double getBackV() {
-        return back.getVoltage();
     }
 
     public boolean getDSensorSupplier() {

@@ -79,6 +79,9 @@ public class VisionSubsystem extends SubsystemBase {
     private final WebcamName chassisCam;
     private final WebcamName slideCam;
     private double angle = 0;
+
+    private boolean possibleSample = false;
+    private boolean confirmedSample = false;
     Optional<ColorBlobLocatorProcessor.Blob> largestBlob = Optional.empty();
 
 
@@ -115,8 +118,8 @@ public class VisionSubsystem extends SubsystemBase {
                 Color.rgb(3, 227, 252),
                 new Point[]{
                         new Point(0, 0),
-                        new Point(VisionConstants.width-60, 0),
-                        new Point(VisionConstants.width-60, VisionConstants.height),
+                        new Point(VisionConstants.width, 0),
+                        new Point(VisionConstants.width, VisionConstants.height),
                         new Point(0, VisionConstants.height)
                 }
         );
@@ -191,18 +194,22 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        //telemetry.addData("Is color process", visionPortal.getProcessorEnabled(colorLocator));
-        //telemetry.addData("Is close process", visionPortal.getProcessorEnabled(closeLocator));
+        telemetry.addData("Is color process", visionPortal.getProcessorEnabled(colorLocator));
+        telemetry.addData("Is close process", visionPortal.getProcessorEnabled(closeLocator));
 
         pixelPos = 0;
 
         if (visionPortal.getProcessorEnabled(colorLocator)) {
+            possibleSample = false;
+            confirmedSample = false;
 
             samplePoses = new ArrayList<>();
 
             List<ColorBlobLocatorProcessor.Blob> blobs = colorLocator.getBlobs();
 
             ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, 20000, blobs);
+            int dist = 10000;
+            ColorBlobLocatorProcessor.Util.sortByArea(SortOrder.DESCENDING, blobs);
 
             if (!blobs.isEmpty()) {
                 for (int i = 0; i < Math.min(blobs.size(), 3); i++) {
@@ -221,6 +228,7 @@ public class VisionSubsystem extends SubsystemBase {
 
             ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, 20000, blobs);
             double dist = 10000;
+            double centerDist = 10000;
             ColorBlobLocatorProcessor.Util.sortByArea(SortOrder.DESCENDING, blobs);
             largestBlob = Optional.empty();
 
@@ -245,12 +253,28 @@ public class VisionSubsystem extends SubsystemBase {
                         }
                     }
 
-                    // weight by distance (90%)
+                    // weight by distance (75%)
                     for (int i = 0; i < blobs.size(); i++) {
                         Point center = blobs.get(i).getBoxFit().center;
                         double newDist = Math.hypot(samplePos.getX() - center.x, samplePos.getY() - center.y);
-                        weights[i] += dist * 0.9 / newDist;
+                        weights[i] += dist * 0.75 / newDist;
                     }
+                }
+
+                // weight by distance from center (15%)
+
+                for (int i = 0; i < blobs.size(); i++) {
+                    Point center = blobs.get(i).getBoxFit().center;
+                    double newDist = Math.hypot(VisionConstants.xOffset - center.x, VisionConstants.yOffset - center.y);
+                    if (newDist < centerDist) {
+                        centerDist = newDist;
+                    }
+                }
+
+                for (int i = 0; i < blobs.size(); i++) {
+                    Point center = blobs.get(i).getBoxFit().center;
+                    double newDist = Math.hypot(VisionConstants.xOffset - center.x, VisionConstants.yOffset - center.y);
+                    weights[i] += centerDist * 0.15 / newDist;
                 }
 
 
@@ -265,12 +289,15 @@ public class VisionSubsystem extends SubsystemBase {
 
                 pixelPos = dist;
                 RotatedRect blob = blobs.get(index).getBoxFit();
+                Log.i("vision pooopy", "blob size puyallup: " + blob.size.area());
+                possibleSample = blob.size.area()>VisionConstants.minSampleArea;
                 pixelPos = (int) (160 - blob.center.x);
                 samplePos = new Vector2d(blob.center.x, blob.center.y);
                 angle = blob.angle;
                 if (blob.size.width < blob.size.height) {
                     angle -= 90;
                 }
+                confirmedSample = Math.hypot(VisionConstants.xOffset - blob.center.x, VisionConstants.yOffset - blob.center.y)<VisionConstants.visionEndThreshold;
                 //angle += 90;
                 //angle = AngleUnit.normalizeDegrees(angle);
             } else {
@@ -281,6 +308,12 @@ public class VisionSubsystem extends SubsystemBase {
 
     public Optional<ColorBlobLocatorProcessor.Blob> getLargestBlob(){
         return largestBlob;
+    }
+    public boolean getPossibilityForSampleExistingInThisGivenMomentOfTimeAndSpace() {
+        return possibleSample;
+    }
+    public boolean isConfirmedSample() {
+        return confirmedSample;
     }
 
     public Vector2d getSamplePos() {

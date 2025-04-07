@@ -4,9 +4,12 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
 import java.util.LinkedList;
 import java.util.Queue;
+
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.lib.Util;
 
 @Config
 public class BucketSensorSubsystem extends SubsystemBase {
@@ -35,14 +38,14 @@ public class BucketSensorSubsystem extends SubsystemBase {
      * @return In whatever unit you set it to
      */
     public double getSensorLeft() {
-        return unit.fromCm(sensorLeftAverage * 500 / 3.3);
+        return unit.fromCm(sensorLeft.getVoltage() * 500 / 3.3);
     }
 
     /**
      * @return In whatever unit you set it to
      */
     public double getSensorRight() {
-        return unit.fromCm(sensorRightAverage * 500 / 3.3);
+        return unit.fromCm(sensorRight.getVoltage() * 500 / 3.3);
     }
 
     @Override
@@ -52,21 +55,13 @@ public class BucketSensorSubsystem extends SubsystemBase {
             sensorLeftData.remove();
         }
 
-        // noinspection OptionalGetWithoutIsPresent
-        sensorLeftAverage =
-                sensorLeftData.stream()
-                        .reduce((total, el) -> total + el / sensorLeftData.size())
-                        .get();
+        sensorLeftAverage = Util.average(sensorLeftData);
 
         sensorRightData.add(sensorRight.getVoltage());
         if (sensorRightData.size() > rollingAverageSize) {
             sensorRightData.remove();
         }
 
-        // noinspection OptionalGetWithoutIsPresent
-        sensorRightAverage =
-                sensorRightData.stream()
-                        .reduce((total, el) -> total + el / sensorRightData.size())
-                        .get();
+        sensorRightAverage = Util.average(sensorRightData);
     }
 }

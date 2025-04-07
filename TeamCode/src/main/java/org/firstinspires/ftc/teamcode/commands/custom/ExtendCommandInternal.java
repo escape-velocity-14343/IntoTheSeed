@@ -6,12 +6,17 @@ import com.arcrobotics.ftclib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
 
+import java.util.Objects;
+import java.util.function.DoubleSupplier;
+
 import javax.annotation.Nullable;
 
 class ExtendCommandInternal extends CommandBase {
 
     ExtensionSubsystem extend;
     double target;
+
+    private DoubleSupplier targetSupplier;
     @Nullable
     private Double powerMul = null;
     private double oldExtensionPowerMul;
@@ -23,6 +28,12 @@ class ExtendCommandInternal extends CommandBase {
     public ExtendCommandInternal(ExtensionSubsystem subsystem, double target) {
         this.extend = subsystem;
         this.target = target;
+        addRequirements(subsystem);
+    }
+
+    public ExtendCommandInternal(ExtensionSubsystem subsystem, DoubleSupplier target) {
+        this.extend = subsystem;
+        this.targetSupplier = target;
         addRequirements(subsystem);
     }
 
@@ -42,6 +53,9 @@ class ExtendCommandInternal extends CommandBase {
         if (powerMul != null) {
             oldExtensionPowerMul = extend.getPowerMul();
             extend.setPowerMul(powerMul);
+        }
+        if (Objects.nonNull(targetSupplier)) {
+            this.target = targetSupplier.getAsDouble();
         }
         extend.setTargetInches(target);
         extend.setManualControl(false);

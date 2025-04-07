@@ -18,28 +18,38 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-import org.firstinspires.ftc.teamcode.commands.custom.BucketAlignCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.BucketRelocalizeCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.group.BucketPosCommand;
-import org.firstinspires.ftc.teamcode.commands.group.IntakePosCommand;
+import org.firstinspires.ftc.teamcode.commands.group.DefaultGVFCommand;
+import org.firstinspires.ftc.teamcode.commands.group.GroundSubPosCommand;
+import org.firstinspires.ftc.teamcode.commands.group.GroundSubReadyPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.LowBucketPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.RetractCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosReadyCommand;
+import org.firstinspires.ftc.teamcode.constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.CachingVoltageSensor;
+import org.firstinspires.ftc.teamcode.lib.Util;
+import org.firstinspires.ftc.teamcode.lib.path.spline.CubicBezier;
+import org.firstinspires.ftc.teamcode.lib.path.spline.Spline;
 
 public abstract class Robot extends LinearOpMode {
 
     public enum FSMStates {
         READY,
-        INTAKE_READY,
-        INTAKE,
+        TOP_INTAKE_READY,
+        TOP_INTAKE,
+        GROUND_INTAKE_READY,
+        GROUND_INTAKE,
         HANG,
         OUTTAKE,
         SPECIMEN,
         FOLD,
-        BASKET_ALIGN,
+        BUCKET_ALIGN,
     }
+
     public enum StateProgress {
         NONE,
         PROGRESS,
@@ -60,7 +70,7 @@ public abstract class Robot extends LinearOpMode {
     // @Deprecated
     // public OTOSSubsystem otos;
     public PinpointSubsystem pinpoint;
-//    public VisionSubsystem visionSubsystem;
+    //    public VisionSubsystem visionSubsystem;
     public CachingVoltageSensor voltage;
     public BucketSensorSubsystem basketSensor;
     public TurretSubsystem turret;
@@ -72,11 +82,14 @@ public abstract class Robot extends LinearOpMode {
     public IMU imu;
 
     public ElapsedTime timer = new ElapsedTime();
+    public ElapsedTime loopTime = new ElapsedTime();
+    private int cycles = 0;
     public CommandScheduler cs = CommandScheduler.getInstance();
 
     protected double lastTurretAngle;
 
     public void initialize() {
+        loopTime.reset();
         SlideConstants.highExtend = false;
 
         hubs = hardwareMap.getAll(LynxModule.class);
@@ -117,6 +130,8 @@ public abstract class Robot extends LinearOpMode {
         vision = new VisionSubsystem(hardwareMap, telemetry);
         target = new TargetingSubsystem(vision, pinpoint, telemetry);
 
+        mecanum.setForwardCompensationSupplier(() -> extension.getCurrentInches() / SlideConstants.maxExtension * DriveConstants.forwardMotorMultiplier * Math.cos(Math.toRadians(pivot.getCurrentPosition())) + 1.0);
+
         cs.registerSubsystem(basketSensor, pinpoint, mecanum, pivot, extension, wrist, intake, turret, PTO, vision, target);
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -127,6 +142,14 @@ public abstract class Robot extends LinearOpMode {
             hub.clearBulkCache();
         }
         CommandScheduler.getInstance().run();
+
+        if (cycles == 0) {
+            loopTime.reset();
+        }
+
+        cycles++;
+        telemetry.addData("HZ", "" + cycles / loopTime.seconds());
+
         telemetry.update();
     }
 
@@ -134,19 +157,9 @@ public abstract class Robot extends LinearOpMode {
         cs.reset();
     }
 
-    public Command intakePos() {
-        return new IntakePosCommand(extension, pivot, wrist, intake)
-                .andThen(setStateCommand(FSMStates.INTAKE));
-    }
-
-    public Command intake() {
-        return new SubPosCommand(extension, wrist, intake, pivot, SlideConstants.submersibleIntakeMaxExtension)
-                .andThen(setStateCommand(FSMStates.INTAKE));
-    }
-
-    public Command intake(DoubleSupplier forwardInches) {
-        return new SubPosCommand(extension, wrist, intake, pivot, forwardInches)
-                .andThen(setStateCommand(FSMStates.INTAKE));
+    public Command topIntake() {
+        return new SubPosCommand(extension, wrist, intake, pivot, SlideConstants.submersibleIntakeMidExtension)
+                .andThen(setStateCommand(FSMStates.TOP_INTAKE));
     }
 
     public Command bucketPos() {
@@ -161,7 +174,7 @@ public abstract class Robot extends LinearOpMode {
         return new RetractCommand(wrist, pivot, extension, turret, intake).andThen(setStateCommand(FSMStates.READY));
     }
 
-    public Command intakeReady(DoubleSupplier turretAngle, DoubleSupplier forwardInches) {
+    public Command topIntakeReady(DoubleSupplier turretAngle) {
         return new SubPosReadyCommand(
                 extension,
                 pivot,
@@ -169,30 +182,73 @@ public abstract class Robot extends LinearOpMode {
                 intake,
                 turret,
                 turretAngle,
-                forwardInches,
-                notInAnyState(FSMStates.INTAKE_READY, FSMStates.INTAKE)
-        ).alongWith(new InstantCommand(() -> lastTurretAngle = turretAngle.getAsDouble())).andThen(setStateCommand(FSMStates.INTAKE_READY));
+                SlideConstants.submersibleIntakeMidExtension,
+                notInAnyState(FSMStates.TOP_INTAKE_READY, FSMStates.TOP_INTAKE)
+        ).alongWith(new InstantCommand(() -> lastTurretAngle = turretAngle.getAsDouble())).andThen(setStateCommand(FSMStates.TOP_INTAKE_READY));
     }
 
-    public Command intakeReady(DoubleSupplier turretAngle) {
-        return new SubPosReadyCommand(
+    public Command topIntakeReady() {
+        return topIntakeReady(() -> lastTurretAngle);
+    }
+
+    public Command groundIntakeReady() {
+        return new ConditionalCommand(
+                retract(),
+                new InstantCommand(),
+                inState(FSMStates.OUTTAKE)
+        ).andThen(new GroundSubReadyPosCommand(
+                extension,
+                pivot,
+                intake,
+                turret,
+                SlideConstants.submersibleIntakeGroundMaxExtension
+        )).andThen(setStateCommand(FSMStates.GROUND_INTAKE_READY));
+    }
+
+    public Command groundIntake() {
+        return new ConditionalCommand(
+                retract(),
+                new InstantCommand(),
+                inState(FSMStates.OUTTAKE)
+        ).andThen(new GroundSubPosCommand(
                 extension,
                 pivot,
                 wrist,
                 intake,
                 turret,
-                turretAngle,
-                SlideConstants.submersibleIntakeMaxExtension,
-                notInAnyState(FSMStates.INTAKE_READY, FSMStates.INTAKE)
-        ).alongWith(new InstantCommand(() -> lastTurretAngle = turretAngle.getAsDouble())).andThen(setStateCommand(FSMStates.INTAKE_READY));
-    }
-
-    public Command intakeReady() {
-        return intakeReady(() -> lastTurretAngle);
+                SlideConstants.submersibleIntakeGroundMaxExtension
+        )).andThen(setStateCommand(FSMStates.GROUND_INTAKE));
     }
 
     public Command bucketAlign() {
-        return new BucketAlignCommand(mecanum, basketSensor, pinpoint).whenClose(48.0, bucketPos()).alongWith(setStateCommand(FSMStates.BASKET_ALIGN));
+        //return new BucketAlignCommand(mecanum, basketSensor, pinpoint).whenClose(48.0, bucketPos()).alongWith(setStateCommand(FSMStates.BASKET_ALIGN));
+        return new InstantCommand(() -> {
+            double x = pinpoint.getPose().getX();
+            double y = pinpoint.getPose().getY();
+            Spline generatedSpline = new CubicBezier(
+                    x, y,
+                    -30 - 0.5 * x + 10, 35,
+                    -50, 50,
+                    -60, 60
+            );
+            if (currentlyInState(
+                    FSMStates.TOP_INTAKE, FSMStates.TOP_INTAKE_READY,
+                    FSMStates.GROUND_INTAKE, FSMStates.GROUND_INTAKE_READY
+            )) {
+                // sus ඞ
+                cs.schedule(new InstantCommand(() -> extension.setTargetInches(0.0)));
+            }
+            cs.schedule(
+                    new DefaultGVFCommand(mecanum, pinpoint, generatedSpline)
+                            .whenClose(bucketPos(), 48.0)
+                            //.whenClose(new BucketRelocalizeCommand(basketSensor, pinpoint, telemetry), 2.0)
+                            .setTangentOffset(180)
+                            //.endWhenClose(4.0)
+                            .alongWith(setStateCommand(FSMStates.BUCKET_ALIGN))
+                            .interruptOn(() -> Util.isGamepadAlive(gamepad1, 0.5))
+                            .whenFinished(() -> cs.schedule(retract()))
+            );
+        });
     }
 
     public void setState(FSMStates state) {

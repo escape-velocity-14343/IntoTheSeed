@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -8,11 +9,15 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.lib.CachingVoltageSensor;
 import org.firstinspires.ftc.teamcode.lib.Localizer;
+import org.firstinspires.ftc.teamcode.lib.Util;
+
+import java.util.function.DoubleSupplier;
 
 public class MecanumDriveSubsystem extends SubsystemBase {
     DcMotor fr, fl, br, bl;
     Localizer odo;
     CachingVoltageSensor voltage;
+    private DoubleSupplier forwardCompensationSupplier;
 
     public MecanumDriveSubsystem(
             DcMotor fr,
@@ -64,11 +69,23 @@ public class MecanumDriveSubsystem extends SubsystemBase {
 
         double rotY = y * Math.sin(headingRads) - x * Math.cos(headingRads);
 
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        double frontLeftPower = (rotY + rotX + rx) / denominator;
-        double backLeftPower = (rotY - rotX + rx) / denominator;
-        double frontRightPower = (rotY - rotX - rx) / denominator;
-        double backRightPower = (rotY + rotX - rx) / denominator;
+        double frontLeftPower = rotY + rotX + rx;
+        double backLeftPower = rotY - rotX + rx;
+        double frontRightPower = rotY - rotX - rx;
+        double backRightPower = rotY + rotX - rx;
+
+        double forwardCompensation = forwardCompensationSupplier.getAsDouble();
+
+        backLeftPower *= forwardCompensation;
+        backRightPower *= forwardCompensation;
+
+        double denominator = Util.max(frontLeftPower, backLeftPower, frontRightPower, backRightPower, 1.0);
+
+        frontLeftPower /= denominator;
+        backLeftPower /= denominator;
+        frontRightPower /= denominator;
+        backRightPower /= denominator;
+
         if (!(Double.valueOf(frontLeftPower).isNaN()
                 || Double.valueOf(backLeftPower).isNaN()
                 || Double.valueOf(frontRightPower).isNaN()
@@ -118,5 +135,27 @@ public class MecanumDriveSubsystem extends SubsystemBase {
 
     public double getAutoVoltageMult() {
         return this.voltage.getVoltageNormalized();
+    }
+
+    public void setBrake() {
+        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
+
+    public void clearBrake() {
+        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+    }
+
+    public DoubleSupplier getForwardCompensationSupplier() {
+        return forwardCompensationSupplier;
+    }
+
+    public void setForwardCompensationSupplier(DoubleSupplier forwardCompensationSupplier) {
+        this.forwardCompensationSupplier = forwardCompensationSupplier;
     }
 }

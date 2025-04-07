@@ -93,6 +93,12 @@ public class PivotSubsystem extends SubsystemBase {
             power *= PivotConstants.bottomPMult;
         }
 
+        if (power < 0) {
+            power = -Math.min(Math.abs(power), 1 - (getKg() * 2));
+        }
+
+        power *= voltage.getVoltageNormalized();
+
         openloop(power);
     }
 
@@ -138,6 +144,9 @@ public class PivotSubsystem extends SubsystemBase {
      */
     public boolean isClose(double target, double tolerance) {
         return Util.inRange(target, currentPos, tolerance); // || currentPos < PivotConstants.bottomLimit;
+    }
+    public boolean isDone() {
+        return isClose(target);
     }
 
     /**

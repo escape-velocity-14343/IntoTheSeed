@@ -22,12 +22,15 @@ public class DefaultGoToPointCommand extends CommandBase {
 
     public DrivetrainSquIDController drivetrainSquIDController = new DrivetrainSquIDController();
 
-    public static double translationkP = 0.035;
+    public static double translationkP = 0.025;
     public static double translationkI = 0;
     public static double translationkD = 0;
     public static double headingkP = 0.004;
+    public static double headingKPSmall = 0.012;
+    public static double useSmallThresh = 7.0;
     public static double headingkI = 0;
     public static double headingkD = 0;
+    public static double headingKS = 0;
 
     public double tol = 3;
     public double hTol = 4;
@@ -137,7 +140,9 @@ public class DefaultGoToPointCommand extends CommandBase {
 
         xMove *= voltageScalar;
         yMove *= voltageScalar;
+
         double hMove = -rotSpeedSupplier.getAsDouble() * voltageScalar;
+        //hMove += Math.signum(hMove) * headingKS;
 
         if (toggle) {
             drive.driveFieldCentricCompensated(-xMove, -yMove, hMove);
@@ -205,6 +210,10 @@ public class DefaultGoToPointCommand extends CommandBase {
         zeroVelocityTimer.reset();
         hasBeenZeroVelocity = false;
         timer.reset();
+        headingPID.setPID(
+                Math.abs(Util.getAngularDifference(target.getRotation().getDegrees(), pinpoint.getPose().getRotation().getDegrees())) < useSmallThresh
+                        ? headingKPSmall : headingkP, headingkI, headingkD
+        );
     }
 
     public double getTargetHeading() {

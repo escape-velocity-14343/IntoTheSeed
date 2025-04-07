@@ -3,6 +3,11 @@ package org.firstinspires.ftc.teamcode.lib;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
+import com.qualcomm.robotcore.hardware.Gamepad;
+
+import java.security.InvalidParameterException;
+import java.util.Collection;
+import java.util.List;
 
 public class Util {
     public static boolean inRange(double a, double b, double thres) {
@@ -69,5 +74,31 @@ public class Util {
 
     public static double pose2dToDistance(Pose2d p1, Pose2d p2) {
         return Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2) + Math.pow(p1.getY() - p2.getY(), 2));
+    }
+
+    public static double max(double... vals) {
+        if (vals.length == 0) {
+            throw new InvalidParameterException("Length cannot be zero");
+        }
+        double maxVal = vals[0];
+        for (double val : vals) {
+            maxVal = Math.max(maxVal, val);
+        }
+        return maxVal;
+    }
+
+    public static boolean isGamepadAlive(Gamepad gp, double threshold) {
+        return Math.abs(gp.left_stick_x) > threshold
+                || Math.abs(gp.left_stick_y) > threshold
+                || Math.abs(gp.right_stick_x) > threshold
+                || Math.abs(gp.right_stick_y) > threshold;
+    }
+
+    public static double average(Collection<Double> values) {
+        double total = 0.0;
+        for (double value : values) {
+            total += value;
+        }
+        return total / values.size();
     }
 }

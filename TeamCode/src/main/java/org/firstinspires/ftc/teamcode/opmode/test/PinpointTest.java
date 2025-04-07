@@ -4,7 +4,6 @@ import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.teamcode.commands.custom.DefaultDriveCommand;
@@ -31,9 +30,9 @@ public class PinpointTest extends Robot {
 
         CommandScheduler.getInstance().setDefaultCommand(mecanum, new DefaultDriveCommand(
                 mecanum,
-                () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftY() / driverPad.getLeftX()) < 0.05 ? 0 : driverPad.getLeftY()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? 1 : 1),
-                () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftX() / driverPad.getLeftY()) < 0.05 ? 0 : driverPad.getLeftX()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? 1 : 1),
-                () -> Util.halfLinearHalfCubic(driverPad.getRightX()) * (getState() == FSMStates.INTAKE || getState() == FSMStates.OUTTAKE ? 1 : 1),
+                () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftY() / driverPad.getLeftX()) < 0.05 ? 0 : driverPad.getLeftY()) * (getState() == FSMStates.TOP_INTAKE || getState() == FSMStates.OUTTAKE ? 1 : 1),
+                () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftX() / driverPad.getLeftY()) < 0.05 ? 0 : driverPad.getLeftX()) * (getState() == FSMStates.TOP_INTAKE || getState() == FSMStates.OUTTAKE ? 1 : 1),
+                () -> Util.halfLinearHalfCubic(driverPad.getRightX()) * (getState() == FSMStates.TOP_INTAKE || getState() == FSMStates.OUTTAKE ? 1 : 1),
                 () -> pinpoint.getPose().getRotation().getDegrees()));
 
 

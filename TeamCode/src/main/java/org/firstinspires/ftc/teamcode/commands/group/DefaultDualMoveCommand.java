@@ -15,10 +15,12 @@ public class DefaultDualMoveCommand extends CommandBase {
     private DefaultGVFCommand gvfc;
     public enum MoveState {
         P2P,
-        GVF
+        GVF,
+        BRAKE
     }
 
     private MoveState state = MoveState.P2P;
+    private MecanumDriveSubsystem drive;
 
     public DefaultDualMoveCommand(MecanumDriveSubsystem driveSubsystem,
                                   PinpointSubsystem otosSubsystem,
@@ -27,6 +29,7 @@ public class DefaultDualMoveCommand extends CommandBase {
         addRequirements(driveSubsystem, otosSubsystem);
         this.gtpc = gtpc;
         this.gvfc = gvfc;
+        this.drive = driveSubsystem;
     }
 
     @Override
@@ -43,6 +46,9 @@ public class DefaultDualMoveCommand extends CommandBase {
                 break;
             case GVF:
                 gvfc.execute();
+                break;
+            case BRAKE:
+                drive.driveFieldCentric(0, 0, 0);
                 break;
         }
     }
@@ -67,6 +73,11 @@ public class DefaultDualMoveCommand extends CommandBase {
     }
     public void setState(MoveState state) {
         this.state = state;
+        if (state == MoveState.BRAKE) {
+            drive.setBrake();
+        } else {
+            drive.clearBrake();
+        }
     }
 
     public Command setP2P() {

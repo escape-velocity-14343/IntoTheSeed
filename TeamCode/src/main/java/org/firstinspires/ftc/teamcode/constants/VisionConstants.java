@@ -11,7 +11,7 @@ public class VisionConstants {
     //QVGA
     public static int width = 320;
     public static int height = 240;
-    public static int minHeight = 160;
+    public static int minHeight = 0;
 
     public static double cx = 338.083 / 2;
     public static double cy = 218.771 / 2;
@@ -27,6 +27,7 @@ public class VisionConstants {
 
     public static boolean reverseX = true;
     public static boolean reverseY = false;
+    public static double minSampleArea = 900;
 
     //Supported resolutions 1280 720
     // 800 600

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.lib.path.follower;
 
+import static org.firstinspires.ftc.teamcode.commands.group.DefaultGoToPointCommand.headingKS;
 import static org.firstinspires.ftc.teamcode.commands.group.DefaultGoToPointCommand.translationkP;
 
 import android.util.Log;
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commands.group.DefaultGoToPointCommand;
 import org.firstinspires.ftc.teamcode.lib.DrivetrainSquIDController;
 import org.firstinspires.ftc.teamcode.lib.Util;
+import org.firstinspires.ftc.teamcode.lib.path.spline.CubicBezier;
 import org.firstinspires.ftc.teamcode.lib.path.spline.Spline;
 
 import java.util.ArrayList;
@@ -53,11 +55,14 @@ public class GVFFollower {
     /**
      * Tells GVF when to switch to SquID 2.0.
      */
-    public static double pathEndUsageInches = 15.0;
+    public static double pathEndUsageInches = 24.0;
 
     public static double headingLookaheadScalar = 15.0 / 40.0;
 
     private Pose2d lastPose;
+    private boolean reverseHeading = false;
+    private double tangentOffset = 0.0;
+    private boolean endWhenClose = false;
 
     public GVFFollower() {
 
@@ -98,11 +103,9 @@ public class GVFFollower {
 
         // get curvature vector
         // TODO: check the sign on this
-        Vector2d curvatureVec = new Vector2d();
-        if (perpVecNoScale.magnitude() > 0.001) {
-            curvatureVec = perpVecNoScale.normalize().scale(Spline.getCurvature(closestT, currentSpline) * curvatureP);
-            Log.v("GVFf", "vec3: " + curvatureVec.getX() + ", " + curvatureVec.getY());
-        }
+        Vector2d curvatureVec = new Vector2d(0, 1).rotateBy(robotPose.getRotation().getDegrees());
+        curvatureVec = curvatureVec.scale(Spline.getCurvature(closestT, currentSpline) * curvatureP);
+        Log.v("GVFf", "vec3: " + curvatureVec.getX() + ", " + curvatureVec.getY());
         // add!
         Vector2d movementVec = forwardVec.plus(perpendicularVec).plus(curvatureVec);
         Log.v("GVFf", "vec4: " + movementVec.getX() + ", " + movementVec.getY());
@@ -130,7 +133,12 @@ public class GVFFollower {
             currAngleSpline = splines.get(currAngleIndex);
         }
 
-        double targetAngle = Math.toDegrees(currAngleSpline.getVelocity(angleT).angle());
+        double targetAngle = Math.toDegrees(currAngleSpline.getVelocity(angleT).angle()) + tangentOffset;
+
+        if (reverseHeading) {
+            targetAngle += 180;
+        }
+        targetAngle = AngleUnit.normalizeDegrees(targetAngle);
 
         if (pos.minus(endpoint).magnitude() < pathEndUsageInches) {
             useSquid = true;
@@ -146,13 +154,19 @@ public class GVFFollower {
                             robotVelocity);
 
             movementVec = new Vector2d(xyMove.getX(), xyMove.getY());
-            targetAngle = Math.toDegrees(lastSpline.getVelocity(lastSpline.getLength()).angle());
+            targetAngle = Math.toDegrees(lastSpline.getVelocity(lastSpline.getLength()).angle()) + tangentOffset;
+
+            if (reverseHeading) {
+                targetAngle += 180;
+            }
+            targetAngle = AngleUnit.normalizeDegrees(targetAngle);
         }
 
 
 
         // squid
         double rot = Util.signedSqrt(-Util.getAngularDifference(targetAngle, robotPose.getRotation().getDegrees()) * DefaultGoToPointCommand.headingkP);
+        rot += Math.signum(rot) * headingKS;
         Log.v("GVFf", "attempted movement: " + movementVec.getX() + ", " + movementVec.getY() + ", " + rot);
 
         //FtcDashboard.getInstance().sendTelemetryPacket(getSplineDrawPacket(100));
@@ -198,6 +212,16 @@ public class GVFFollower {
         currentSplineIndex = 0;
     }
 
+    public void setSplines(boolean reverseHeading, Spline... splines) {
+        this.splines = new ArrayList<>(Arrays.asList(splines));
+        this.useSquid = false;
+        this.reverseHeading = reverseHeading;
+        for (Spline spline : this.splines) {
+            spline.initArclen();
+        }
+        currentSplineIndex = 0;
+    }
+
     public void getSplineDrawPacket(TelemetryPacket packet, int precision) {
         double[] pointsX = new double[precision];
         double[] pointsY = new double[precision];
@@ -216,6 +240,24 @@ public class GVFFollower {
                 .setStrokeWidth(1)
                 .strokePolyline(pointsX, pointsY);
 
+        for (Spline spline : splines) {
+            if (!(spline instanceof CubicBezier)) {
+                continue;
+            }
+            CubicBezier cb = (CubicBezier) spline;
+            packet.fieldOverlay().fillCircle(
+                    cb.getControlPoints().get(1).getX(),
+                    cb.getControlPoints().get(1).getY(),
+                    2
+            );
+
+            packet.fieldOverlay().fillCircle(
+                    cb.getControlPoints().get(2).getX(),
+                    cb.getControlPoints().get(2).getY(),
+                    2
+            );
+        }
+
     }
 
     public void getRobotDrawPacket(TelemetryPacket packet) {
@@ -229,5 +271,13 @@ public class GVFFollower {
                         lastPose.getX() + headingPos.getX(), lastPose.getY() + headingPos.getY()
                 );
 
+    }
+
+    public double getTangentOffset() {
+        return tangentOffset;
+    }
+
+    public void setTangentOffset(double tangentOffset) {
+        this.tangentOffset = tangentOffset;
     }
 }

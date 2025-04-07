@@ -4,24 +4,21 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
-import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
-import org.firstinspires.ftc.teamcode.constants.VisionConstants;
 import org.firstinspires.ftc.teamcode.lib.RobotPnP;
 import org.firstinspires.ftc.teamcode.subsystems.PinpointSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
-import org.firstinspires.ftc.vision.VisionPortal;
 
 @TeleOp
 @Config
 public class PNPTest extends LinearOpMode {
     public static boolean red = true;
-    VisionSubsystem highCameraSubsystem;
+    VisionSubsystem vision;
     PinpointSubsystem pinpoint;
 
     public static double cx = 338.083 / 2;
@@ -52,15 +49,15 @@ public class PNPTest extends LinearOpMode {
         else{
             AutoConstants.alliance = AutoConstants.Alliance.BLUE;
         }
-        highCameraSubsystem = new VisionSubsystem(hardwareMap, telemetry);
-        highCameraSubsystem.setCam(true);
+        // vision = new VisionSubsystem(hardwareMap, telemetry);
+        vision.setCam(true);
         pinpoint = new PinpointSubsystem(hardwareMap);
         pinpoint.reset();
         pinpoint.resetYaw();
 
-        highCameraSubsystem.waitForSetExposure(3000, 10000, exposure);
+        vision.waitForSetExposure(3000, 10000, exposure);
 
-        CommandScheduler.getInstance().registerSubsystem(pinpoint, highCameraSubsystem);
+        CommandScheduler.getInstance().registerSubsystem(pinpoint, vision);
 
         waitForStart();
         pinpoint.setPosition(x, y);
@@ -68,13 +65,13 @@ public class PNPTest extends LinearOpMode {
         while (opModeIsActive()) {
 
             if (gamepad1.x) {
-                highCameraSubsystem.setCam(false);
+                vision.setCam(false);
             }
             if (gamepad1.y) {
-                highCameraSubsystem.setCam(true);
+                vision.setCam(true);
             }
 
-            Pose2d samplePos = highCameraSubsystem.getSamplePose();
+            Pose2d samplePos = vision.getSamplePose();
 
             Translation2d sampleFCPos = pnp.getFieldCoordinates((int) samplePos.getX(), (int) samplePos.getY(), pinpoint.getPose());
 

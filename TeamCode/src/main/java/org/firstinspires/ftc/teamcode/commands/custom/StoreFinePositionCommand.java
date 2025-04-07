@@ -12,6 +12,7 @@ import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
 import com.arcrobotics.ftclib.geometry.Vector2d;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.constants.IVKConstants;
 import org.firstinspires.ftc.teamcode.constants.VisionConstants;
 import org.firstinspires.ftc.teamcode.lib.RobotPnP;
@@ -48,6 +49,11 @@ public class StoreFinePositionCommand extends CommandBase {
     }
 
     @Override
+    public void initialize() {
+        storage.setFinePosition(pinpoint.getPose());
+    }
+
+    @Override
     public void execute() {
         Pose2d samplePos = vision.getSamplePose();
 
@@ -60,14 +66,38 @@ public class StoreFinePositionCommand extends CommandBase {
         SlidePnP.rz = Math.sin(Math.toRadians(pivot.getCurrentPosition())) * extend.getCurrentInches() + IVKConstants.pivotPointHeight;
         Log.v("FineAlign", "RZ: " + SlidePnP.rz);
         SlidePnP.rp = Math.toRadians(-90 + pivot.getCurrentPosition());
-        Translation2d fieldSamp = pnp.getFieldCoordinates((int) samplePos.getY(), (int) -samplePos.getX(), pinpoint.getPose());
+        Log.v("FineAlign", "RP (deg): " + Math.toDegrees(SlidePnP.rp));
+        Translation2d rcSamp = pnp.getRobotCentricTranslation((int) samplePos.getX(), (int) samplePos.getY());
+        Translation2d fieldSamp = pnp.getFieldCoordinates((int) samplePos.getX(), (int) samplePos.getY(), pinpoint.getPose());
         Log.i("FineAlign", "Sample X: " + fieldSamp.getX());
         Log.i("FineAlign", "Sample Y: " + fieldSamp.getY());
 
-        storage.setFinePosition(new Pose2d(fieldSamp.getX(), fieldSamp.getY(), pinpoint.getPose().getRotation()));
-        turret.rotateTo(samplePos.getRotation().getDegrees());
+        // now we know where the sample is relative to the camera
+        // we now have to figure out where the camera is
+        double forwardExtension = Math.cos(Math.toRadians(pivot.getCurrentPosition())) * extend.getCurrentInches() + (IVKConstants.lengthOfBot / 2);
+
+        // sample position relative to robot
+        Vector2d rcSampleVector = new Vector2d(forwardExtension, 0).plus(new Vector2d(rcSamp.getX(), rcSamp.getY()));
+        Log.i("FineAlign", "rc sample x: " + rcSampleVector.getX());
+        Log.i("FineAlign", "rc sample y: " + rcSampleVector.getY());
+
+        // compute angle to turn
+        double deltaAngle = Math.toDegrees(rcSampleVector.angle());
+        Log.i("FineAlign", "delta angle: " + deltaAngle);
+
+        // compute extension to add
+        double deltaExtension = rcSampleVector.magnitude() - forwardExtension - IVKConstants.slideBackOffset;
+        Log.i("FineAlign", "delta extension: " + deltaExtension);
+
+        double newAngle = pinpoint.getPose().getRotation().getDegrees() + deltaAngle;
+        double newExtension = extend.getCurrentInches() + deltaExtension;
+
+        storage.setFinePosition(new Pose2d(pinpoint.getPose().getX(), pinpoint.getPose().getY(),
+                new Rotation2d(Math.toRadians(newAngle))));
+        storage.setNewExtension(newExtension);
+        turret.rotateTo(AngleUnit.normalizeDegrees(samplePos.getRotation().getDegrees() - deltaAngle));
         done = true;
-        vision.setCam(true);
+        //vision.setCam(true);
 
     }
 
@@ -81,6 +111,7 @@ public class StoreFinePositionCommand extends CommandBase {
         // if we end early, set the position to current position to not disrupt stuff
         if (interrupted) {
             storage.setFinePosition(pinpoint.getPose());
+            storage.setNewExtension(extend.getCurrentInches());
         }
     }
 

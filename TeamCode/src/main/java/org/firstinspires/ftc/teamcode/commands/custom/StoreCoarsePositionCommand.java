@@ -48,8 +48,8 @@ public class StoreCoarsePositionCommand extends CommandBase {
             Log.i("CoarseAlign", "Sample X: " + fieldSamp.getX());
             Log.i("CoarseAlign", "Sample Y: " + fieldSamp.getY());
 
-            if (-15 < fieldSamp.getX() && fieldSamp.getX() < 15
-                    && -13 < fieldSamp.getY() && fieldSamp.getY() < 13) {
+            if (-10 < fieldSamp.getX() && fieldSamp.getX() < 20
+                    && -5 < fieldSamp.getY() && fieldSamp.getY() < 13) {
                 storage.setCoarsePosition(new Pose2d(fieldSamp.getX(), fieldSamp.getY(), new Rotation2d()));
                 done = true;
                 vision.setCam(false);

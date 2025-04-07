@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands.custom;
 
 import static org.firstinspires.ftc.teamcode.constants.AutoConstants.autoscoreMaxVel;
+import static org.firstinspires.ftc.teamcode.constants.AutoConstants.stabilziedMaxAngVel;
 
 import android.util.Log;
 import com.arcrobotics.ftclib.command.Command;
@@ -32,7 +33,7 @@ public class WaitUntilStabilizedCommand extends CommandBase {
     @Override
     public boolean isFinished() {
         return (pinpointSubsystem.getVelocity().getTranslation().getNorm() < autoscoreMaxVel
-                && (timer.seconds() > timeout));
+                && (timer.seconds() > timeout) && pinpointSubsystem.getVelocity().getRotation().getDegrees() < stabilziedMaxAngVel);
     }
 
     @Override

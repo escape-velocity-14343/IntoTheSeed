@@ -21,5 +21,7 @@ public class DriveConstants {
     public static double ptoLeftEngagedPos = 1.0;
     public static double ptoLeftDisengagedPos = 0.7;
 
-    public static double strafeMultiplier = 0.75;
+    public static double strafeMultiplier = 1.1;
+
+    public static double forwardMotorMultiplier = 0.35;
 }

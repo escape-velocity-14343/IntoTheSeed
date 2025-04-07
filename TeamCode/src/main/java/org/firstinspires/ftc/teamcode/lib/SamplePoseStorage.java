@@ -9,6 +9,7 @@ public class SamplePoseStorage {
 
     public Pose2d coarsePosition = new Pose2d();
     public Pose2d finePosition = new Pose2d();
+    public double newExtension = 0;
 
 
     public SamplePoseStorage() {
@@ -38,5 +39,13 @@ public class SamplePoseStorage {
 
     public void setFinePosition(Pose2d finePosition) {
         this.finePosition = finePosition;
+    }
+
+    public double getNewExtension() {
+        return newExtension;
+    }
+
+    public void setNewExtension(double newExtension) {
+        this.newExtension = newExtension;
     }
 }

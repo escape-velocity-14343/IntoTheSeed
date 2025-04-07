@@ -21,8 +21,10 @@ import java.util.function.DoubleSupplier;
 
 public class IVKCommand extends ParallelCommandGroup {
     // useful constants:
-    public static double intakeReadyY = 10;
-    public static double intakeY = 7;
+    // DO NOT MODIFY; MODIFY THE ONES IN IVKCONSTANTS
+    // kept for backcompatibility
+    public static double intakeReadyY = IVKConstants.intakeReadyY;
+    public static double intakeY = IVKConstants.intakeY;
 
     /**
      * Height is from the tile to the claw

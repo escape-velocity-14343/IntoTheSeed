@@ -39,7 +39,10 @@ public class GTPointTest extends Robot {
         DefaultGoToPointCommand gtpc =
                 new DefaultGoToPointCommand(
                         mecanum, pinpoint, new Pose2d(x, y, Rotation2d.fromDegrees(rot)));
-        cs.schedule(gtpc);
+        cs.schedule(
+                topIntakeReady(),
+                gtpc
+        );
 
         while (!isStopRequested()) {
             update();
@@ -48,7 +51,10 @@ public class GTPointTest extends Robot {
 
             telemetry.addData("x", pinpoint.getPose().getX());
             telemetry.addData("y", pinpoint.getPose().getY());
-            telemetry.addData("heading", pinpoint.getPose().getHeading());
+            telemetry.addData("heading", pinpoint.getPose().getRotation().getDegrees());
+            telemetry.addData("tx", x);
+            telemetry.addData("ty", y);
+            telemetry.addData("theading", rot);
         }
         cs.reset();
     }

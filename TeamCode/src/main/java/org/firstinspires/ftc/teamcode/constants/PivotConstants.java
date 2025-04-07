@@ -20,7 +20,7 @@ public class PivotConstants {
     public static double bottomLimit = 0.5;
     public static double topLimit = 86;
     public static double stallTopLimit = 88.5;
-    public static double tolerance = 1.5;
+    public static double tolerance = 3;
     public static double direction = -1;
     public static boolean encoderInvert = true;
     public static double encoderOffset = 170.2;
