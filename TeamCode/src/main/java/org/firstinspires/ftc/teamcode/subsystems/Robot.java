@@ -19,7 +19,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import org.firstinspires.ftc.teamcode.commands.custom.BucketRelocalizeCommand;
-import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.group.BucketPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.DefaultGVFCommand;
 import org.firstinspires.ftc.teamcode.commands.group.GroundSubPosCommand;
@@ -29,6 +28,7 @@ import org.firstinspires.ftc.teamcode.commands.group.RetractCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosReadyCommand;
 import org.firstinspires.ftc.teamcode.constants.DriveConstants;
+import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.CachingVoltageSensor;
 import org.firstinspires.ftc.teamcode.lib.Util;
@@ -229,24 +229,27 @@ public abstract class Robot extends LinearOpMode {
                     x, y,
                     -30 - 0.5 * x + 10, 35,
                     -50, 50,
-                    -60, 60
+                    -62, 58
             );
             if (currentlyInState(
                     FSMStates.TOP_INTAKE, FSMStates.TOP_INTAKE_READY,
                     FSMStates.GROUND_INTAKE, FSMStates.GROUND_INTAKE_READY
             )) {
                 // sus ඞ
-                cs.schedule(new InstantCommand(() -> extension.setTargetInches(0.0)));
+                cs.schedule(new InstantCommand(() -> {
+                    extension.setTargetInches(0.0);
+                    wrist.setWrist(IntakeConstants.foldedPos);
+                }));
             }
             cs.schedule(
                     new DefaultGVFCommand(mecanum, pinpoint, generatedSpline)
                             .whenClose(bucketPos(), 48.0)
-                            //.whenClose(new BucketRelocalizeCommand(basketSensor, pinpoint, telemetry), 2.0)
+                            .whenClose(new BucketRelocalizeCommand(basketSensor, pinpoint), 2.0)
                             .setTangentOffset(180)
                             //.endWhenClose(4.0)
                             .alongWith(setStateCommand(FSMStates.BUCKET_ALIGN))
                             .interruptOn(() -> Util.isGamepadAlive(gamepad1, 0.5))
-                            .whenFinished(() -> cs.schedule(retract()))
+                            //.whenFinished(() -> cs.schedule(retract()))
             );
         });
     }

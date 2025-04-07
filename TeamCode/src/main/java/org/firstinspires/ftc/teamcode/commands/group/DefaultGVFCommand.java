@@ -88,11 +88,16 @@ public class DefaultGVFCommand extends CommandBase {
         Log.v("GVF", "xDist: " + xDist + ", yDist: " + yDist);
         distanceToEnd = Math.sqrt(xDist * xDist + yDist * yDist);
 
+        ArrayList<DistanceAndCommand> commandsToRemove = new ArrayList<>();
         for (DistanceAndCommand whenCloseCommand : whenCloseCommands) {
             if (distanceToEnd < whenCloseCommand.distance) {
                 CommandScheduler.getInstance().schedule(whenCloseCommand.command);
-                whenCloseCommands.remove(whenCloseCommand);
+                commandsToRemove.add(whenCloseCommand);
             }
+        }
+
+        for (DistanceAndCommand commandToRemove : commandsToRemove) {
+            whenCloseCommands.remove(commandToRemove);
         }
 
         Pose2d move = gvf.update(currentPose, pinpoint.getVelocity());
