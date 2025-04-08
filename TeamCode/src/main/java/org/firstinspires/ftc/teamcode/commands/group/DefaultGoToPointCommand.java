@@ -25,7 +25,7 @@ public class DefaultGoToPointCommand extends CommandBase {
     public static double translationkP = 0.025;
     public static double translationkI = 0;
     public static double translationkD = 0;
-    public static double headingkP = 0.004;
+    public static double headingkP = 0.021;
     public static double headingKPSmall = 0.012;
     public static double useSmallThresh = 7.0;
     public static double headingkI = 0;
@@ -96,9 +96,7 @@ public class DefaultGoToPointCommand extends CommandBase {
         drivetrainSquIDController.setPID(translationkP);
 
         rotSpeedSupplier =
-                () ->
-                        Util.signedSqrt(
-                                headingPID.calculate(0, Util.getAngularDifference(target.getRotation().getDegrees(), currentPose.getRotation().getDegrees())));
+                () -> headingPID.calculate(0, Util.getAngularDifference(target.getRotation().getDegrees(), currentPose.getRotation().getDegrees()));
     }
 
     @Override

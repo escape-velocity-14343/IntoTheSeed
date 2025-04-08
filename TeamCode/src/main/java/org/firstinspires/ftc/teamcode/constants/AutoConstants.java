@@ -13,6 +13,7 @@ public class AutoConstants {
     public static Pose2d scorePosOffset = new Pose2d(-62,58.5, Rotation2d.fromDegrees(-45));
 
     public static double subBarrierY = 18.5;
+    public static double closeToBucketDistance = 1.0;
 
     public static double autoscoreMaxVel = 8.5;
     public static double stabilziedMaxAngVel = 15;

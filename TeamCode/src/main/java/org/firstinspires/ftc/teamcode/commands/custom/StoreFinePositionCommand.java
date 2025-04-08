@@ -6,6 +6,9 @@ import static org.firstinspires.ftc.teamcode.constants.VisionConstants.focalL;
 
 import android.util.Log;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
@@ -37,6 +40,7 @@ public class StoreFinePositionCommand extends CommandBase {
     private ExtensionSubsystem extend;
     private TurretSubsystem turret;
 
+    private boolean drawn = false;
 
     public StoreFinePositionCommand(VisionSubsystem vision, SamplePoseStorage storage, PinpointSubsystem pinpoint, PivotSubsystem pivot, ExtensionSubsystem extend, TurretSubsystem turret) {
         this.vision = vision;
@@ -98,7 +102,12 @@ public class StoreFinePositionCommand extends CommandBase {
         turret.rotateTo(AngleUnit.normalizeDegrees(samplePos.getRotation().getDegrees() - deltaAngle));
         done = true;
         //vision.setCam(true);
-
+        if (!drawn){
+            TelemetryPacket packet = new TelemetryPacket();
+            drawSample(packet.fieldOverlay(), fieldSamp, samplePos);
+            FtcDashboard.getInstance().sendTelemetryPacket(packet);
+            drawn = true;
+        }
     }
 
     @Override
@@ -113,6 +122,25 @@ public class StoreFinePositionCommand extends CommandBase {
             storage.setFinePosition(pinpoint.getPose());
             storage.setNewExtension(extend.getCurrentInches());
         }
+    }
+
+    public void drawSample(Canvas c, Translation2d fieldSamp, Pose2d samplePos) {
+        //Use samplePos for rotation of gamepiece
+        //Use fieldSamp for field relative coordinates to draw on
+        final double SAMPLE_LENGTH = 3.5;
+        final double SAMPLE_WIDTH = 1.5;
+
+        Translation2d frontLeft = fieldSamp.plus(new Translation2d(SAMPLE_LENGTH/2, SAMPLE_WIDTH/2).rotateBy(samplePos.getRotation().plus(Rotation2d.fromDegrees(-90))));
+        Translation2d frontRight = fieldSamp.plus(new Translation2d(SAMPLE_LENGTH/2, -SAMPLE_WIDTH/2).rotateBy(samplePos.getRotation().plus(Rotation2d.fromDegrees(-90))));
+        Translation2d backRight = fieldSamp.plus(new Translation2d(-SAMPLE_LENGTH/2, -SAMPLE_WIDTH/2).rotateBy(samplePos.getRotation().plus(Rotation2d.fromDegrees(-90))));
+        Translation2d backLeft = fieldSamp.plus(new Translation2d(-SAMPLE_LENGTH/2, SAMPLE_WIDTH/2).rotateBy(samplePos.getRotation().plus(Rotation2d.fromDegrees(-90))));
+
+        double[] xPoints = {frontLeft.getX(), frontRight.getX(), backRight.getX(), backLeft.getX()};
+        double[] yPoints = {frontLeft.getY(), frontRight.getY(), backRight.getY(), backLeft.getY()};
+
+
+        c.setStrokeWidth(1);
+        c.strokePolygon(xPoints, yPoints);
     }
 
 }

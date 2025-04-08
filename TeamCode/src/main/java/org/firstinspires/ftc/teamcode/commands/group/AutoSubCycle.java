@@ -61,7 +61,10 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         () -> pivot.isDone() && vision.getPossibilityForSampleExistingInThisGivenMomentOfTimeAndSpace()
                 ).alongWith(
                         new ParallelCommandGroup(
-                                new InterruptCommand(new ExtendCommand(extension, 0.0), () -> extension.getCurrentInches() < SlideConstants.pivotDownExtension),
+                                new WaitUntilCommand(() -> pinpoint.getPose().relativeTo(AutoConstants.scorePos).getTranslation().getNorm() > 5.0).andThen(
+                                        new InterruptCommand(new ExtendCommand(extension, 0.0), () -> extension.getCurrentInches() < SlideConstants.pivotDownExtension)
+                                ),
+                                new WristCommand(wrist, IntakeConstants.groundPos),
                                 new InstantCommand(() -> vision.setCam(false)),
                                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1)
                         ).andThen(
@@ -138,9 +141,10 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         ),
                         new TimeoutCommand(new StoreCoarsePositionCommand(vision, storage, pinpoint), 200)
                 ),
+                dmc.setP2P(),
+                new GoToPointWithDefaultCommand(AutoConstants.scorePos, dmc.getGtpc()),
                 new IntakeControlCommand(intake, IntakeConstants.openPos, 0),
                 new WaitCommand(100),
-                new WristCommand(wrist, IntakeConstants.groundPos),
                 dmc.setP2P()
         );
 

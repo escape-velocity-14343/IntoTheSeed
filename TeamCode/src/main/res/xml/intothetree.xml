@@ -27,6 +27,8 @@
             <AnalogInput name="bucketSensorLeft" port="2" />
             <AnalogInput name="bucketSensorRight" port="3" />
             <goBILDAPinpoint name="pinpoint" port="0" bus="1" />
+            <APDS9960 name="bucketBottom" port="0" bus="1" />
+            <VEML3328 name="colorSensor" port="0" bus="2" />
         </LynxModule>
     </LynxUsbDevice>
 </Robot>

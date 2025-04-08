@@ -71,7 +71,7 @@ public class PinpointSubsystem extends SubsystemBase implements Localizer {
         // Log.i("posex", "" + pose.getX(DistanceUnit.INCH));
         if (DriveConstants.drawRobot) {
             TelemetryPacket packet = new TelemetryPacket();
-            drawRobot(packet.field(), getPose());
+            drawRobot(packet.fieldOverlay(), getPose());
             FtcDashboard.getInstance().sendTelemetryPacket(packet);
         }
 

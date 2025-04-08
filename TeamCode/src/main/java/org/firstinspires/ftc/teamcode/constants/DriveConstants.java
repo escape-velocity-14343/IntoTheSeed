@@ -11,7 +11,7 @@ public class DriveConstants {
     public static double kS = 0;
 
     public static boolean useFieldCentric = false;
-    public static boolean drawRobot = false;
+    public static boolean drawRobot = true;
 
     // pto
     public static double ptoRightEngagedPos = 0.53;
