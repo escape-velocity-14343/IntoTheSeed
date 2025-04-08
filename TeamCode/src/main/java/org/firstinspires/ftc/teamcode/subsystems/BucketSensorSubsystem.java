@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.lib.Util;
 
 @Config
 public class BucketSensorSubsystem extends SubsystemBase {
-    public static int rollingAverageSize = 5;
+    public static int rollingAverageSize = 4;
 
     private final AnalogInput sensorLeft;
     private final AnalogInput sensorRight;
@@ -33,19 +33,18 @@ public class BucketSensorSubsystem extends SubsystemBase {
     public void setDistanceUnit(DistanceUnit distanceUnit) {
         unit = distanceUnit;
     }
-
     /**
      * @return In whatever unit you set it to
      */
     public double getSensorLeft() {
-        return unit.fromCm(sensorLeft.getVoltage() * 500 / 3.3);
+        return unit.fromCm(sensorLeftAverage * 500 / 3.3);
     }
 
     /**
      * @return In whatever unit you set it to
      */
     public double getSensorRight() {
-        return unit.fromCm(sensorRight.getVoltage() * 500 / 3.3);
+        return unit.fromCm(sensorRightAverage * 500 / 3.3);
     }
 
     @Override

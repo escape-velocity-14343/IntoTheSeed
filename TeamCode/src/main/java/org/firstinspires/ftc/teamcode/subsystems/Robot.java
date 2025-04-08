@@ -6,6 +6,9 @@ import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.geometry.Pose2d;
+import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -18,9 +21,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import org.firstinspires.ftc.teamcode.commands.SquIDDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.BucketRelocalizeCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.DefaultDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.group.BucketPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.DefaultGVFCommand;
+import org.firstinspires.ftc.teamcode.commands.group.DefaultGoToPointCommand;
 import org.firstinspires.ftc.teamcode.commands.group.GroundSubPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.GroundSubReadyPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.LowBucketPosCommand;
@@ -244,12 +250,16 @@ public abstract class Robot extends LinearOpMode {
             cs.schedule(
                     new DefaultGVFCommand(mecanum, pinpoint, generatedSpline)
                             .whenClose(bucketPos(), 48.0)
-                            .whenClose(new BucketRelocalizeCommand(basketSensor, pinpoint), 2.0)
+                            //.whenClose(new BucketRelocalizeCommand(basketSensor, pinpoint, 3), 2.0)
                             .setTangentOffset(180)
-                            //.endWhenClose(4.0)
+                            .endWhenClose(1.0)
                             .alongWith(setStateCommand(FSMStates.BUCKET_ALIGN))
+                            .whenFinished(() -> cs.schedule(
+                                    new DefaultGoToPointCommand(mecanum, pinpoint, new Pose2d(-63, 59, Rotation2d.fromDegrees(-45)))
+                                            .alongWith(new WaitCommand(200).andThen(new BucketRelocalizeCommand(basketSensor, pinpoint, 3.0)))
+                                            .interruptOn(() -> Util.isGamepadAlive(gamepad1, 0.5))
+                            ))
                             .interruptOn(() -> Util.isGamepadAlive(gamepad1, 0.5))
-                            //.whenFinished(() -> cs.schedule(retract()))
             );
         });
     }

@@ -23,7 +23,10 @@ public class BucketSensorTest extends LinearOpMode {
 
         pinpoint.resetYaw();
         pinpoint.setPosition(-65, 40);
-        CommandScheduler.getInstance().schedule(new BucketRelocalizeCommand(bucketSensor, pinpoint));
+        BucketRelocalizeCommand bucketCommand = new BucketRelocalizeCommand(bucketSensor, pinpoint, 1.0);
+        bucketCommand.setTelemetry(telemetry);
+        bucketCommand.setDryRun(true);
+        CommandScheduler.getInstance().schedule(bucketCommand);
 
         while (!isStopRequested()) {
             CommandScheduler.getInstance().run();

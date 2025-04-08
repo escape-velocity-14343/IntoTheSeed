@@ -55,7 +55,7 @@ public class TeleOpps extends Robot {
 
         DoubleSupplier fieldCentricHeading = true ? () -> pinpoint.getPose().getRotation().getDegrees() : () -> 0.0;
         BooleanSupplier inIntake = () -> currentlyInState(FSMStates.TOP_INTAKE, FSMStates.TOP_INTAKE_READY, FSMStates.GROUND_INTAKE, FSMStates.GROUND_INTAKE_READY);
-        DoubleSupplier xyGain = () -> inIntake.getAsBoolean() ? 0.7 : 1;
+        DoubleSupplier xyGain = () -> 1.0;//inIntake.getAsBoolean() ? 0.7 : 1;
         DoubleSupplier tGain = () -> inIntake.getAsBoolean() ? 0.3 : 1;
         Function<Double, Double> normalStickCurve = Util::halfLinearHalfCubic;
         Function<Double, Double> intakingStickCurve = (x) -> x;//Math.signum(x) * Math.sqrt(Math.abs(x));
