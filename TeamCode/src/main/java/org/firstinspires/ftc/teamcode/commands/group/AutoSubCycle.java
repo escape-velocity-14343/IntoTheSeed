@@ -62,13 +62,13 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 ).alongWith(
                         new ParallelCommandGroup(
                                 new InterruptCommand(new ExtendCommand(extension, 0.0), () -> extension.getCurrentInches() < SlideConstants.pivotDownExtension),
-                                new WristCommand(wrist, IntakeConstants.groundPos - 0.115),
                                 new InstantCommand(() -> vision.setCam(false)),
                                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1)
                         ).andThen(
+                                new WristCommand(wrist, IntakeConstants.groundPos - 0.115),
                                 new InterruptCommand(
                                         new PivotCommand(pivot, PivotConstants.bottomLimit),
-                                        () -> pivot.getCurrentPosition() < 45.0
+                                        () -> pivot.getCurrentPosition() < 10.0
                                 ).alongWith(
                                         new TurretCommand(turret, 0.0),
                                         new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 0)
@@ -106,6 +106,14 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 //new WaitUntilStabilizedCommand(pinpoint),
                 new InstantCommand(() -> vision.setCam(true)),
 
+                // What we need to do next:
+                // Wait Until Stabilized pitch
+                // Use the non-supplier subPos Command because there's no reason to use a supplier, we're
+                // continually supplying the same value over and over
+                // We can keep the timeout
+                // Potentially what we can do is create a new stabilizedSubCommand which splits the IVK
+                // Into 1 inch Y value increments, and uses wait for stabilized internally between each iteration
+
                 // intake
                 new TimeoutCommand(
                         new SubPosCommand(extension, wrist, intake, pivot, () -> Math.cos(Math.toRadians(pivot.getCurrentPosition())) * extension.getCurrentInches()), 200
@@ -130,10 +138,9 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         ),
                         new TimeoutCommand(new StoreCoarsePositionCommand(vision, storage, pinpoint), 200)
                 ),
-                new IntakeControlCommand(intake, IntakeConstants.openPos, 0).alongWith(
-                        new WristCommand(wrist, IntakeConstants.scoringPos)
-                ),
+                new IntakeControlCommand(intake, IntakeConstants.openPos, 0),
                 new WaitCommand(100),
+                new WristCommand(wrist, IntakeConstants.groundPos),
                 dmc.setP2P()
         );
 

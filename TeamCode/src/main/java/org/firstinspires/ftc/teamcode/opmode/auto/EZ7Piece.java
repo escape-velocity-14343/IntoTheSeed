@@ -172,6 +172,7 @@ public class EZ7Piece extends Robot {
                         new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
                                 new DunkCommand(extension, pivot, wrist, turret, intake)
                         ),
+                        new WristCommand(wrist, IntakeConstants.groundPos),
                         new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target),
                         new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target),
                         new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target),
