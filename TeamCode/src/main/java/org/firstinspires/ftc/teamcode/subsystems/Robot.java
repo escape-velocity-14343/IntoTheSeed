@@ -234,7 +234,7 @@ public abstract class Robot extends LinearOpMode {
             Spline generatedSpline = new CubicBezier(
                     x, y,
                     -30 - 0.5 * x + 10, 35,
-                    -50, 50,
+                    -52, 48,
                     -62, 58
             );
             if (currentlyInState(
@@ -250,15 +250,15 @@ public abstract class Robot extends LinearOpMode {
             cs.schedule(
                     new DefaultGVFCommand(mecanum, pinpoint, generatedSpline)
                             .whenClose(bucketPos(), 48.0)
-                            //.whenClose(new BucketRelocalizeCommand(basketSensor, pinpoint, 3), 2.0)
+                            .whenClose(new WaitCommand(300).andThen(new BucketRelocalizeCommand(basketSensor, pinpoint, 3)), 1.0)
                             .setTangentOffset(180)
-                            .endWhenClose(1.0)
+                            //.endWhenClose(1.0)
                             .alongWith(setStateCommand(FSMStates.BUCKET_ALIGN))
-                            .whenFinished(() -> cs.schedule(
-                                    new DefaultGoToPointCommand(mecanum, pinpoint, new Pose2d(-63, 59, Rotation2d.fromDegrees(-45)))
-                                            .alongWith(new WaitCommand(200).andThen(new BucketRelocalizeCommand(basketSensor, pinpoint, 3.0)))
-                                            .interruptOn(() -> Util.isGamepadAlive(gamepad1, 0.5))
-                            ))
+                            //.whenFinished(() -> cs.schedule(
+                            //        new DefaultGoToPointCommand(mecanum, pinpoint, new Pose2d(-63, 59, Rotation2d.fromDegrees(-45)))
+                            //                .alongWith(new WaitCommand(200).andThen(new BucketRelocalizeCommand(basketSensor, pinpoint, 3.0)))
+                            //                .interruptOn(() -> Util.isGamepadAlive(gamepad1, 0.5))
+                            //))
                             .interruptOn(() -> Util.isGamepadAlive(gamepad1, 0.5))
             );
         });
