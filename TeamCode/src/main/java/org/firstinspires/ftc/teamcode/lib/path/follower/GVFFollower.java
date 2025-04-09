@@ -167,6 +167,7 @@ public class GVFFollower {
         // squid
         double rot = Util.signedSqrt(-Util.getAngularDifference(targetAngle, robotPose.getRotation().getDegrees()) * DefaultGoToPointCommand.headingkP);
         rot += Math.signum(rot) * headingKS;
+        Log.v("GVFf", String.format("target heading: %.2f", targetAngle));
         Log.v("GVFf", "attempted movement: " + movementVec.getX() + ", " + movementVec.getY() + ", " + rot);
 
         //FtcDashboard.getInstance().sendTelemetryPacket(getSplineDrawPacket(100));
