@@ -115,7 +115,7 @@ public class DefaultGVFCommand extends CommandBase {
         double hMove = move.getRotation().getDegrees();
 
         if (toggle) {
-            drive.driveFieldCentric(-xMove, -yMove * 1.2, hMove);
+            drive.driveFieldCentricCompensated(-xMove, -yMove, hMove);
         }
 
         // velocity end
