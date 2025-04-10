@@ -14,14 +14,15 @@ public class DriveConstants {
     public static boolean drawRobot = true;
 
     // pto
-    public static double ptoRightEngagedPos = 0.53;
+    public static double ptoRightEngagedPos = 0.3;
     public static double ptoRightDisengagedPos = 0.6;
 
 
-    public static double ptoLeftEngagedPos = 1.0;
-    public static double ptoLeftDisengagedPos = 0.7;
+    public static double ptoLeftEngagedPos = 0.15;
+    public static double ptoLeftDisengagedPos = 0.45;
 
     public static double strafeMultiplier = 1.1;
 
     public static double forwardMotorMultiplier = 0.35;
+    public static double ptoPowerFac = 0.5;
 }

@@ -133,21 +133,28 @@ public class MecanumDriveSubsystem extends SubsystemBase {
         }
     }
 
+    public void driveRaw(double fl, double bl, double fr, double br) {
+        this.fl.setPower(fl);
+        this.bl.setPower(bl);
+        this.fr.setPower(fr);
+        this.br.setPower(br);
+    }
+
     public double getAutoVoltageMult() {
         return this.voltage.getVoltageNormalized();
     }
 
     public void setBrake() {
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void clearBrake() {
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 

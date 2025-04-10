@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands.custom;
 
+import android.util.Log;
+
 import com.arcrobotics.ftclib.command.CommandBase;
 import java.util.function.DoubleSupplier;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
@@ -24,6 +26,7 @@ public class DefaultDriveCommand extends CommandBase {
 
     @Override
     public void execute() {
+        Log.i("default drive command", "it is happening");
         drive.driveFieldCentric(
                 -x.getAsDouble() + getXModPower(),
                 y.getAsDouble() + getYModPower(),

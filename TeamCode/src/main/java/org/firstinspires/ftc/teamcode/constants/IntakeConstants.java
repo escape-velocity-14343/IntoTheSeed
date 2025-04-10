@@ -50,4 +50,5 @@ public class IntakeConstants {
     public static double wristOffset = -0.06;
 
     public static double intakeSensorVoltageThres = 0.25;
+    public static double hangReady = 0.35;
 }

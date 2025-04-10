@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import android.util.Log;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
@@ -11,9 +12,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
 import java.util.function.DoubleSupplier;
+
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
+import org.firstinspires.ftc.teamcode.constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.CachingVoltageSensor;
@@ -32,6 +36,8 @@ public class ExtensionSubsystem extends SubsystemBase {
     private double extensionPowerMul = 1.0;
 
     private final PivotSubsystem pivotSubsystem;
+    private final MecanumDriveSubsystem drive;
+    private final PtoSubsystem pto;
 
     // Triggers
     public Trigger underZeroTrigger;
@@ -45,9 +51,11 @@ public class ExtensionSubsystem extends SubsystemBase {
     public Trigger isExtendedTrigger;
 
     public ExtensionSubsystem(
-            HardwareMap hMap, PivotSubsystem pivotSubsystem, CachingVoltageSensor voltage) {
+            HardwareMap hMap, PivotSubsystem pivotSubsystem, CachingVoltageSensor voltage, MecanumDriveSubsystem drive, PtoSubsystem pto) {
         this.voltage = voltage;
         this.pivotSubsystem = pivotSubsystem;
+        this.drive = drive;
+        this.pto = pto;
 
         motor0 = (DcMotorEx) hMap.dcMotor.get("slide0");
         motor0.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -60,6 +68,10 @@ public class ExtensionSubsystem extends SubsystemBase {
         squid.setPID(SlideConstants.kP);
 
         this.initialize();
+    }
+
+    public ExtensionSubsystem(HardwareMap hMap, PivotSubsystem pivotSubsystem, CachingVoltageSensor voltage) {
+        this(hMap, pivotSubsystem, voltage, null, null);
     }
 
     /**
@@ -79,7 +91,7 @@ public class ExtensionSubsystem extends SubsystemBase {
                                         () ->
                                                 getCurrentInches()
                                                         > SlideConstants
-                                                                .submersibleIntakeMaxExtension))
+                                                        .submersibleIntakeMaxExtension))
                         .and(forwardTargetTrigger)
                         .and(new Trigger(() -> pivotSubsystem.isClose(PivotConstants.intakePos)))
                         .whenActive(
@@ -182,10 +194,11 @@ public class ExtensionSubsystem extends SubsystemBase {
      * Sets openloop power to the motors.
      * <br> <br>
      * Returns a InstantCommand factory, for setting the motor powers instantaneously.
+     *
      * @param power
      * @return
      */
-    public Command openloopC(Double power){
+    public Command openloopC(Double power) {
         return new InstantCommand(() -> openloop(power), this);
     }
 
@@ -196,19 +209,21 @@ public class ExtensionSubsystem extends SubsystemBase {
      * and for pure open loop control, like for stalling the robot.
      * <br> Bind to a Trigger that is decorated with the manual control Trigger!
      * <br> Throws warning if manual control is not enabled.
+     *
      * @param power
      * @return RunCommand Factory
      */
-    public Command openloopC(DoubleSupplier power){
+    public Command openloopC(DoubleSupplier power) {
         return new RunCommand(() -> openloopS(power), this);
     }
 
     /**
      * Internal factory method for openloop slide control
+     *
      * @param power
      * @return
      */
-    private void openloopS(DoubleSupplier power){
+    private void openloopS(DoubleSupplier power) {
         openloop(power.getAsDouble());
     }
 
@@ -217,9 +232,14 @@ public class ExtensionSubsystem extends SubsystemBase {
      *
      * @param power from [-1.0 to 1.0]
      */
-    private void openloop(double power) {
-        motor0.setPower(power * SlideConstants.direction);
-        motor1.setPower(-power * SlideConstants.direction);
+    public void openloop(double power) {
+        power *= SlideConstants.direction;
+        if (pto != null && drive != null && pto.isEngaged()) {
+            drive.driveRaw(power, power, power, power);
+            power *= DriveConstants.ptoPowerFac;
+        }
+        motor0.setPower(power);
+        motor1.setPower(-power);
     }
 
     public Command enableManualControl() {
@@ -241,6 +261,7 @@ public class ExtensionSubsystem extends SubsystemBase {
     /**
      * Intended Access/Entry Point for ExtensionSubsystem
      * <br> The way it's wrapped with Extend command adds logging and end state functionality.
+     *
      * @param inches
      */
     public void setTargetInches(double inches) {
@@ -251,28 +272,31 @@ public class ExtensionSubsystem extends SubsystemBase {
     /**
      * Regular Extend Command reference owned in the subsystem. <br>
      * See @ExtendCommand for actual implementation.
+     *
      * @param target
      * @return Command
      */
-    public Command getExtendCommand(double target){
+    public Command getExtendCommand(double target) {
         return new ExtendCommand(this, target);
     }
 
     /**
      * Run Command factory for extend command, that never ends.
+     *
      * @param target
      * @return Command
      */
-    public Command getExtendCommand(DoubleSupplier target){
+    public Command getExtendCommand(DoubleSupplier target) {
         return new RunCommand(() -> this.setTargetInches(target.getAsDouble()), this);
     }
 
     /**
      * Run Command factory for extend command, that never ends.
+     *
      * @param target
      * @return Command
      */
-    public Command getExtendCommandInstant(DoubleSupplier target){
+    public Command getExtendCommandInstant(DoubleSupplier target) {
         return new InstantCommand(() -> this.setTargetInches(target.getAsDouble()), this);
     }
 
@@ -298,7 +322,7 @@ public class ExtensionSubsystem extends SubsystemBase {
                 +squid.calculate(ticks, getCurrentPosition()) * extensionPowerMul
                         + SlideConstants.kS
                         + interpolate(getCurrentInches())
-                                * Math.sin(Math.toRadians(pivotSubsystem.getCurrentPosition()));
+                        * Math.sin(Math.toRadians(pivotSubsystem.getCurrentPosition()));
 
         power *= voltage.getVoltageNormalized();
 
@@ -307,6 +331,7 @@ public class ExtensionSubsystem extends SubsystemBase {
 
     /**
      * Method for interpolating feedforward for slides, against gravity.
+     *
      * @param x
      * @return
      */
@@ -344,14 +369,16 @@ public class ExtensionSubsystem extends SubsystemBase {
         return getCurrentPosition() / SlideConstants.ticksPerInch;
     }
 
-    /** Would be useful as an e-stop, binded to some trigger. */
+    /**
+     * Would be useful as an e-stop, binded to some trigger.
+     */
     public void stop() {
         openloop(0);
     }
 
     /**
      * Factory for stop()
-     *
+     * <p>
      * wait bruh it never ends if you don't cancel it
      *
      * @return Command
@@ -372,7 +399,9 @@ public class ExtensionSubsystem extends SubsystemBase {
         return (long) (Math.abs(targetInches - getCurrentInches()) * SlideConstants.millisPerInch);
     }
 
-    /** Resets the position of the slides */
+    /**
+     * Resets the position of the slides
+     */
     public void reset() {
         motor0.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor0.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -382,11 +411,13 @@ public class ExtensionSubsystem extends SubsystemBase {
     /**
      * Factory command for reseting the position of the slides
      */
-    public Command resetC(){
+    public Command resetC() {
         return new InstantCommand(this::reset, this);
     }
 
-    /** The periodic loop for the subsystem. */
+    /**
+     * The periodic loop for the subsystem.
+     */
     @Override
     public void periodic() {
         // Hardware Access every loop

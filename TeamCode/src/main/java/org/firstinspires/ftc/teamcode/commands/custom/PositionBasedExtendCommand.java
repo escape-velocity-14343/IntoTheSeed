@@ -11,7 +11,7 @@ import java.util.function.DoubleSupplier;
 
 import javax.annotation.Nullable;
 
-class ExtendCommandInternal extends CommandBase {
+public class PositionBasedExtendCommand extends CommandBase {
 
     ExtensionSubsystem extend;
     double target;
@@ -20,18 +20,19 @@ class ExtendCommandInternal extends CommandBase {
     @Nullable
     private Double powerMul = null;
     private double oldExtensionPowerMul;
+    private boolean isEnding = true;
 
     /**
      * @param subsystem
      * @param target    in inches
      */
-    public ExtendCommandInternal(ExtensionSubsystem subsystem, double target) {
+    public PositionBasedExtendCommand(ExtensionSubsystem subsystem, double target) {
         this.extend = subsystem;
         this.target = target;
         addRequirements(subsystem);
     }
 
-    public ExtendCommandInternal(ExtensionSubsystem subsystem, DoubleSupplier target) {
+    public PositionBasedExtendCommand(ExtensionSubsystem subsystem, DoubleSupplier target) {
         this.extend = subsystem;
         this.targetSupplier = target;
         addRequirements(subsystem);
@@ -43,7 +44,7 @@ class ExtendCommandInternal extends CommandBase {
      * @param powerMul  the power multipler to feed into the subsystem, will reset to the previous
      *                  power multiplier once command finishes
      */
-    public ExtendCommandInternal(ExtensionSubsystem subsystem, double target, double powerMul) {
+    public PositionBasedExtendCommand(ExtensionSubsystem subsystem, double target, double powerMul) {
         this(subsystem, target);
         this.powerMul = powerMul;
     }
@@ -63,7 +64,7 @@ class ExtendCommandInternal extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return extend.isClose(target);
+        return isEnding && extend.isClose(target);
     }
 
     @Override
@@ -72,5 +73,14 @@ class ExtendCommandInternal extends CommandBase {
             extend.setPowerMul(oldExtensionPowerMul);
         }
         Log.i("%9", "Extension to " + target);
+    }
+
+    public boolean isEnding() {
+        return isEnding;
+    }
+
+    public PositionBasedExtendCommand setEnding(boolean ending) {
+        this.isEnding = ending;
+        return this;
     }
 }

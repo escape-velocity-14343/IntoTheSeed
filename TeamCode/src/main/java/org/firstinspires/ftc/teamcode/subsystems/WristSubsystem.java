@@ -15,6 +15,7 @@ public class WristSubsystem extends SubsystemBase {
     private ServoImplEx wrist;
     private double rotation = IntakeConstants.groundPos;
     public static double debug = 0;
+    private boolean pwmDisabled = false;
 
     public WristSubsystem(HardwareMap hardwareMap) {
         wrist = (ServoImplEx) hardwareMap.get(Servo.class, "wrist");
@@ -22,6 +23,7 @@ public class WristSubsystem extends SubsystemBase {
     }
 
     public void setWrist(double rotation) {
+        setPwmDisabled(false);
         wrist.setPosition(rotation + IntakeConstants.wristOffset);
         this.rotation = rotation + IntakeConstants.wristOffset;
     }
@@ -33,5 +35,18 @@ public class WristSubsystem extends SubsystemBase {
 
     public boolean isClose(double target) {
         return Util.inRange(target, getPosition(), SlideConstants.tolerance);
+    }
+
+    public boolean isPwmDisabled() {
+        return pwmDisabled;
+    }
+
+    public void setPwmDisabled(boolean disabled) {
+        this.pwmDisabled = disabled;
+        if (disabled) {
+            wrist.setPwmDisable();
+        } else {
+            wrist.setPwmEnable();
+        }
     }
 }

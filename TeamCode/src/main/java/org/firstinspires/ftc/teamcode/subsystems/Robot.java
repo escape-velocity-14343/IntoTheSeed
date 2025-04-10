@@ -6,9 +6,8 @@ import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
-import com.arcrobotics.ftclib.geometry.Pose2d;
-import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -21,12 +20,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-import org.firstinspires.ftc.teamcode.commands.SquIDDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.BucketRelocalizeCommand;
-import org.firstinspires.ftc.teamcode.commands.custom.DefaultDriveCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.ExtensionPowerCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
 import org.firstinspires.ftc.teamcode.commands.group.BucketPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.DefaultGVFCommand;
-import org.firstinspires.ftc.teamcode.commands.group.DefaultGoToPointCommand;
 import org.firstinspires.ftc.teamcode.commands.group.GroundSubPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.GroundSubReadyPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.LowBucketPosCommand;
@@ -35,6 +35,7 @@ import org.firstinspires.ftc.teamcode.commands.group.SubPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosReadyCommand;
 import org.firstinspires.ftc.teamcode.constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
+import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.CachingVoltageSensor;
 import org.firstinspires.ftc.teamcode.lib.Util;
@@ -49,7 +50,9 @@ public abstract class Robot extends LinearOpMode {
         TOP_INTAKE,
         GROUND_INTAKE_READY,
         GROUND_INTAKE,
-        HANG,
+        HANG_READY,
+        HANG_L2,
+        HANG_L3,
         OUTTAKE,
         SPECIMEN,
         FOLD,
@@ -80,7 +83,7 @@ public abstract class Robot extends LinearOpMode {
     public CachingVoltageSensor voltage;
     public BucketSensorSubsystem basketSensor;
     public TurretSubsystem turret;
-    public PtoSubsystem PTO;
+    public PtoSubsystem pto;
     public VisionSubsystem vision;
     public TargetingSubsystem target;
 
@@ -118,11 +121,11 @@ public abstract class Robot extends LinearOpMode {
                         pinpoint,
                         voltage);
         pivot = new PivotSubsystem(hardwareMap, voltage);
-        extension = new ExtensionSubsystem(hardwareMap, pivot, voltage);
+        pto = new PtoSubsystem(hardwareMap);
+        extension = new ExtensionSubsystem(hardwareMap, pivot, voltage, mecanum, pto);
         wrist = new WristSubsystem(hardwareMap);
         intake = new IntakeSubsystem(hardwareMap);
         turret = new TurretSubsystem(hardwareMap);
-        PTO = new PtoSubsystem(hardwareMap);
 
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(
@@ -132,13 +135,13 @@ public abstract class Robot extends LinearOpMode {
                                 RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD)));
 
         pivot.setExtensionSupplier(extension::getCurrentInches);
-        PTO.setEngaged(false);
+        pto.setEngaged(false);
         vision = new VisionSubsystem(hardwareMap, telemetry);
         target = new TargetingSubsystem(vision, pinpoint, telemetry);
 
         mecanum.setForwardCompensationSupplier(() -> extension.getCurrentInches() / SlideConstants.maxExtension * DriveConstants.forwardMotorMultiplier * Math.cos(Math.toRadians(pivot.getCurrentPosition())) + 1.0);
 
-        cs.registerSubsystem(basketSensor, pinpoint, mecanum, pivot, extension, wrist, intake, turret, PTO, vision, target);
+        cs.registerSubsystem(basketSensor, pinpoint, mecanum, pivot, extension, wrist, intake, turret, pto, vision, target);
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
     }
@@ -262,6 +265,22 @@ public abstract class Robot extends LinearOpMode {
                             .interruptOn(() -> Util.isGamepadAlive(gamepad1, 0.5))
             );
         });
+    }
+
+    public Command hangReady() {
+        return new ParallelCommandGroup(
+                new ExtendCommand(extension, SlideConstants.hangReady),
+                new PivotCommand(pivot, PivotConstants.hangReady),
+                new WristCommand(wrist, IntakeConstants.hangReady)
+        ).andThen(setStateCommand(FSMStates.HANG_READY));
+    }
+
+    public Command hangL2() {
+        return new ParallelCommandGroup(
+                new ExtensionPowerCommand(extension, mecanum, pto, -1.0),
+                new InstantCommand(() -> wrist.setPwmDisabled(true)),
+                setStateCommand(FSMStates.HANG_L2)
+        ).whenFinished(() -> cs.schedule(new InstantCommand(() -> pto.setEngaged(false))));
     }
 
     public void setState(FSMStates state) {

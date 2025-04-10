@@ -17,7 +17,6 @@ import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.InterruptCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
-import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
 import org.firstinspires.ftc.teamcode.commands.group.FullIntakeFoldCommand;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
@@ -165,7 +164,15 @@ public class TeleOpps extends Robot {
                         inState(FSMStates.TOP_INTAKE, FSMStates.GROUND_INTAKE)
                 ));
 
+        // ------- AUTO ALIGN -------
         new Trigger(() -> driverPad.gamepad.touchpad).whenActive(bucketAlign());
+
+        // ------- HANG -------
+        driverPad.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(hangReady());
+        driverPad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileActiveOnce(hangL2());
+
+        new Trigger(() -> Util.isGamepadAlive(driverPad.gamepad) && pto.isEngaged())
+                .whenActive(new InstantCommand(() -> pto.setEngaged(false)));
     }
 
     public void configureOperator() {

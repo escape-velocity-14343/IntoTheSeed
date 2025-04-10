@@ -95,6 +95,10 @@ public class Util {
                 || Math.abs(gp.right_stick_y) > threshold;
     }
 
+    public static boolean isGamepadAlive(Gamepad gp) {
+        return isGamepadAlive(gp, 0.1);
+    }
+
     public static double mean(Collection<Double> values) {
         double total = 0.0;
         for (double value : values) {
