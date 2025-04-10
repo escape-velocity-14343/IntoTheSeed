@@ -30,6 +30,7 @@ public class PinpointTest extends Robot {
 
         CommandScheduler.getInstance().setDefaultCommand(mecanum, new DefaultDriveCommand(
                 mecanum,
+                pto,
                 () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftY() / driverPad.getLeftX()) < 0.05 ? 0 : driverPad.getLeftY()) * (getState() == FSMStates.TOP_INTAKE || getState() == FSMStates.OUTTAKE ? 1 : 1),
                 () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftX() / driverPad.getLeftY()) < 0.05 ? 0 : driverPad.getLeftX()) * (getState() == FSMStates.TOP_INTAKE || getState() == FSMStates.OUTTAKE ? 1 : 1),
                 () -> Util.halfLinearHalfCubic(driverPad.getRightX()) * (getState() == FSMStates.TOP_INTAKE || getState() == FSMStates.OUTTAKE ? 1 : 1),

@@ -58,7 +58,13 @@ public class ExtensionPowerCommand extends CommandBase {
     }
 
     @Override
+    public boolean isFinished() {
+        return false;
+    }
+
+    @Override
     public void end(boolean interrupted) {
+        Log.i("extension power finish", String.format("was interrupted: %s", interrupted));
         extension.setManualControl(lastManualControl);
     }
 }

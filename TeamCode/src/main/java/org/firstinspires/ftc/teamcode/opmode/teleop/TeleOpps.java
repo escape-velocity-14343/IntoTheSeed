@@ -60,6 +60,7 @@ public class TeleOpps extends Robot {
         Function<Double, Double> intakingStickCurve = (x) -> x;//Math.signum(x) * Math.sqrt(Math.abs(x));
         CommandScheduler.getInstance().setDefaultCommand(mecanum, new DefaultDriveCommand(
                 mecanum,
+                pto,
                 () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftY() / driverPad.getLeftX()) < 0.05 ? 0 : driverPad.getLeftY()) * xyGain.getAsDouble(),
                 () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftX() / driverPad.getLeftY()) < 0.05 ? 0 : driverPad.getLeftX()) * xyGain.getAsDouble(),
                 () -> (inIntake.getAsBoolean() ? intakingStickCurve : normalStickCurve).apply(driverPad.getRightX()) * tGain.getAsDouble(),
@@ -100,6 +101,7 @@ public class TeleOpps extends Robot {
         // ------- UTILITIES -------
         // heading reset
         new Trigger(() -> gamepad1.options && gamepad1.share).whileActiveOnce(new InstantCommand(pinpoint::resetYaw));
+        new Trigger(intake::proxClose).whileActiveContinuous(()->gamepad1.rumble(50));
 
         // ------- BUCKET --------
         driverPad.getGamepadButton(GamepadKeys.Button.X).whenActive(new ConditionalCommand(
@@ -169,7 +171,7 @@ public class TeleOpps extends Robot {
 
         // ------- HANG -------
         driverPad.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(hangReady());
-        driverPad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileActiveOnce(hangL2());
+        driverPad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileActiveOnce(hangL2()).whenInactive(new InstantCommand(() -> pto.setEngaged(false)));
 
         new Trigger(() -> Util.isGamepadAlive(driverPad.gamepad) && pto.isEngaged())
                 .whenActive(new InstantCommand(() -> pto.setEngaged(false)));
@@ -189,7 +191,7 @@ public class TeleOpps extends Robot {
         Trigger leftOperatorTrigger = new Trigger(() -> operatorPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.1);
         Trigger rightOperatorTrigger = new Trigger(() -> operatorPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1);
 
-        extension.manualControlTrigger.whenActive(extension.openloopC(() -> Util.applyDeadband(operatorPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) - operatorPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER), SlideConstants.manualControlDeadband)));
+        extension.manualControlTrigger.and(new Trigger(notInAnyState(FSMStates.HANG_READY, FSMStates.HANG_L2, FSMStates.HANG_L3))).whenActive(extension.openloopC(() -> Util.applyDeadband(operatorPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) - operatorPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER), SlideConstants.manualControlDeadband)));
         pivot.manualControlTrigger.whenActive(pivot.openloopC(() -> Util.applyDeadband(operatorPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) - operatorPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER), PivotConstants.manualControlDeadband)));
 
         //A and Y on opposite sides

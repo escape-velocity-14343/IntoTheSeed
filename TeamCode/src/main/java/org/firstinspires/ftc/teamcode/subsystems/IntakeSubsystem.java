@@ -4,7 +4,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -14,7 +13,7 @@ import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 public class IntakeSubsystem extends SubsystemBase {
     private CRServo intake;
     private Servo clawer;
-    private AnalogInput front;
+    private AnalogInput prox, imu;
     private double speed = 0;
     private double clawPos = IntakeConstants.closedPos;
 
@@ -23,9 +22,9 @@ public class IntakeSubsystem extends SubsystemBase {
     public IntakeSubsystem(HardwareMap hardwareMap) {
         intake = hardwareMap.crservo.get("intake");
         clawer = hardwareMap.servo.get("clawer");
-        //front = hardwareMap.analogInput.get("clawSens1");
+        prox = hardwareMap.analogInput.get("clawProx");
+        imu = hardwareMap.analogInput.get("clawImu");
         clawer.setDirection(Servo.Direction.REVERSE);
-//        intake.setDirection(DcMotorSimple.Direction.REVERSE);
         lastResetTime = new ElapsedTime();
     }
 
@@ -49,12 +48,22 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public double getFrontV() {
-        return front.getVoltage();
+        return prox.getVoltage();
+    }
+    public boolean proxClose() {
+        return prox.getVoltage() < IntakeConstants.intakeSensorVoltageThres;
+    }
+    public boolean stable() {
+        return Math.abs(getAccel()) < IntakeConstants.intakeAccelThres;
     }
 
-    public boolean getDSensorSupplier() {
-        return (front.getVoltage() > IntakeConstants.intakeSensorVoltageThres);
+    /**
+     * @return in m/s^2
+     */
+    public double getAccel() {
+        return (imu.getVoltage()-imu.getMaxVoltage()/2)*3*9.8;
     }
+
 
     @Override
     public void periodic() {

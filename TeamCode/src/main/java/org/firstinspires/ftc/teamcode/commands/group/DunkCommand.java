@@ -5,6 +5,8 @@ import android.util.Log;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.ParallelRaceGroup;
+import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
@@ -13,6 +15,7 @@ import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.InterruptCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.TimeoutCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
@@ -65,11 +68,11 @@ public class DunkCommand extends SequentialCommandGroup {
                                                 () -> extension.getCurrentInches() > SlideConstants.safeForDunk),
                                         new WaitUntilCommand(
                                                 () -> extension.getCurrentInches() > SlideConstants.safeForDunk
-                                        ).andThen(new WristCommand(wrist, IntakeConstants.dunkScoringPos))
+                                        ).andThen(new WristCommand(wrist, IntakeConstants.dunkScoringPos).interruptOn(intake::stable))
                                 )
                         )
                 ),
-                new WaitCommand(50),
+                new ParallelRaceGroup(new TimeoutCommand(new RunCommand(()->Log.i("imu poo", "imu accel: " + intake.getAccel())), 50), new WaitUntilCommand(intake::stable)),
                 new IntakeClawCommand(intake, IntakeConstants.openPos),
                 new InstantCommand(() -> Log.i("%2", "Dunk End")));
     }

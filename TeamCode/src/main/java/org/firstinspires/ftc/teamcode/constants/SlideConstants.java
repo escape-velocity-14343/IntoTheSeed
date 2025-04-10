@@ -40,7 +40,7 @@ public class SlideConstants {
     public static double lowExtendInches = -1;
     public static double extendedThreshold = 3;
     // It takes 0.4 seconds from scoring pos reversed to scoring Pos
-    public static double pivotDownExtension = 15;
+    public static double pivotDownExtension = 24;
 
     public static double safeForDunk = 26;
 

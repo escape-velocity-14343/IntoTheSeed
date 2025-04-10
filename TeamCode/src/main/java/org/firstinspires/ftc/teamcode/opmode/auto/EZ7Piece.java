@@ -66,7 +66,7 @@ public class EZ7Piece extends Robot {
         intake.setClawer(IntakeConstants.closedPos);
 
         SamplePoseStorage storage = new SamplePoseStorage();
-        storage.setCoarsePosition(new Pose2d(-15.0, 3.0, new Rotation2d()));
+        storage.setCoarsePosition(new Pose2d(-15, 2, new Rotation2d()));
         vision.waitForSetExposure(3000, 10000, PNPTest.exposure);
         while (!vision.setCam(true)) ;
 
@@ -110,7 +110,7 @@ public class EZ7Piece extends Robot {
                         //new WaitUntilCommand(() -> pivot.getPivotVelocity() < PivotConstants.maxPivotVelocity),
                         new ParallelCommandGroup(
                                 new SlowExtendCommand(extension, AutoConstants.spike1ExtensionLength, AutoConstants.spikeExtensionSpeed),
-                                new WaitUntilCommand(() -> extension.getCurrentInches() > AutoConstants.spike1ExtensionLength - AutoConstants.clawCloseDistance
+                                new WaitUntilCommand(() -> (extension.getCurrentInches() > AutoConstants.spike1ExtensionLength - AutoConstants.clawCloseDistance) || intake.proxClose()
                                 ).andThen(
                                         new IntakeControlCommand(intake, IntakeConstants.closedPos, 1)
                                 )
@@ -134,7 +134,7 @@ public class EZ7Piece extends Robot {
                         ),
                         new ParallelCommandGroup(
                                 new SlowExtendCommand(extension, AutoConstants.spike2ExtensionLength, AutoConstants.spikeExtensionSpeed),
-                                new WaitUntilCommand(() -> extension.getCurrentInches() > AutoConstants.spike2ExtensionLength - AutoConstants.clawCloseDistance
+                                new WaitUntilCommand(() -> (extension.getCurrentInches() > AutoConstants.spike2ExtensionLength - AutoConstants.clawCloseDistance) || intake.proxClose()
                                 ).andThen(
                                         new IntakeControlCommand(intake, IntakeConstants.closedPos, 1)
                                 )
@@ -146,7 +146,7 @@ public class EZ7Piece extends Robot {
 
                         // intake third
                         // The thing is that you have to make sure you don't slam your intake on the ground and pop it
-                        new GoToPointWithDefaultCommand(new Pose2d(-45, 63.5, Rotation2d.fromDegrees(5)), gtpc, 0.5, 2)
+                        new GoToPointWithDefaultCommand(new Pose2d(-45, 60, Rotation2d.fromDegrees(10)), gtpc, 0.5, 2)
                                 .withTimeout(1500)
                                 .alongWith(
                                         new ExtendCommand(extension, AutoConstants.spike3ExtensionLength - AutoConstants.extendedWhilePivotOffset)
@@ -160,11 +160,11 @@ public class EZ7Piece extends Robot {
                                         new IntakeControlCommand(intake, (2 * IntakeConstants.openPos + IntakeConstants.singleIntakePos) / 3, 1)
                                 ),
                         new GoToPointWithDefaultCommand(
-                                new Pose2d(-44, 62, Rotation2d.fromDegrees(9.5)), gtpc, 0.5, 2
+                                new Pose2d(-44, 60, Rotation2d.fromDegrees(20)), gtpc, 0.5, 2
                         ),
                         new ParallelCommandGroup(
                                 new TimeoutCommand(new SlowExtendCommand(extension, AutoConstants.spike3ExtensionLength, AutoConstants.spikeExtensionSpeed), 2000),
-                                new WaitUntilCommand(() -> extension.getCurrentInches() > AutoConstants.spike3ExtensionLength - AutoConstants.clawCloseDistance
+                                new WaitUntilCommand(() -> (extension.getCurrentInches() > AutoConstants.spike3ExtensionLength - AutoConstants.clawCloseDistance) || intake.proxClose()
                                 ).andThen(
                                         new IntakeControlCommand(intake, IntakeConstants.closedPos, 1)
                                 )

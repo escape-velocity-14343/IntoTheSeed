@@ -49,6 +49,7 @@ public class IntakeConstants {
     // 1 tooth of skip = 0.05 position
     public static double wristOffset = -0.06;
 
-    public static double intakeSensorVoltageThres = 0.25;
+    public static double intakeSensorVoltageThres = 1.6;
     public static double hangReady = 0.35;
+    public static double intakeAccelThres = 45;
 }

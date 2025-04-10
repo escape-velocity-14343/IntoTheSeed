@@ -7,6 +7,7 @@ import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -276,11 +277,11 @@ public abstract class Robot extends LinearOpMode {
     }
 
     public Command hangL2() {
-        return new ParallelCommandGroup(
-                new ExtensionPowerCommand(extension, mecanum, pto, -1.0),
+        return new SequentialCommandGroup(
+                setStateCommand(FSMStates.HANG_L2),
                 new InstantCommand(() -> wrist.setPwmDisabled(true)),
-                setStateCommand(FSMStates.HANG_L2)
-        ).whenFinished(() -> cs.schedule(new InstantCommand(() -> pto.setEngaged(false))));
+                new ExtensionPowerCommand(extension, mecanum, pto, -1.0)
+        );
     }
 
     public void setState(FSMStates state) {

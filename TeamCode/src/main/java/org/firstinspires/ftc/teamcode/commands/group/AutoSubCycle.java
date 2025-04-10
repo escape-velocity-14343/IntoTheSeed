@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commands.group;
 
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.ParallelRaceGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
@@ -121,7 +122,10 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 new TimeoutCommand(
                         new SubPosCommand(extension, wrist, intake, pivot, () -> Math.cos(Math.toRadians(pivot.getCurrentPosition())) * extension.getCurrentInches()), 200
                 ),
-                new WaitCommand(200),
+                new ParallelRaceGroup(
+                  new WaitCommand(200),
+                  new WaitUntilCommand(intake::proxClose)
+                ),
 
                 // go to score
                 dmc.setGVF(),
