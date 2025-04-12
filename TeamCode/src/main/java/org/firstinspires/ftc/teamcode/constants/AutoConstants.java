@@ -9,7 +9,7 @@ import com.arcrobotics.ftclib.geometry.Rotation2d;
 public class AutoConstants {
 
     public static Pose2d scorePos = new Pose2d(-61, 59, Rotation2d.fromDegrees(-45));
-    public static Pose2d cycleScorePos = new Pose2d(-62, 63, Rotation2d.fromDegrees(-30));
+    public static Pose2d cycleScorePos = new Pose2d(-62, 64, Rotation2d.fromDegrees(-30));
     public static Pose2d scorePosOffset = new Pose2d(-62,58.5, Rotation2d.fromDegrees(-45));
 
     public static double subBarrierY = 18.5;
@@ -27,6 +27,8 @@ public class AutoConstants {
 
     public static double clawCloseDistance = 1;
     public static double extendedWhilePivotOffset = 2;
+
+    public static double fastDropDistance = 8.0;
 
     // Milliseconds
     public static long outtakeTimeout = 1300;

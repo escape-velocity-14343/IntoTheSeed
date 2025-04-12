@@ -215,7 +215,7 @@ public class PivotSubsystem extends SubsystemBase {
     }
 
     private double getKg(){
-        return (interpolatedRawFeedforwardkG() * Math.cos(getCurrentPosition()));
+        return (interpolatedRawFeedforwardkG() * Math.cos(Math.toRadians(getCurrentPosition())));
     }
 
     @Override

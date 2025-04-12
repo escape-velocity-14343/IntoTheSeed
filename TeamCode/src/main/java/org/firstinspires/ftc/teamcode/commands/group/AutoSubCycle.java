@@ -44,6 +44,8 @@ import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
 
+import java.sql.Time;
+
 public class AutoSubCycle extends SequentialCommandGroup {
 
     public AutoSubCycle(VisionSubsystem vision, PivotSubsystem pivot, ExtensionSubsystem extension, SamplePoseStorage storage, DefaultDualMoveCommand dmc, MecanumDriveSubsystem drive, PinpointSubsystem pinpoint, IntakeSubsystem intake, WristSubsystem wrist, TurretSubsystem turret, TargetingSubsystem target, BucketSensorSubsystem bucketSensors) {
@@ -105,33 +107,17 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
                         400
                 ),
-                new WaitUntilCommand(() -> dmc.getGtpc().isDone()).alongWith(
-                        new WaitUntilCommand(extension::isClose)
-                ).deadlineWith(
-                        new PerpetualCommand(new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret)),
-                        new PerpetualCommand(
-                                new ExtendCommand(extension, storage::getNewExtension) {
-                                    @Override
-                                    public void execute() {
-                                        super.execute();
-                                        extension.setTargetInches(storage.getNewExtension());
-                                        Log.v("Auto Sub Cycle", "Extension Target: " + storage.getNewExtension());
-                                        Log.v("Auto Sub Cycle", "Extension: " + extension.getCurrentInches());
-                                    }
-                                }
-                        ),
-                        new PerpetualCommand(
-                                new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2) {
-                                    @Override
-                                    public void execute() {
-                                        dmc.getGtpc().setTarget(storage.getFinePosition());
-                                        Log.v("Auto Sub Cycle", "Heading Target: " + storage.getFinePosition().getRotation().getDegrees());
-                                        Log.v("Auto Sub Cycle", "Heading: " + pinpoint.getPose().getRotation().getDegrees());
-                                    }
-                                }
-                        )
+                new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(
+                        new ExtendCommand(extension, storage::getNewExtension)
                 ),
-                new WristCommand(wrist, IntakeConstants.toptakePos),
+                new TimeoutCommand(
+                        new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
+                        200
+                ),
+                new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(
+                        new ExtendCommand(extension, storage::getNewExtension),
+                        new WristCommand(wrist, IntakeConstants.toptakePos)
+                ),
 
                 /*new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(
                         new ExtendCommand(extension, storage::getNewExtension),
@@ -149,11 +135,17 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 // Into 1 inch Y value increments, and uses wait for stabilized internally between each iteration
 
                 // intake
+                new IntakeControlCommand(intake, IntakeConstants.toptakePos, 1),
+                pivot.disableManualControl(),
                 new TimeoutCommand(
-                        new SubPosCommand(extension, wrist, intake, pivot, () -> Math.cos(Math.toRadians(pivot.getCurrentPosition())) * extension.getCurrentInches()), 200
+                        pivot.openloopC(() -> -0.1),
+                        10
                 ),
+                //new TimeoutCommand(
+                //new SubPosCommand(extension, wrist, intake, pivot, () -> Math.cos(Math.toRadians(pivot.getCurrentPosition())) * extension.getCurrentInches()), 200
+                //),
                 new ParallelRaceGroup(
-                        new WaitCommand(500),
+                        new WaitCommand(700),
                         new WaitUntilCommand(intake::proxClose)
                 ),
 
@@ -173,13 +165,15 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         ).andThen(
                                 new BucketPosCommand(extension, pivot, wrist, turret, false)
                         ),
-                        new TimeoutCommand(new StoreCoarsePositionCommand(vision, storage, pinpoint), 500)
-                ),
-                new WaitUntilCommand(intake::stable),
-                new IntakeControlCommand(intake, IntakeConstants.openPos, 0)
-        //new GoToPointWithDefaultCommand(AutoConstants.scorePos, dmc.getGtpc()),
-        //new BucketRelocalizeCommand(bucketSensors, pinpoint, 0.1).alongWith(new WaitCommand(100)),
-        //dmc.setP2P()
+                        new TimeoutCommand(new StoreCoarsePositionCommand(vision, storage, pinpoint), 500),
+                        new WaitUntilCommand(() -> AutoConstants.cycleScorePos.minus(pinpoint.getPose()).getTranslation().getNorm() < AutoConstants.fastDropDistance).andThen(
+                                new IntakeControlCommand(intake, IntakeConstants.openPos, 0)
+                        )
+                )
+
+                //new GoToPointWithDefaultCommand(AutoConstants.scorePos, dmc.getGtpc()),
+                //new BucketRelocalizeCommand(bucketSensors, pinpoint, 0.1).alongWith(new WaitCommand(100)),
+                //dmc.setP2P()
         );
 
     }
