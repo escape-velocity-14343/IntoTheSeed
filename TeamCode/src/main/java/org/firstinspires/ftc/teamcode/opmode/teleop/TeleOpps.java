@@ -74,12 +74,11 @@ public class TeleOpps extends Robot {
 
 
         waitForStart();
-        // temporary pls remove later
-        pinpoint.setPosition(-65, 40);
+
         while (!isStopRequested()) {
             telemetry.addData("current state", getState().toString());
             telemetry.addData("current intake state", intakeState.toString());
-            telemetry.addData("motorpos", extension.getCurrentInches());
+            telemetry.addData("extension position", extension.getCurrentInches());
             telemetry.addData("pivotpos", pivot.getCurrentPosition());
             telemetry.addData("time", timer.milliseconds());
             telemetry.addData("hi", CommandScheduler.getInstance().getDefaultCommand(mecanum));

@@ -9,6 +9,7 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -25,6 +26,7 @@ import org.firstinspires.ftc.teamcode.commands.custom.BucketRelocalizeCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.ExtensionPowerCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.TimeoutCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
 import org.firstinspires.ftc.teamcode.commands.group.BucketPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.DefaultGVFCommand;
@@ -280,7 +282,12 @@ public abstract class Robot extends LinearOpMode {
         return new SequentialCommandGroup(
                 setStateCommand(FSMStates.HANG_L2),
                 new InstantCommand(() -> wrist.setPwmDisabled(true)),
-                new ExtensionPowerCommand(extension, mecanum, pto, -1.0)
+                new TimeoutCommand(new ExtendCommand(extension, 0.0), 250),
+                new ExtensionPowerCommand(extension, mecanum, pto, -0.8).alongWith(
+                        new WaitUntilCommand(() -> extension.isClose(0.0, 3.0)).andThen(
+                                new PivotCommand(pivot, 30.0)
+                        )
+                )
         );
     }
 

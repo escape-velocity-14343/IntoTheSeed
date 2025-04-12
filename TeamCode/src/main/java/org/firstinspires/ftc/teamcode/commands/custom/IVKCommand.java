@@ -40,10 +40,25 @@ public class IVKCommand extends ParallelCommandGroup {
                 pivotSubsystem.getPivotCommand(getTargetAngleDegrees(x, y))
         );
     }
+    public IVKCommand(double x, double y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem, double power) {
+        addCommands(
+                new ClampExtendCommand(extensionSubsystem, getTargetExtension(x, y),power),
+                pivotSubsystem.getPivotCommand(getTargetAngleDegrees(x, y))
+        );
+    }
+
 
     public IVKCommand(DoubleSupplier x, DoubleSupplier y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem) {
         addCommands(
                 extensionSubsystem.getExtendCommand(() -> getTargetExtension(x.getAsDouble(), y.getAsDouble())),
+                pivotSubsystem.getPivotCommand(() -> getTargetAngleDegrees(x.getAsDouble(), y.getAsDouble())),
+                new InstantCommand(() -> System.out.println(getTargetExtension(x.getAsDouble(), y.getAsDouble()))),
+                new InstantCommand(() -> System.out.println(getTargetAngleDegrees(x.getAsDouble(), y.getAsDouble())))
+        );
+    }
+    public IVKCommand(DoubleSupplier x, DoubleSupplier y, ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem, double speed) {
+        addCommands(
+                new SlowExtendCommand(extensionSubsystem, () -> getTargetExtension(x.getAsDouble(), y.getAsDouble()), speed),
                 pivotSubsystem.getPivotCommand(() -> getTargetAngleDegrees(x.getAsDouble(), y.getAsDouble())),
                 new InstantCommand(() -> System.out.println(getTargetExtension(x.getAsDouble(), y.getAsDouble()))),
                 new InstantCommand(() -> System.out.println(getTargetAngleDegrees(x.getAsDouble(), y.getAsDouble())))

@@ -59,7 +59,7 @@ public class BucketPosCommand extends SequentialCommandGroup {
                                         .interruptOn(
                                                 () ->
                                                         extension.getCurrentInches()
-                                                                > SlideConstants.bucketPos - 7)),
+                                                                > SlideConstants.bucketPos - 4)),
                         new WristCommand(wrist, IntakeConstants.groundPos).andThen(new WaitUntilCommand(
                                         () ->
                                                 extension.getCurrentInches()

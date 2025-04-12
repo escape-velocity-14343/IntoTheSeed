@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+
 import java.util.function.DoubleSupplier;
 
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
@@ -40,8 +42,10 @@ public class PivotSubsystem extends SubsystemBase {
     public PivotSubsystem(HardwareMap hMap, CachingVoltageSensor voltage) {
         motor0 = hMap.dcMotor.get("tilt0");
         motor0.setDirection(DcMotorSimple.Direction.REVERSE);
+        motor0.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         motor1 = hMap.dcMotor.get("tilt1");
         motor1.setDirection(DcMotorSimple.Direction.REVERSE);
+        motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         encoder = new AnalogEncoder("sensOrange", hMap);
         encoder.setPositionOffset(PivotConstants.encoderOffset);
         encoder.setInverted(PivotConstants.encoderInvert);
@@ -96,6 +100,13 @@ public class PivotSubsystem extends SubsystemBase {
         if (power < 0) {
             power = -Math.min(Math.abs(power), 1 - (getKg() * 2));
         }
+
+        //stop breaking belt, doesnt seem to cause problems
+        if (power < 0 && currentPos < PivotConstants.powerCutAngle) {
+            power = 0;
+        }
+
+        power = Range.clip(power, -1.0, 1.0);
 
         power *= voltage.getVoltageNormalized();
 
@@ -209,6 +220,10 @@ public class PivotSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+
+        pid.setP(PivotConstants.kPRetracted
+                + (extensionInches.getAsDouble() / SlideConstants.maxExtension)
+                * (PivotConstants.kPExtended - PivotConstants.kPRetracted));
         //Cache last position
         double lastPos = currentPos;
         pivotVelocity = (lastPos - currentPos) / timer.seconds();

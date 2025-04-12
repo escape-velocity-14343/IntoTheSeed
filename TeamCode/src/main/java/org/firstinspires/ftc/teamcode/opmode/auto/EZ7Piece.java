@@ -12,8 +12,11 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
+import com.arcrobotics.ftclib.geometry.Transform2d;
+import com.arcrobotics.ftclib.geometry.Translation2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.commands.custom.BucketRelocalizeCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IVKCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
@@ -66,7 +69,7 @@ public class EZ7Piece extends Robot {
         intake.setClawer(IntakeConstants.closedPos);
 
         SamplePoseStorage storage = new SamplePoseStorage();
-        storage.setCoarsePosition(new Pose2d(-15, 2, new Rotation2d()));
+        storage.setCoarsePosition(new Pose2d(-9, 2, new Rotation2d()));
         vision.waitForSetExposure(3000, 10000, PNPTest.exposure);
         while (!vision.setCam(true)) ;
 
@@ -89,7 +92,7 @@ public class EZ7Piece extends Robot {
                 new SequentialCommandGroup(
                         new InstantCommand(() -> SlideConstants.lowExtend = true),
                         // score preload
-                        new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
+                        new GoToPointWithDefaultCommand(AutoConstants.scorePos.plus(new Transform2d(new Translation2d(1,-1), new Rotation2d())), gtpc, 500, 100).alongWith(
                                 new DunkCommand(extension, pivot, wrist, turret, intake)
                         ),
 
@@ -97,7 +100,7 @@ public class EZ7Piece extends Robot {
                         new GoToPointWithDefaultCommand(
                                 new Pose2d(-46, 47.5, new Rotation2d()), gtpc)
                                 .alongWith(
-                                        new ExtendCommand(extension, AutoConstants.spike1ExtensionLength - AutoConstants.extendedWhilePivotOffset)
+                                        new ExtendCommand(extension, AutoConstants.spike1ExtensionLength - AutoConstants.extendedWhilePivotOffset - 2)
                                                 .alongWith(
                                                         new WaitUntilCommand(() -> extension.getCurrentInches() < SlideConstants.pivotDownExtension).andThen(
                                                                 new PivotCommand(pivot, 0)
@@ -115,7 +118,7 @@ public class EZ7Piece extends Robot {
                                         new IntakeControlCommand(intake, IntakeConstants.closedPos, 1)
                                 )
                         ),
-                        new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
+                        new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc, 500, 100).alongWith(
                                 new DunkCommand(extension, pivot, wrist, turret, intake)
                         ),
 
@@ -139,14 +142,14 @@ public class EZ7Piece extends Robot {
                                         new IntakeControlCommand(intake, IntakeConstants.closedPos, 1)
                                 )
                         ),
-                        new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
+                        new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc, 100, 100).alongWith(
                                 new DunkCommand(extension, pivot, wrist, turret, intake)
                         ),
 
 
                         // intake third
                         // The thing is that you have to make sure you don't slam your intake on the ground and pop it
-                        new GoToPointWithDefaultCommand(new Pose2d(-45, 60, Rotation2d.fromDegrees(10)), gtpc, 0.5, 2)
+                        new GoToPointWithDefaultCommand(new Pose2d(-45, 60, Rotation2d.fromDegrees(10)), gtpc, 5, 5)
                                 .withTimeout(1500)
                                 .alongWith(
                                         new ExtendCommand(extension, AutoConstants.spike3ExtensionLength - AutoConstants.extendedWhilePivotOffset)
@@ -160,7 +163,7 @@ public class EZ7Piece extends Robot {
                                         new IntakeControlCommand(intake, (2 * IntakeConstants.openPos + IntakeConstants.singleIntakePos) / 3, 1)
                                 ),
                         new GoToPointWithDefaultCommand(
-                                new Pose2d(-44, 60, Rotation2d.fromDegrees(20)), gtpc, 0.5, 2
+                                new Pose2d(-44, 60, Rotation2d.fromDegrees(24)), gtpc, 3, 3
                         ),
                         new ParallelCommandGroup(
                                 new TimeoutCommand(new SlowExtendCommand(extension, AutoConstants.spike3ExtensionLength, AutoConstants.spikeExtensionSpeed), 2000),
@@ -169,14 +172,15 @@ public class EZ7Piece extends Robot {
                                         new IntakeControlCommand(intake, IntakeConstants.closedPos, 1)
                                 )
                         ),
-                        new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc).alongWith(
+                        new GoToPointWithDefaultCommand(AutoConstants.scorePos, gtpc, 500, 100).alongWith(
                                 new DunkCommand(extension, pivot, wrist, turret, intake)
                         ),
-                        new WristCommand(wrist, IntakeConstants.groundPos),
-                        new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target),
-                        new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target),
-                        new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target),
-                        new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target)
+                        //new TimeoutCommand(new WristCommand(wrist, IntakeConstants.groundPos), 1),
+                        new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target, basketSensor),
+                        new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target, basketSensor),
+                        new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target, basketSensor),
+                        new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target, basketSensor),
+                        new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target, basketSensor)
                 )
         );
 

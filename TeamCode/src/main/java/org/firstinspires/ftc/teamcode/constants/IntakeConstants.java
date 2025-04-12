@@ -51,5 +51,5 @@ public class IntakeConstants {
 
     public static double intakeSensorVoltageThres = 1.6;
     public static double hangReady = 0.35;
-    public static double intakeAccelThres = 45;
+    public static double intakeAccelThres = 40;
 }

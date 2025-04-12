@@ -24,5 +24,5 @@ public class DriveConstants {
     public static double strafeMultiplier = 1.1;
 
     public static double forwardMotorMultiplier = 0.35;
-    public static double ptoPowerFac = 0.5;
+    public static double ptoPowerFac = 0.0;
 }

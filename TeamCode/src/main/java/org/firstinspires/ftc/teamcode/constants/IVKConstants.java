@@ -20,4 +20,5 @@ public class IVKConstants {
     public static Double intakeY = 7.0;
     public static double intakeReadyY = 10.0;
     public static double slideBackOffset = 1.5;
+    public static double slideRotationOffset = 0.0;
 }

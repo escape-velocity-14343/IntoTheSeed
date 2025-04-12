@@ -7,8 +7,8 @@ public class PivotConstants {
     public static double maxVelocity = 4;
     public static double maxAcceleration = 4;
 
-    public static double kPRetracted = -0.05;
-    public static double kPExtended = 0.06;
+    public static double kPRetracted = -0.03;
+    public static double kPExtended = -0.075;
     public static double kS = 0;
     public static double kD = -0.2;
     public static double kGRetracted = 0;
@@ -23,7 +23,7 @@ public class PivotConstants {
     public static double tolerance = 3;
     public static double direction = -1;
     public static boolean encoderInvert = true;
-    public static double encoderOffset = 170.2;
+    public static double encoderOffset = -56.94;
     public static double outtakeExtendDegrees = 30;
     public static double autoOuttakeExtendDegrees = 10;
     public static double retractDegrees = bottomLimit;
@@ -39,5 +39,6 @@ public class PivotConstants {
 
     public static double bottomPMult = 1.25;
     public static double hangReady = 60.0;
+    public static double powerCutAngle = 10;
 }
 

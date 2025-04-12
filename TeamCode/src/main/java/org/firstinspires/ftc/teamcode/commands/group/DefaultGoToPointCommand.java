@@ -25,7 +25,7 @@ public class DefaultGoToPointCommand extends CommandBase {
     public static double translationkP = 0.025;
     public static double translationkI = 0;
     public static double translationkD = 0;
-    public static double headingkP = 0.021;
+    public static double headingkP = 0.004;
     public static double headingSquidkP = 0.004;
     public static double headingKPSmall = 0.012;
     public static double useSmallThresh = 7.0;
@@ -56,8 +56,6 @@ public class DefaultGoToPointCommand extends CommandBase {
     private DoubleSupplier xSpeedSupplier;
     private DoubleSupplier ySpeedSupplier;
     private DoubleSupplier rotSpeedSupplier;
-
-    private boolean shouldLog = true;
 
     public DefaultGoToPointCommand(
             MecanumDriveSubsystem driveSubsystem,
@@ -97,7 +95,7 @@ public class DefaultGoToPointCommand extends CommandBase {
         drivetrainSquIDController.setPID(translationkP);
 
         rotSpeedSupplier =
-                () -> headingPID.calculate(0, Util.getAngularDifference(target.getRotation().getDegrees(), currentPose.getRotation().getDegrees()));
+                () -> Util.signedSqrt(headingPID.calculate(0, Util.getAngularDifference(target.getRotation().getDegrees(), currentPose.getRotation().getDegrees())));
     }
 
     @Override
@@ -183,6 +181,11 @@ public class DefaultGoToPointCommand extends CommandBase {
     }
 
     public boolean isDone() {
+        Log.i("%GTPC", "Tolerance translation: " + tol + "Tolerance heading: " + hTol);
+        Log.i("%isDone", "distance done: " + (currentPose.getTranslation().getDistance(target.getTranslation())
+                < tol) + "heading done: " + (Math.abs(Util.getAngularDifference(
+                target.getRotation().getDegrees(),
+                currentPose.getRotation().getDegrees()))<hTol));
         if (target == null) {
             Log.i("%isDone", "target was null");
             return false;
@@ -193,13 +196,11 @@ public class DefaultGoToPointCommand extends CommandBase {
             return false;
         }
 
-        return shouldLog
-                        && ((currentPose.getTranslation().getDistance(target.getTranslation())
+        return (currentPose.getTranslation().getDistance(target.getTranslation())
                                         < tol)
-                                && (Util.inRange(
+                                && (Math.abs(Util.getAngularDifference(
                                         target.getRotation().getDegrees(),
-                                        currentPose.getRotation().getDegrees(),
-                                        hTol)))
+                                        currentPose.getRotation().getDegrees()))<hTol)
                 || (hasBeenZeroVelocity);
     }
 

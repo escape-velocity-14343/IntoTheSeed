@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.Range;
 
 import java.util.function.DoubleSupplier;
 
@@ -30,6 +31,7 @@ public class ExtensionSubsystem extends SubsystemBase {
     private final CachingVoltageSensor voltage;
     private int currentPos = 0;
     private double targetInches = 0;
+    private double maxPower = 1.0;
     private final SquIDController squid = new SquIDController();
     private boolean manualControl = false;
     private int resetOffset = 0;
@@ -324,6 +326,9 @@ public class ExtensionSubsystem extends SubsystemBase {
                         + interpolate(getCurrentInches())
                         * Math.sin(Math.toRadians(pivotSubsystem.getCurrentPosition()));
 
+
+        power = Range.clip(power, -maxPower, maxPower);
+
         power *= voltage.getVoltageNormalized();
 
         openloop(power);
@@ -349,6 +354,20 @@ public class ExtensionSubsystem extends SubsystemBase {
      */
     public boolean isClose(double target) {
         return Util.inRange(target, getCurrentInches(), SlideConstants.tolerance);
+    }
+
+    /**
+     * @param target in inches, uses the same one as the pid target
+     */
+    public boolean isClose(double target, double tolerance) {
+        return Util.inRange(target, getCurrentInches(), tolerance);
+    }
+
+    /**
+     * returns if slides are close to the target
+     */
+    public boolean isClose() {
+        return Util.inRange(targetInches, getCurrentInches(), SlideConstants.tolerance);
     }
 
     /**
@@ -443,5 +462,13 @@ public class ExtensionSubsystem extends SubsystemBase {
         FtcDashboard.getInstance().getTelemetry().addData("maxExtensionTrigger", maxExtensionLimitTrigger.get());
         FtcDashboard.getInstance().getTelemetry().addData("SubmersibleLimitTrigger", submersibleLimitTrigger.get());
         FtcDashboard.getInstance().getTelemetry().addData("manualControlTrigger", manualControlTrigger.get());
+    }
+
+    public double getMaxPower() {
+        return maxPower;
+    }
+
+    public void setMaxPower(double maxPower) {
+        this.maxPower = maxPower;
     }
 }
