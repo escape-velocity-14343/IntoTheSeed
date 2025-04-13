@@ -233,6 +233,12 @@ public class VisionSubsystem extends SubsystemBase {
                 return;
             }
 
+            for (ColorBlobLocatorProcessor.Blob blob : blobs){
+                if (blob == null){
+                    blobs.remove(blob);
+                }
+            }
+
             ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, 20000, blobs);
             ColorBlobLocatorProcessor.Util.filterByAspectRatio(1.5, 5, blobs);
             double dist = 10000;
