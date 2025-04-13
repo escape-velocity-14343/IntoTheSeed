@@ -16,6 +16,8 @@ import org.firstinspires.ftc.teamcode.constants.IVKConstants;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.PivotSubsystem;
 
+import java.util.function.DoubleSupplier;
+
 
 public class SlideKinematics {
 
@@ -55,6 +57,14 @@ public class SlideKinematics {
         Pose2d targets = getIVKClawPos(target);
         return new ParallelCommandGroup(
                 new ClampExtendCommand(extension, targets.getX(), speed),
+                new PivotCommand(pivot, targets.getRotation().getDegrees())
+        );
+    }
+
+    public static Command getIVKCommand(ExtensionSubsystem extension, PivotSubsystem pivot, DoubleSupplier x, DoubleSupplier y) {
+        Pose2d targets = getIVKClawPos(new Translation2d(x.getAsDouble(), y.getAsDouble()));
+        return new ParallelCommandGroup(
+                new ExtendCommand(extension, targets.getX()),
                 new PivotCommand(pivot, targets.getRotation().getDegrees())
         );
     }

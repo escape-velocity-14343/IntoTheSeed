@@ -57,6 +57,33 @@ public class RetractCommand extends SequentialCommandGroup {
         );
     }
 
+    public RetractCommand(
+            WristSubsystem wrist,
+            PivotSubsystem pivot,
+            ExtensionSubsystem extend,
+            TurretSubsystem turret,
+            IntakeSubsystem intake,
+            boolean sub) {
+
+        addCommands(
+                new SequentialCommandGroup(
+                        new ParallelCommandGroup(
+                                new IntakeControlCommand(intake, IntakeConstants.closedPos, 0),
+                                new ConditionalCommand(
+                                        new WristCommand(wrist, (IntakeConstants.foldedPos + IntakeConstants.toptakePos) / 2),
+                                        new WristCommand(wrist, IntakeConstants.foldedPos),
+                                        () -> pivot.getCurrentPosition() > 70
+                                ),
+                                new TurretCommand(turret, 0)
+                        ),
+                        new ExtendCommand(extend, SlideConstants.minExtension),
+                        new PivotCommand(pivot, sub ? 15 : PivotConstants.bottomLimit).alongWith(
+                                new WristCommand(wrist, IntakeConstants.foldedPos)
+                        )
+                ).whenFinished(() -> Log.i("5", "Retract command"))
+        );
+    }
+
     public static RetractCommand newWithWristPos(
             WristSubsystem wrist,
             PivotSubsystem pivot,

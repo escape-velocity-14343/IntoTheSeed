@@ -27,6 +27,7 @@ public class IntakeConstants {
     public static double openPos = 0.675;
     public static double closedPos = 0.92; //holy fuck are we stalling ts
     public static double singleIntakePos = 0.875;
+    public static double slightOpenPos = 0.78;
 
     public static double clawOffset = -0.35;
 

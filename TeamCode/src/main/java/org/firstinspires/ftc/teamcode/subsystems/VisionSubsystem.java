@@ -229,7 +229,12 @@ public class VisionSubsystem extends SubsystemBase {
         } else if (visionPortal.getProcessorEnabled(closeLocator)) {
             List<ColorBlobLocatorProcessor.Blob> blobs = closeLocator.getBlobs();
 
+            if (blobs.isEmpty()){
+                return;
+            }
+
             ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, 20000, blobs);
+            ColorBlobLocatorProcessor.Util.filterByAspectRatio(1.5, 5, blobs);
             double dist = 10000;
             double centerDist = 10000;
             ColorBlobLocatorProcessor.Util.sortByArea(SortOrder.DESCENDING, blobs);

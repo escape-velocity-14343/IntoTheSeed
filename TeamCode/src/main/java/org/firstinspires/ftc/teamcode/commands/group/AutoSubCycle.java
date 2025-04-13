@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.commands.custom.BucketRelocalizeCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.DrivetrainBrakeCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IVKCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.IntakeClosingCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.InterruptCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
@@ -72,23 +73,21 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         )
                 ).alongWith(
                         new ParallelCommandGroup(
-                                new WaitUntilCommand(() -> pinpoint.getPose().relativeTo(AutoConstants.scorePos).getTranslation().getNorm() > 2.5).andThen(
+                                new WaitUntilCommand(() -> pinpoint.getPose().relativeTo(AutoConstants.scorePos).getTranslation().getNorm() > 6.0).andThen(
                                         new InterruptCommand(new ExtendCommand(extension, 0.0), () -> extension.getCurrentInches() < SlideConstants.pivotDownExtension - 15.0)
                                 ),
-                                new WristCommand(wrist, IntakeConstants.halfFoldPos),
-                                new InstantCommand(() -> vision.setCam(false)),
-                                new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1)
+                                new InstantCommand(() -> vision.setCam(false))
                         ).andThen(
                                 new WristCommand(wrist, IntakeConstants.halfFoldPos),
                                 new InterruptCommand(
-                                        new PivotCommand(pivot, PivotConstants.bottomLimit),
+                                        new PivotCommand(pivot, PivotConstants.bottomLimit + 15),
                                         () -> pivot.getCurrentPosition() < 20.0
                                 ).alongWith(
                                         new TurretCommand(turret, 0.0),
-                                        new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 0)
+                                        new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1)
                                 ),
                                 new InterruptCommand(
-                                        SlideKinematics.getIVKCommand(extension, pivot, new Translation2d(SlideConstants.submersibleIntakeMidExtension, IVKConstants.clawIntakeIVKHeight+3), 0.8),
+                                        SlideKinematics.getIVKCommand(extension, pivot, new Translation2d(SlideConstants.submersibleIntakeMidExtension, IVKConstants.clawIntakeIVKHeight+4.0), 0.8),
                                         () -> pivot.getPivotVelocity() < AutoConstants.autoscoreMaxPivotVel
                                 )
                         )
@@ -100,7 +99,6 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 new WaitUntilStabilizedCommand(pinpoint).alongWith(
                         new WristCommand(wrist, IntakeConstants.halfFoldPos)
                 ),
-                new InstantCommand(drive::clearBrake),
                 dmc.setP2P(),
                 new InstantCommand(() -> dmc.getGtpc().setTarget(pinpoint.getPose())),
 
@@ -109,12 +107,9 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
                         800
                 ),
+                new InstantCommand(drive::clearBrake),
                 new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(
                         new ExtendCommand(extension, storage::getNewExtension)
-                ),
-                new TimeoutCommand(
-                        new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
-                        50
                 ),
                 new WristCommand(wrist, IntakeConstants.toptakePos),
                 /*new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(
@@ -138,19 +133,23 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 // Into 1 inch Y value increments, and uses wait for stabilized internally between each iteration
 
                 // intake
-                new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
+                new DrivetrainBrakeCommand(dmc),
                 pivot.enableManualControl(),
                 new TimeoutCommand(
-                        pivot.openloopC(() -> 0.0),
+                        pivot.openloopC(() -> PivotConstants.slowDropPower * extension.getCurrentInches()/SlideConstants.maxExtension),
                         10
                 ),
                 //new TimeoutCommand(
                 //new SubPosCommand(extension, wrist, intake, pivot, () -> Math.cos(Math.toRadians(pivot.getCurrentPosition())) * extension.getCurrentInches()), 200
-                //),
-                new ParallelRaceGroup(
-                        new WaitCommand(700),
-                        new WaitUntilCommand(intake::proxClose)
-                ),
+                //)
+                new TimeoutCommand(
+                        new ParallelCommandGroup(
+                                new IntakeClosingCommand(intake, IntakeConstants.slightOpenPos, 1),
+                                new WaitUntilCommand(intake::proxClose))
+                        , 500),
+                new IntakeControlCommand(intake, IntakeConstants.closedPos, 1),
+                new WaitCommand(450),
+                new InstantCommand(drive::clearBrake),
 
                 // go to score
                 dmc.setGVF(),
@@ -165,16 +164,19 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         () -> AutoConstants.scorePos.minus(pinpoint.getPose()).getTranslation().getNorm() < 5.0
                 ).alongWith(
                         new InterruptCommand(
-                                new RetractCommand(wrist, pivot, extension, turret, intake),
+                                new RetractCommand(wrist, pivot, extension, turret, intake, true),
                                 () -> pinpoint.getPose().getY() - extension.getCurrentInches() > 16
                         ).andThen(
                                 new BucketPos2Command(extension, pivot, wrist, turret, false)
                         ),
                         new TimeoutCommand(new StoreCoarsePositionCommand(vision, storage, pinpoint), 500),
                         new WaitUntilCommand(() -> AutoConstants.scorePos.minus(pinpoint.getPose()).getTranslation().getNorm() < AutoConstants.fastDropDistance).andThen(
-                                new IntakeControlCommand(intake, IntakeConstants.openPos, 0.5)
+                                new IntakeControlCommand(intake, IntakeConstants.openPos, 0)
                         )
-                )
+                ),
+                new DrivetrainBrakeCommand(dmc),
+                new WaitCommand(100),
+                new InstantCommand(drive::clearBrake)
 
                 //new GoToPointWithDefaultCommand(AutoConstants.scorePos, dmc.getGtpc()),
                 //new BucketRelocalizeCommand(bucketSensors, pinpoint, 0.1).alongWith(new WaitCommand(100)),

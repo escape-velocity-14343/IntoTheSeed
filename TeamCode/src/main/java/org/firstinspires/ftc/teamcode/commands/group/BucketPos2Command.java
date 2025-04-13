@@ -50,17 +50,11 @@ public class BucketPos2Command extends SequentialCommandGroup {
                                                         > (auto ? PivotConstants.autoOuttakeExtendDegrees : PivotConstants.outtakeExtendDegrees)),
                                 new ExtendCommand(
                                         extension,
-                                        SlideConstants.bucketPos
-                                                + (SlideConstants.highExtend
-                                                ? SlideConstants.highExtendInches
-                                                : 0)
-                                                + (SlideConstants.lowExtend
-                                                ? SlideConstants.lowExtendInches
-                                                : 0))
+                                        SlideConstants.bucketPos-2.0)
                                         .withTimeout(1000))
                                 .alongWith(
                                         new WristCommand(wrist, IntakeConstants.scoringPos),
-                                        new TurretCommand(turret, 90)
+                                        new TurretCommand(turret, 0)
                                 ),
                 new InstantCommand(() -> Log.i("%2", "BucketPos End"))));
     }

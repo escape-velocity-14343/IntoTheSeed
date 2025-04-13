@@ -41,6 +41,6 @@ public class PivotConstants {
     public static double hangReady = 60.0;
     public static double powerCutAngle = 30;
 
-
+    public static double slowDropPower = 0.16;
 }
 
