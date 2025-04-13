@@ -9,6 +9,7 @@ public class IntakeConstants {
     // It takes 0.4 seconds from scoring pos reversed to scoring Pos
     public static double foldedPos = 0.25;
     public static double groundPos = 0.4;
+    public static double halfFoldPos = 0.41;
     public static double dunkScoringPos = 0.1;
     public static double scoringPos = 0.25;
     public static double specimenScoringPos = 0.4;

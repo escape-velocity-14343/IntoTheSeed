@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
+import com.arcrobotics.ftclib.geometry.Translation2d;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.commands.custom.CoarseAlignCommand;
@@ -30,6 +31,7 @@ import org.firstinspires.ftc.teamcode.constants.IVKConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.SamplePoseStorage;
+import org.firstinspires.ftc.teamcode.lib.SlideKinematics;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
 
@@ -57,18 +59,20 @@ public class FineAlignTest extends Robot {
         cs.schedule(
                 new SequentialCommandGroup(
                         retract().andThen(
-                                new IntakeClawCommand(intake, IntakeConstants.openPos)
+                                new IntakeClawCommand(intake, IntakeConstants.openPos),
+                                new WristCommand(wrist, IntakeConstants.halfFoldPos)
                         ),
                         new TimeoutCommand(new InterruptCommand(
-                                new IVKCommand(SlideConstants.submersibleIntakeMidExtension, IVKCommand.intakeReadyY + 4, extension, pivot, 0.8),
+                                SlideKinematics.getIVKCommand(extension, pivot, new Translation2d(SlideConstants.submersibleIntakeMidExtension, IVKConstants.clawIntakeIVKHeight+8), 0.8),
+                                // live in Puyallup farming every day they know me where it rains i farm apples daily i dont know no nothin bout no citrus its too cold 40 something milli apples farmed every dayI
                                 () -> pivot.getPivotVelocity() < AutoConstants.autoscoreMaxPivotVel && extension.isClose()
                         ), 2000
                         ),
                         new TimeoutCommand(
                                 new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
                                 800
-                        )
-                        /*new GoToPointWithDefaultCommand(storage::getFinePosition, gtpc, 0.5, 2).alongWith(
+                        ),
+                        new GoToPointWithDefaultCommand(storage::getFinePosition, gtpc, 0.5, 2).alongWith(
                                 new ExtendCommand(extension, storage::getNewExtension)
                         ),
                         new TimeoutCommand(
@@ -80,7 +84,7 @@ public class FineAlignTest extends Robot {
                         new TimeoutCommand(
                                 pivot.openloopC(() -> 0.0),
                                 10
-                        )*/
+                        )
                         //new CoarseAlignCommand(gtpc, vision, pinpoint),
                         /*new SequentialIVKCommand(SlideConstants.submersibleIntakeMidExtension, IVKCommand.intakeReadyY, extension, pivot).alongWith(
                                 new TurretCommand(turret, 0.0),

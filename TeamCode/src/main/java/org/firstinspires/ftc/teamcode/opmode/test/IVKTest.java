@@ -2,11 +2,13 @@ package org.firstinspires.ftc.teamcode.opmode.test;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.geometry.Translation2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.commands.custom.IVKCommand;
 import org.firstinspires.ftc.teamcode.lib.CachingVoltageSensor;
+import org.firstinspires.ftc.teamcode.lib.SlideKinematics;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.PivotSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
@@ -35,7 +37,7 @@ public class IVKTest extends LinearOpMode {
         waitForStart();
 
         while (!isStopRequested()) {
-            cs.schedule(new IVKCommand(() -> x, () -> y, extension, pivot, 1));
+            cs.schedule(SlideKinematics.getIVKCommand(extension,pivot, new Translation2d(x, y)));
             cs.run();
         }
 

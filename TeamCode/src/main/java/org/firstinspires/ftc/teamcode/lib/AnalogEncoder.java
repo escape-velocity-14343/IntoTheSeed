@@ -60,7 +60,7 @@ public class AnalogEncoder {
                 (inverted ? -1 : 1) * (sensor.getVoltage() * maxAngle / maxVoltage) + offset);
     }
 
-    public double normalizeDegrees(double degrees)
+    public static double normalizeDegrees(double degrees)
     {
         degrees = degrees % 360;
 

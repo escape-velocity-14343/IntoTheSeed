@@ -22,10 +22,11 @@ public class IVKConstants {
     public static double intakeReadyY = 10.0;
     public static double slideBackOffset = 1.5;
     public static double slideRotationOffset = 0.0;
+    public static double pivotPointForwardOffset = -3.36;
+    public static double pivotPointHeightOffset = 5.28;
     public static double cameraOffsetForward = 4.78;
     public static double cameraOffsetUp = -2.33;
-    public static double pivotPointForwardCam = -3.36;
-    public static double pivotPointHeightCam = 5.28;
-    public static double pivotPointForwardClaw = 9.25;
-    public static double pivotPointHeightClaw = -8.5;
+    public static double clawOffsetForward = 9.25;
+    public static double clawOffsetUp = -9.5;
+    public static double clawIntakeIVKHeight = 1.5;
 }

@@ -10,6 +10,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.geometry.Pose2d;
+import com.arcrobotics.ftclib.geometry.Translation2d;
 
 import org.firstinspires.ftc.teamcode.commands.custom.BucketRelocalizeCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.DrivetrainBrakeCommand;
@@ -32,6 +33,7 @@ import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.SampleMovementOptimizer;
 import org.firstinspires.ftc.teamcode.lib.SamplePoseStorage;
+import org.firstinspires.ftc.teamcode.lib.SlideKinematics;
 import org.firstinspires.ftc.teamcode.lib.path.spline.CubicBezier;
 import org.firstinspires.ftc.teamcode.subsystems.BucketSensorSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
@@ -56,8 +58,8 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         new InterruptCommand(
                                 new GVFWithDefaultCommand(dmc.getGvfc(), 3.0, 10.0, () -> {
 
-                                    Pose2d intermediate = SampleMovementOptimizer.getIntermediatePoint(storage.getCoarsePosition(), -18.0, 35.0, 25.0);
-                                    Pose2d end = SampleMovementOptimizer.getClosestPoint(storage.getCoarsePosition(), -18.0, 35.0, 25.0);
+                                    Pose2d intermediate = SampleMovementOptimizer.getIntermediatePoint(storage.getCoarsePosition(), -18.0, 35.0, SlideConstants.submersibleIntakeMidExtension);
+                                    Pose2d end = SampleMovementOptimizer.getClosestPoint(storage.getCoarsePosition(), -18.0, 35.0, SlideConstants.submersibleIntakeMidExtension);
 
                                     return new CubicBezier[]{new CubicBezier(AutoConstants.scorePos.getX(), AutoConstants.scorePos.getY(),
                                             -52, 48,
@@ -73,11 +75,11 @@ public class AutoSubCycle extends SequentialCommandGroup {
                                 new WaitUntilCommand(() -> pinpoint.getPose().relativeTo(AutoConstants.scorePos).getTranslation().getNorm() > 2.5).andThen(
                                         new InterruptCommand(new ExtendCommand(extension, 0.0), () -> extension.getCurrentInches() < SlideConstants.pivotDownExtension - 15.0)
                                 ),
-                                new WristCommand(wrist, IntakeConstants.groundPos),
+                                new WristCommand(wrist, IntakeConstants.halfFoldPos),
                                 new InstantCommand(() -> vision.setCam(false)),
                                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1)
                         ).andThen(
-                                new WristCommand(wrist, IntakeConstants.groundPos - 0.115),
+                                new WristCommand(wrist, IntakeConstants.halfFoldPos),
                                 new InterruptCommand(
                                         new PivotCommand(pivot, PivotConstants.bottomLimit),
                                         () -> pivot.getCurrentPosition() < 20.0
@@ -86,7 +88,7 @@ public class AutoSubCycle extends SequentialCommandGroup {
                                         new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 0)
                                 ),
                                 new InterruptCommand(
-                                        new IVKCommand(SlideConstants.submersibleIntakeMidExtension, IVKCommand.intakeReadyY, extension, pivot, 0.8),
+                                        SlideKinematics.getIVKCommand(extension, pivot, new Translation2d(SlideConstants.submersibleIntakeMidExtension, IVKConstants.clawIntakeIVKHeight+3), 0.8),
                                         () -> pivot.getPivotVelocity() < AutoConstants.autoscoreMaxPivotVel
                                 )
                         )
@@ -96,7 +98,7 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 // stabilize
                 new DrivetrainBrakeCommand(dmc),
                 new WaitUntilStabilizedCommand(pinpoint).alongWith(
-                        new WristCommand(wrist, IntakeConstants.toptakePos - 0.1)
+                        new WristCommand(wrist, IntakeConstants.halfFoldPos)
                 ),
                 new InstantCommand(drive::clearBrake),
                 dmc.setP2P(),
@@ -112,7 +114,7 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 ),
                 new TimeoutCommand(
                         new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
-                        800
+                        50
                 ),
                 new WristCommand(wrist, IntakeConstants.toptakePos),
                 /*new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(

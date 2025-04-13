@@ -77,7 +77,7 @@ public class SubPosReadyCommand extends SequentialCommandGroup {
                 ).alongWith(
                         new TurretCommand(turret, angle),
                         // flip down wrist to a ready position
-                        new WaitUntilCommand(() -> Math.sin(pivot.getCurrentPosition()) * extension.getCurrentInches() > IVKCommand.intakeY - IVKConstants.pivotPointHeightCam).andThen(new WristCommand(wrist, IntakeConstants.toptakePos))
+                        new WaitUntilCommand(() -> Math.sin(pivot.getCurrentPosition()) * extension.getCurrentInches() > IVKCommand.intakeY - IVKConstants.pivotPointHeightOffset).andThen(new WristCommand(wrist, IntakeConstants.toptakePos))
                 )
 
         );

@@ -16,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.IVKConstants;
 import org.firstinspires.ftc.teamcode.constants.VisionConstants;
+import org.firstinspires.ftc.teamcode.lib.AnalogEncoder;
 import org.firstinspires.ftc.teamcode.lib.RobotPnP;
 import org.firstinspires.ftc.teamcode.lib.RobotSlidePnP;
 import org.firstinspires.ftc.teamcode.lib.SamplePoseStorage;
@@ -81,58 +82,21 @@ public class StoreFinePositionCommand extends CommandBase {
         Log.i("FineAlign", "RC Sample X: " + rcSamp.getX());
         Log.i("FineAlign", "RC Sample Y: " + rcSamp.getY());
 
-        Translation2d fieldSamp = pnp.getFieldCoordinates((int) (samplePos.getY()), (int) (320-samplePos.getX()), pinpoint.getPose());
-
-
-        // now we know where the sample is relative to the camera
-        // we now have to figure out where the camera is
-//        double forwardExtension = Math.cos(Math.toRadians(pivot.getCurrentPosition())) * extend.getCurrentInches() + (IVKConstants.lengthOfBot / 2);
-        //double forwardExtension = Math.cos(Math.toRadians(pivot.getCurrentPosition())) * extend.getCurrentInches() + IVKConstants.slideLength * Math.cos(Math.toRadians(pivot.getCurrentPosition())) - IVKConstants.slideRotationOffset;
-        double forwardExtension = SlideKinematics.getRCCameraPos(Rotation2d.fromDegrees(pivot.getCurrentPosition()), extend.getCurrentInches()).getX();
-        fieldSamp.plus(new Translation2d(forwardExtension, 0).rotateBy(pinpoint.getPose().getRotation()));
-
-        Log.i("FineAlign", "Sample X: " + fieldSamp.getX());
-        Log.i("FineAlign", "Sample Y: " + fieldSamp.getY());
-
-        // if too close to edge, offset
-        /*if (!(fieldSamp.getY() < 11.5 && fieldSamp.getY() > -11.5
-                && fieldSamp.getX() < 20.0 && fieldSamp.getX() > -20.0)) {
-            Translation2d fieldSampNew = new Translation2d(Range.clip(fieldSamp.getX(), -20.0, 20.0), Range.clip(fieldSamp.getY(), -11.5, 11.5));
-            Translation2d delta = fieldSampNew.minus(fieldSamp);
-            Log.i("FineAlign", "Delta X: " + delta.getX());
-            Log.i("FineAlign", "Delta Y: " + delta.getY());
-            rcSamp = rcSamp.plus(delta.rotateBy(pinpoint.getPose().getRotation().times(-1)));
-        }*/
 
         // sample position relative to robot
-        Vector2d rcSampleVector = new Vector2d(forwardExtension - IVKConstants.backOfSlidesToCenterOffset, 0).plus(new Vector2d(rcSamp.getX(), rcSamp.getY()));
-        Log.i("FineAlign", "rc sample x: " + rcSampleVector.getX());
-        Log.i("FineAlign", "rc sample y: " + rcSampleVector.getY());
-
+        Vector2d rcSampleVector = new Vector2d(rcSamp.getX(), rcSamp.getY());
         // compute angle to turn
         double deltaAngle = Math.toDegrees(rcSampleVector.angle());
         Log.i("FineAlign", "delta angle: " + deltaAngle);
 
-        // compute extension to add
-        double deltaExtension = rcSampleVector.magnitude() - forwardExtension - IVKConstants.slideBackOffset;
-        Log.i("FineAlign", "delta extension: " + deltaExtension);
-
         double newAngle = pinpoint.getPose().getRotation().getDegrees() + deltaAngle;
-        double newExtension = extend.getCurrentInches() + deltaExtension;
-
-        // compute min extension
-        double yDist = VisionConstants.minExtensionYOffset + (pinpoint.getPose().getY() - AutoConstants.subBarrierY);
-        double subBotAngle = pinpoint.getPose().getRotation().getDegrees() + 90;
-        double minExtension = yDist / Math.cos(Math.toRadians(subBotAngle));
-
-        newExtension = Math.max(newExtension, minExtension);
+        double newExtension = SlideKinematics.getIVKClawPos(new Translation2d(rcSamp.getX(), IVKConstants.clawIntakeIVKHeight)).getX();
 
         storage.setFinePosition(new Pose2d(pinpoint.getPose().getX(), pinpoint.getPose().getY(),
                 new Rotation2d(Math.toRadians(newAngle))));
         storage.setNewExtension(newExtension);
-        turret.rotateTo(AngleUnit.normalizeDegrees(samplePos.getRotation().getDegrees() - deltaAngle));
+        turret.rotateTo(AnalogEncoder.normalizeDegrees(samplePos.getRotation().getDegrees() - deltaAngle));
         done = true;
-        //vision.setCam(true);
     }
 
     @Override

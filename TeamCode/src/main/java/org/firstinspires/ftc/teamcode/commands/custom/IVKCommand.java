@@ -89,10 +89,10 @@ public class IVKCommand extends ParallelCommandGroup {
     }
 
     private double getTargetExtension(double x, double y) {
-        return Math.max(Math.sqrt(Math.pow(x, 2) + Math.pow(y - IVKConstants.pivotPointHeightCam, 2)), 0);
+        return Math.max(Math.sqrt(Math.pow(x, 2) + Math.pow(y - IVKConstants.pivotPointHeightOffset, 2)), 0);
     }
 
     private double getTargetAngleDegrees(double x, double y) {
-        return Math.toDegrees(Math.atan2(y - IVKConstants.pivotPointHeightCam, x));
+        return Math.toDegrees(Math.atan2(y - IVKConstants.pivotPointHeightOffset, x));
     }
 }
