@@ -7,6 +7,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.geometry.Pose2d;
+import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.commands.custom.CoarseAlignCommand;
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.teamcode.commands.custom.FineAlignCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IVKCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.InterruptCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.SequentialIVKCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.StoreFinePositionCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TimeoutCommand;
@@ -23,6 +25,7 @@ import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
 import org.firstinspires.ftc.teamcode.commands.group.DefaultGoToPointCommand;
 import org.firstinspires.ftc.teamcode.commands.group.GoToPointWithDefaultCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosCommand;
+import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.IVKConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
@@ -39,13 +42,14 @@ public class FineAlignTest extends Robot {
         //VisionSubsystem vision = new VisionSubsystem(hardwareMap, telemetry);
         SamplePoseStorage storage = new SamplePoseStorage();
         vision.waitForSetExposure(3000, 10000, PNPTest.exposure);
-        while (!vision.setCam(false));
+        while (!vision.setCam(false)) ;
 
         waitForStart();
         pinpoint.setPosition(0, 0);
         pinpoint.resetYaw();
+        pinpoint.setHeading(0.0, 24.0, -90.0);
 
-        DefaultGoToPointCommand gtpc = new DefaultGoToPointCommand(mecanum, pinpoint, new Pose2d());
+        DefaultGoToPointCommand gtpc = new DefaultGoToPointCommand(mecanum, pinpoint, new Pose2d(0.0, 24.0, Rotation2d.fromDegrees(-90.0)));
 
 
         cs.schedule(gtpc);
@@ -55,8 +59,29 @@ public class FineAlignTest extends Robot {
                         retract().andThen(
                                 new IntakeClawCommand(intake, IntakeConstants.openPos)
                         ),
+                        new InterruptCommand(
+                                new IVKCommand(SlideConstants.submersibleIntakeMidExtension, IVKCommand.intakeReadyY + 4, extension, pivot, 0.8),
+                                () -> pivot.getPivotVelocity() < AutoConstants.autoscoreMaxPivotVel && extension.isClose()
+                        ),
+                        new TimeoutCommand(
+                                new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
+                                800
+                        ),
+                        new GoToPointWithDefaultCommand(storage::getFinePosition, gtpc, 0.5, 2).alongWith(
+                                new ExtendCommand(extension, storage::getNewExtension)
+                        ),
+                        new TimeoutCommand(
+                                new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
+                                800
+                        ),
+                        new WristCommand(wrist, IntakeConstants.toptakePos), new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
+                        pivot.enableManualControl(),
+                        new TimeoutCommand(
+                                pivot.openloopC(() -> 0.0),
+                                10
+                        )
                         //new CoarseAlignCommand(gtpc, vision, pinpoint),
-                        new SequentialIVKCommand(SlideConstants.submersibleIntakeMidExtension, IVKCommand.intakeReadyY, extension, pivot).alongWith(
+                        /*new SequentialIVKCommand(SlideConstants.submersibleIntakeMidExtension, IVKCommand.intakeReadyY, extension, pivot).alongWith(
                                 new TurretCommand(turret, 0.0),
                                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 0),
                                 // flip down wrist to a ready position
@@ -68,21 +93,21 @@ public class FineAlignTest extends Robot {
                         new GoToPointWithDefaultCommand(storage::getFinePosition, gtpc, 0.5, 2).alongWith(
                                 new ExtendCommand(extension, storage::getNewExtension),
                                 new WristCommand(wrist, IntakeConstants.toptakePos)
-                        ),
+                        ),*/
                         /*
                         new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
                         new GoToPointWithDefaultCommand(storage::getFinePosition, gtpc, 0.5, 2).alongWith(
                                 new ExtendCommand(extension, storage::getNewExtension),
 
                         ),*/
-                        new TimeoutCommand(
+                        /*new TimeoutCommand(
                                 new SubPosCommand(extension, wrist, intake, pivot,
                                         () -> Math.cos(Math.toRadians(pivot.getCurrentPosition())) * extension.getCurrentInches()
                                 ), 700
                         ).alongWith(
                                 new InstantCommand(() ->
                                         Log.i("subpos", "forward: " + Math.cos(pivot.getCurrentPosition()) * extension.getCurrentInches()))
-                        )
+                        )*/
                         //new FineAlignCommand(vision, gtpc, mecanum, pinpoint, turret),
                         //new WristCommand(wrist, IntakeConstants.toptakePos),
                         //new SubPosCommand(extension, wrist, intake, pivot, SlideConstants.submersibleIntakeMaxExtension)

@@ -6,21 +6,18 @@ import static org.firstinspires.ftc.teamcode.constants.VisionConstants.focalL;
 
 import android.util.Log;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.canvas.Canvas;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
 import com.arcrobotics.ftclib.geometry.Vector2d;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.IVKConstants;
 import org.firstinspires.ftc.teamcode.constants.VisionConstants;
-import org.firstinspires.ftc.teamcode.lib.RobotPnP;
 import org.firstinspires.ftc.teamcode.lib.SamplePoseStorage;
+import org.firstinspires.ftc.teamcode.lib.SlideKinematics;
 import org.firstinspires.ftc.teamcode.lib.SlidePnP;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.PinpointSubsystem;
@@ -28,9 +25,7 @@ import org.firstinspires.ftc.teamcode.subsystems.PivotSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
 
-import java.util.ArrayList;
 import java.util.Objects;
-import java.util.concurrent.Delayed;
 
 public class StoreFinePositionCommand extends CommandBase {
 
@@ -69,7 +64,7 @@ public class StoreFinePositionCommand extends CommandBase {
         }
 
         SlidePnP pnp = new SlidePnP(cx, cy, focalL);
-        SlidePnP.rz = Math.sin(Math.toRadians(pivot.getCurrentPosition())) * extend.getCurrentInches() + IVKConstants.pivotPointHeight;
+        SlidePnP.rz = Math.sin(Math.toRadians(pivot.getCurrentPosition())) * extend.getCurrentInches() + IVKConstants.pivotPointHeightCam;
         Log.v("FineAlign", "RZ: " + SlidePnP.rz);
         SlidePnP.rp = Math.toRadians(-90 + pivot.getCurrentPosition());
         Log.v("FineAlign", "RP (deg): " + Math.toDegrees(SlidePnP.rp));
@@ -80,8 +75,8 @@ public class StoreFinePositionCommand extends CommandBase {
         // now we know where the sample is relative to the camera
         // we now have to figure out where the camera is
 //        double forwardExtension = Math.cos(Math.toRadians(pivot.getCurrentPosition())) * extend.getCurrentInches() + (IVKConstants.lengthOfBot / 2);
-        double forwardExtension = Math.cos(Math.toRadians(pivot.getCurrentPosition())) * extend.getCurrentInches() + IVKConstants.slideLength * Math.cos(Math.toRadians(pivot.getCurrentPosition())) - IVKConstants.slideRotationOffset;
-
+        //double forwardExtension = Math.cos(Math.toRadians(pivot.getCurrentPosition())) * extend.getCurrentInches() + IVKConstants.slideLength * Math.cos(Math.toRadians(pivot.getCurrentPosition())) - IVKConstants.slideRotationOffset;
+        double forwardExtension = SlideKinematics.getRCCameraPos(Rotation2d.fromDegrees(pivot.getCurrentPosition()), extend.getCurrentInches()).getX();
         fieldSamp.plus(new Translation2d(forwardExtension, 0).rotateBy(pinpoint.getPose().getRotation()));
 
         Log.i("FineAlign", "Sample X: " + fieldSamp.getX());
@@ -98,7 +93,7 @@ public class StoreFinePositionCommand extends CommandBase {
         }*/
 
         // sample position relative to robot
-        Vector2d rcSampleVector = new Vector2d(forwardExtension, 0).plus(new Vector2d(rcSamp.getX(), rcSamp.getY()));
+        Vector2d rcSampleVector = new Vector2d(forwardExtension - IVKConstants.backOfSlidesToCenterOffset, 0).plus(new Vector2d(rcSamp.getX(), rcSamp.getY()));
         Log.i("FineAlign", "rc sample x: " + rcSampleVector.getX());
         Log.i("FineAlign", "rc sample y: " + rcSampleVector.getY());
 
@@ -112,6 +107,13 @@ public class StoreFinePositionCommand extends CommandBase {
 
         double newAngle = pinpoint.getPose().getRotation().getDegrees() + deltaAngle;
         double newExtension = extend.getCurrentInches() + deltaExtension;
+
+        // compute min extension
+        double yDist = VisionConstants.minExtensionYOffset + (pinpoint.getPose().getY() - AutoConstants.subBarrierY);
+        double subBotAngle = pinpoint.getPose().getRotation().getDegrees() + 90;
+        double minExtension = yDist / Math.cos(Math.toRadians(subBotAngle));
+
+        newExtension = Math.max(newExtension, minExtension);
 
         storage.setFinePosition(new Pose2d(pinpoint.getPose().getX(), pinpoint.getPose().getY(),
                 new Rotation2d(Math.toRadians(newAngle))));

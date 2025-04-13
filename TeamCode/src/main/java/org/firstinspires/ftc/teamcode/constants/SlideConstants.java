@@ -48,4 +48,6 @@ public class SlideConstants {
     public static boolean highExtend = false;
     public static boolean lowExtend = false;
     public static double hangReady = 12.0;
+
+
 }

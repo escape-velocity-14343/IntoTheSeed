@@ -93,9 +93,9 @@ public class PivotSubsystem extends SubsystemBase {
         if (power <= 0 && isClose(target) && target == PivotConstants.bottomLimit) {
             power = -0.05;
         }
-        if (power > 0 && currentPos < 20) {
+        /*if (power > 0 && currentPos < 20) {
             power *= PivotConstants.bottomPMult;
-        }
+        }*/
 
         if (power < 0) {
             power = -Math.min(Math.abs(power), 1 - (getKg() * 2));

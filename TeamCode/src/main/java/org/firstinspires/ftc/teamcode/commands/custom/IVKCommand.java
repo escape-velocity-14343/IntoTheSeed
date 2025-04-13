@@ -1,22 +1,12 @@
 package org.firstinspires.ftc.teamcode.commands.custom;
 
-import androidx.core.math.MathUtils;
-
-import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.geometry.Transform2d;
-import com.qualcomm.robotcore.robocol.Command;
 
-import org.firstinspires.ftc.robotcore.external.Func;
-import org.firstinspires.ftc.robotcore.external.Function;
 import org.firstinspires.ftc.teamcode.constants.IVKConstants;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.PivotSubsystem;
 
-import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.DoubleSupplier;
 
 public class IVKCommand extends ParallelCommandGroup {
@@ -99,10 +89,10 @@ public class IVKCommand extends ParallelCommandGroup {
     }
 
     private double getTargetExtension(double x, double y) {
-        return Math.max(Math.sqrt(Math.pow(x, 2) + Math.pow(y - IVKConstants.pivotPointHeight, 2)), 0);
+        return Math.max(Math.sqrt(Math.pow(x, 2) + Math.pow(y - IVKConstants.pivotPointHeightCam, 2)), 0);
     }
 
     private double getTargetAngleDegrees(double x, double y) {
-        return Math.toDegrees(Math.atan2(y - IVKConstants.pivotPointHeight, x));
+        return Math.toDegrees(Math.atan2(y - IVKConstants.pivotPointHeightCam, x));
     }
 }

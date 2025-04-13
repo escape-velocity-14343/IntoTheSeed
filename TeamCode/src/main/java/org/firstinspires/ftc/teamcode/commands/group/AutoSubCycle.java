@@ -59,8 +59,8 @@ public class AutoSubCycle extends SequentialCommandGroup {
                                     Pose2d intermediate = SampleMovementOptimizer.getIntermediatePoint(storage.getCoarsePosition(), -18.0, 35.0, 25.0);
                                     Pose2d end = SampleMovementOptimizer.getClosestPoint(storage.getCoarsePosition(), -18.0, 35.0, 25.0);
 
-                                    return new CubicBezier[]{new CubicBezier(AutoConstants.cycleScorePos.getX(), AutoConstants.cycleScorePos.getY(),
-                                            -42, 53,
+                                    return new CubicBezier[]{new CubicBezier(AutoConstants.scorePos.getX(), AutoConstants.scorePos.getY(),
+                                            -52, 48,
                                             intermediate.getX(), intermediate.getY(),
                                             end.getX(), end.getY())};
                                 }
@@ -71,7 +71,7 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 ).alongWith(
                         new ParallelCommandGroup(
                                 new WaitUntilCommand(() -> pinpoint.getPose().relativeTo(AutoConstants.scorePos).getTranslation().getNorm() > 2.5).andThen(
-                                        new InterruptCommand(new ExtendCommand(extension, 0.0), () -> extension.getCurrentInches() < SlideConstants.pivotDownExtension)
+                                        new InterruptCommand(new ExtendCommand(extension, 0.0), () -> extension.getCurrentInches() < SlideConstants.pivotDownExtension - 15.0)
                                 ),
                                 new WristCommand(wrist, IntakeConstants.groundPos),
                                 new InstantCommand(() -> vision.setCam(false)),
@@ -105,18 +105,19 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 // target and go to sample
                 new TimeoutCommand(
                         new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
-                        400
+                        800
                 ),
                 new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(
                         new ExtendCommand(extension, storage::getNewExtension)
                 ),
                 new TimeoutCommand(
                         new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
-                        200
+                        800
                 ),
-                new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(
+                new WristCommand(wrist, IntakeConstants.toptakePos),
+                /*new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(
                         new ExtendCommand(extension, storage::getNewExtension),
-                        new WristCommand(wrist, IntakeConstants.toptakePos)
+
                 ),
 
                 /*new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(
@@ -135,10 +136,10 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 // Into 1 inch Y value increments, and uses wait for stabilized internally between each iteration
 
                 // intake
-                new IntakeControlCommand(intake, IntakeConstants.toptakePos, 1),
-                pivot.disableManualControl(),
+                new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
+                pivot.enableManualControl(),
                 new TimeoutCommand(
-                        pivot.openloopC(() -> -0.1),
+                        pivot.openloopC(() -> 0.0),
                         10
                 ),
                 //new TimeoutCommand(
@@ -152,22 +153,24 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 // go to score
                 dmc.setGVF(),
                 new InterruptCommand(
-                        new GVFWithDefaultCommand(dmc.getGvfc(), 5, 10, () -> new CubicBezier[]{new CubicBezier(pinpoint.getPose().getX(), pinpoint.getPose().getY(),
-                                -24, 40,
-                                -42, 53,
-                                AutoConstants.cycleScorePos.getX(), AutoConstants.cycleScorePos.getY())}
+                        new GVFWithDefaultCommand(dmc.getGvfc(), 5, 10, () -> new CubicBezier[]{new CubicBezier(
+                                pinpoint.getPose().getX(), pinpoint.getPose().getY(),
+                                -30 - 0.5 * pinpoint.getPose().getX() + 10, 35,
+                                -52, 48,
+                                AutoConstants.scorePos.getX(), AutoConstants.scorePos.getY()
+                        )}
                         ).reverseHeading(),
-                        () -> AutoConstants.cycleScorePos.minus(pinpoint.getPose()).getTranslation().getNorm() < 5.0
+                        () -> AutoConstants.scorePos.minus(pinpoint.getPose()).getTranslation().getNorm() < 5.0
                 ).alongWith(
                         new InterruptCommand(
                                 new RetractCommand(wrist, pivot, extension, turret, intake),
-                                () -> pinpoint.getPose().getY() - extension.getCurrentInches() > 20
+                                () -> pinpoint.getPose().getY() - extension.getCurrentInches() > 16
                         ).andThen(
-                                new BucketPosCommand(extension, pivot, wrist, turret, false)
+                                new BucketPos2Command(extension, pivot, wrist, turret, false)
                         ),
                         new TimeoutCommand(new StoreCoarsePositionCommand(vision, storage, pinpoint), 500),
-                        new WaitUntilCommand(() -> AutoConstants.cycleScorePos.minus(pinpoint.getPose()).getTranslation().getNorm() < AutoConstants.fastDropDistance).andThen(
-                                new IntakeControlCommand(intake, IntakeConstants.openPos, 0)
+                        new WaitUntilCommand(() -> AutoConstants.scorePos.minus(pinpoint.getPose()).getTranslation().getNorm() < AutoConstants.fastDropDistance).andThen(
+                                new IntakeControlCommand(intake, IntakeConstants.openPos, 0.5)
                         )
                 )
 

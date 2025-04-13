@@ -24,6 +24,7 @@ public class VisionConstants {
     public static double maxPower = 0.2;
 
     public static double visionEndThreshold = 10;
+    public static double minExtensionYOffset = 3.5;
 
     public static boolean reverseX = true;
     public static boolean reverseY = false;

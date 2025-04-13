@@ -3,18 +3,14 @@ package org.firstinspires.ftc.teamcode.commands.group;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 
 import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IVKCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
-import org.firstinspires.ftc.teamcode.commands.custom.IntakeSpinCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.InterruptCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.RunIfCommand;
-import org.firstinspires.ftc.teamcode.commands.custom.SequentialIVKCommand;
-import org.firstinspires.ftc.teamcode.commands.custom.TimeoutCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
 import org.firstinspires.ftc.teamcode.constants.IVKConstants;
@@ -81,7 +77,7 @@ public class SubPosReadyCommand extends SequentialCommandGroup {
                 ).alongWith(
                         new TurretCommand(turret, angle),
                         // flip down wrist to a ready position
-                        new WaitUntilCommand(() -> Math.sin(pivot.getCurrentPosition()) * extension.getCurrentInches() > IVKCommand.intakeY - IVKConstants.pivotPointHeight).andThen(new WristCommand(wrist, IntakeConstants.toptakePos))
+                        new WaitUntilCommand(() -> Math.sin(pivot.getCurrentPosition()) * extension.getCurrentInches() > IVKCommand.intakeY - IVKConstants.pivotPointHeightCam).andThen(new WristCommand(wrist, IntakeConstants.toptakePos))
                 )
 
         );

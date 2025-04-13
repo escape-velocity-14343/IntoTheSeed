@@ -41,7 +41,7 @@ public class ChassisCameraTest extends LinearOpMode {
         highCameraSubsystem = new VisionSubsystem(hardwareMap, telemetry);
 
         highCameraSubsystem.waitForSetExposure(3000, 10000, exposure);
-        highCameraSubsystem.setCam(true);
+        highCameraSubsystem.setCam(false);
         highCameraSubsystem.setUseGlowUp(true);
 
         waitForStart();

@@ -40,5 +40,7 @@ public class PivotConstants {
     public static double bottomPMult = 1.25;
     public static double hangReady = 60.0;
     public static double powerCutAngle = 30;
+
+
 }
 

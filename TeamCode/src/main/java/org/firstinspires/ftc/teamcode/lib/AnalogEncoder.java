@@ -56,8 +56,17 @@ public class AnalogEncoder {
      * @return Degrees
      */
     public double getAngle() {
-        return AngleUnit.normalizeDegrees(
+        return this.normalizeDegrees(
                 (inverted ? -1 : 1) * (sensor.getVoltage() * maxAngle / maxVoltage) + offset);
+    }
+
+    public double normalizeDegrees(double degrees)
+    {
+        degrees = degrees % 360;
+
+        if (degrees >= 180.0) degrees -= 360.0;
+        if (degrees < -180.0) degrees += 360.0;
+        return degrees;
     }
 
     /**

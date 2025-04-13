@@ -179,6 +179,9 @@ public class VisionSubsystem extends SubsystemBase {
             visionPortal.setActiveCamera(switchToChassis ? this.chassisCam : this.slideCam);
             visionPortal.setProcessorEnabled(colorLocator, switchToChassis);
             visionPortal.setProcessorEnabled(closeLocator, !switchToChassis);
+            if (!switchToChassis) {
+                samplePos = null;
+            }
             return true;
         } else {
             return false;

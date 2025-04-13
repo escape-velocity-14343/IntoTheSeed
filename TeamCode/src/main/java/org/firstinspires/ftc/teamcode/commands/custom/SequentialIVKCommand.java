@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands.custom;
 
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 
 import org.firstinspires.ftc.teamcode.constants.IVKConstants;
@@ -73,10 +72,10 @@ public class SequentialIVKCommand extends SequentialCommandGroup {
     }
 
     private double getTargetExtension(double x, double y) {
-        return Math.max(Math.sqrt(Math.pow(x, 2) + Math.pow(y - IVKConstants.pivotPointHeight, 2)), 0);
+        return Math.max(Math.sqrt(Math.pow(x, 2) + Math.pow(y - IVKConstants.pivotPointHeightCam, 2)), 0);
     }
 
     private double getTargetAngleDegrees(double x, double y) {
-        return Math.toDegrees(Math.atan2(y - IVKConstants.pivotPointHeight, x));
+        return Math.toDegrees(Math.atan2(y - IVKConstants.pivotPointHeightCam, x));
     }
 }
