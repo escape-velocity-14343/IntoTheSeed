@@ -13,10 +13,9 @@ public class IVKConstants {
     public static Double widthOfBot = 12.94; // in inches
     public static Double intakeLength = 7.0; // in inches
 
-    //Offset constants;cp
-    
-    //    public static Double backOfSlidesToCenterOffset = 5.25;
-    public static Double ivkCenterOffset = 7.0
+    //Offset constants
+    public static Double ivkCenterOffset = 7.0;
+    public static Double backOfSlidesToCenterOffset = 5.25;
     public static Double neutralX = 12.0;
     public static Double neutralY = 8.0;
     public static Double intakeY = 7.0;

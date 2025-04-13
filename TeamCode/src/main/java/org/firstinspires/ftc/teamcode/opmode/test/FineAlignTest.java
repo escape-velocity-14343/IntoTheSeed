@@ -59,15 +59,16 @@ public class FineAlignTest extends Robot {
                         retract().andThen(
                                 new IntakeClawCommand(intake, IntakeConstants.openPos)
                         ),
-                        new InterruptCommand(
+                        new TimeoutCommand(new InterruptCommand(
                                 new IVKCommand(SlideConstants.submersibleIntakeMidExtension, IVKCommand.intakeReadyY + 4, extension, pivot, 0.8),
                                 () -> pivot.getPivotVelocity() < AutoConstants.autoscoreMaxPivotVel && extension.isClose()
+                        ), 2000
                         ),
                         new TimeoutCommand(
                                 new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
                                 800
-                        ),
-                        new GoToPointWithDefaultCommand(storage::getFinePosition, gtpc, 0.5, 2).alongWith(
+                        )
+                        /*new GoToPointWithDefaultCommand(storage::getFinePosition, gtpc, 0.5, 2).alongWith(
                                 new ExtendCommand(extension, storage::getNewExtension)
                         ),
                         new TimeoutCommand(
@@ -79,7 +80,7 @@ public class FineAlignTest extends Robot {
                         new TimeoutCommand(
                                 pivot.openloopC(() -> 0.0),
                                 10
-                        )
+                        )*/
                         //new CoarseAlignCommand(gtpc, vision, pinpoint),
                         /*new SequentialIVKCommand(SlideConstants.submersibleIntakeMidExtension, IVKCommand.intakeReadyY, extension, pivot).alongWith(
                                 new TurretCommand(turret, 0.0),

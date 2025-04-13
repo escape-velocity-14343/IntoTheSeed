@@ -16,6 +16,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.IVKConstants;
 import org.firstinspires.ftc.teamcode.constants.VisionConstants;
+import org.firstinspires.ftc.teamcode.lib.RobotPnP;
+import org.firstinspires.ftc.teamcode.lib.RobotSlidePnP;
 import org.firstinspires.ftc.teamcode.lib.SamplePoseStorage;
 import org.firstinspires.ftc.teamcode.lib.SlideKinematics;
 import org.firstinspires.ftc.teamcode.lib.SlidePnP;
@@ -63,13 +65,23 @@ public class StoreFinePositionCommand extends CommandBase {
             return;
         }
 
-        SlidePnP pnp = new SlidePnP(cx, cy, focalL);
-        SlidePnP.rz = Math.sin(Math.toRadians(pivot.getCurrentPosition())) * extend.getCurrentInches() + IVKConstants.pivotPointHeightCam;
-        Log.v("FineAlign", "RZ: " + SlidePnP.rz);
-        SlidePnP.rp = Math.toRadians(-90 + pivot.getCurrentPosition());
-        Log.v("FineAlign", "RP (deg): " + Math.toDegrees(SlidePnP.rp));
-        Translation2d rcSamp = pnp.getRobotCentricTranslation((int) samplePos.getX(), (int) samplePos.getY());
-        Translation2d fieldSamp = pnp.getFieldCoordinates((int) samplePos.getX(), (int) samplePos.getY(), pinpoint.getPose());
+        RobotSlidePnP pnp = new RobotSlidePnP(cy, cx, focalL);
+        Pose2d cameraPos = SlideKinematics.getRCCameraPos(Rotation2d.fromDegrees(pivot.getCurrentPosition()), extend.getCurrentInches());
+
+        RobotSlidePnP.rx = cameraPos.getX();
+        RobotSlidePnP.rz = cameraPos.getY();
+        RobotSlidePnP.rp = Math.toRadians(-90 + pivot.getCurrentPosition());
+
+        Log.v("FineAlign", "RX: " + RobotSlidePnP.rx);
+        Log.v("FineAlign", "RZ: " + RobotSlidePnP.rz);
+        Log.v("FineAlign", "RP (deg): " + Math.toDegrees(RobotSlidePnP.rp));
+
+        Translation2d rcSamp = pnp.getRobotCentricTranslation((int) (samplePos.getY()), (int) (320-samplePos.getX()));
+
+        Log.i("FineAlign", "RC Sample X: " + rcSamp.getX());
+        Log.i("FineAlign", "RC Sample Y: " + rcSamp.getY());
+
+        Translation2d fieldSamp = pnp.getFieldCoordinates((int) (samplePos.getY()), (int) (320-samplePos.getX()), pinpoint.getPose());
 
 
         // now we know where the sample is relative to the camera
