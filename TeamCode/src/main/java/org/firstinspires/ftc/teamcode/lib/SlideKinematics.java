@@ -3,7 +3,12 @@ package org.firstinspires.ftc.teamcode.lib;
 import android.util.Log;
 
 import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.ProxyScheduleCommand;
+import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
@@ -24,13 +29,14 @@ public class SlideKinematics {
 
     /**
      * @return x is forward, y is height
-     * */
+     */
     public static Pose2d getRCCameraPos(Rotation2d angle, double extension) {
         double slideRelativeExtension = extension + IVKConstants.cameraOffsetForward;
         double forward = IVKConstants.pivotPointForwardOffset + angle.getCos() * slideRelativeExtension - angle.getSin() * IVKConstants.cameraOffsetUp;
         double height = IVKConstants.pivotPointHeightOffset + angle.getSin() * slideRelativeExtension + angle.getCos() * IVKConstants.cameraOffsetUp;
         return new Pose2d(forward, height, angle);
     }
+
     public static Pose2d getIVKClawPos(Translation2d target) {
         target = target.minus(new Translation2d(IVKConstants.pivotPointForwardOffset, IVKConstants.pivotPointHeightOffset));
         Log.v("IVK", "");
@@ -38,14 +44,15 @@ public class SlideKinematics {
         Log.v("IVK", "Target Theta: " + targetTheta);
         double targetDist = Math.hypot(target.getX(), target.getY());
         Log.v("IVK", "Target Dist: " + targetDist);
-        double slideExtend = Math.sqrt(targetDist*targetDist - IVKConstants.clawOffsetUp*IVKConstants.clawOffsetUp) - IVKConstants.clawOffsetForward;
+        double slideExtend = Math.sqrt(targetDist * targetDist - IVKConstants.clawOffsetUp * IVKConstants.clawOffsetUp) - IVKConstants.clawOffsetForward;
         Log.v("IVK", "Slide Extend: " + slideExtend);
-        double slideTheta = Math.asin(-IVKConstants.clawOffsetUp/targetDist);
+        double slideTheta = Math.asin(-IVKConstants.clawOffsetUp / targetDist);
         Log.v("IVK", "Slide Theta: " + slideTheta);
         double theta = targetTheta + slideTheta;
         Log.v("IVK", "Theta: " + theta);
         return new Pose2d(slideExtend, 0, new Rotation2d(theta));
     }
+
     public static Command getIVKCommand(ExtensionSubsystem extension, PivotSubsystem pivot, Translation2d target) {
         Pose2d targets = getIVKClawPos(target);
         return new ParallelCommandGroup(
@@ -53,6 +60,7 @@ public class SlideKinematics {
                 new PivotCommand(pivot, targets.getRotation().getDegrees())
         );
     }
+
     public static Command getIVKCommand(ExtensionSubsystem extension, PivotSubsystem pivot, Translation2d target, double speed) {
         Pose2d targets = getIVKClawPos(target);
         return new ParallelCommandGroup(
@@ -62,11 +70,12 @@ public class SlideKinematics {
     }
 
     public static Command getIVKCommand(ExtensionSubsystem extension, PivotSubsystem pivot, DoubleSupplier x, DoubleSupplier y) {
-        Pose2d targets = getIVKClawPos(new Translation2d(x.getAsDouble(), y.getAsDouble()));
+
         return new ParallelCommandGroup(
-                new ExtendCommand(extension, targets.getX()),
-                new PivotCommand(pivot, targets.getRotation().getDegrees())
+                new ExtendCommand(extension, () -> getIVKClawPos(new Translation2d(x.getAsDouble(), y.getAsDouble())).getX()),
+                new PivotCommand(pivot, () -> getIVKClawPos(new Translation2d(x.getAsDouble(), y.getAsDouble())).getRotation().getDegrees())
         );
+
     }
 
 

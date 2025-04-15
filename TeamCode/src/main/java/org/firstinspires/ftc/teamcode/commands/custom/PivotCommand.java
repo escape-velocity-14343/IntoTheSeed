@@ -4,9 +4,14 @@ import android.util.Log;
 import com.arcrobotics.ftclib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.subsystems.PivotSubsystem;
 
+import java.util.function.DoubleSupplier;
+
 public class PivotCommand extends CommandBase {
     PivotSubsystem pivotSubsystem;
+
     double target;
+
+    DoubleSupplier targetSupplier;
 
     /**
      * @param pivotSubsystem
@@ -14,12 +19,23 @@ public class PivotCommand extends CommandBase {
      */
     public PivotCommand(PivotSubsystem pivotSubsystem, double target) {
         this.pivotSubsystem = pivotSubsystem;
-        this.target = target;
+        this.targetSupplier = () -> target;
+        addRequirements(pivotSubsystem);
+    }
+
+    /**
+     * @param pivotSubsystem
+     * @param target in degrees
+     */
+    public PivotCommand(PivotSubsystem pivotSubsystem, DoubleSupplier target) {
+        this.pivotSubsystem = pivotSubsystem;
+        this.targetSupplier = target;
         addRequirements(pivotSubsystem);
     }
 
     @Override
     public void initialize() {
+        target = targetSupplier.getAsDouble();
         Log.i("%7", "Set pivot target: " + target);
         pivotSubsystem.setTarget(target);
     }

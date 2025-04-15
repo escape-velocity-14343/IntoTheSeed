@@ -38,8 +38,12 @@ public class PivotConstants {
     public static double manualControlDeadband = 0.1;
 
     public static double bottomPMult = 1.25;
-    public static double hangReady = 60.0;
+    public static double hangPuyallup = 10;
+    public static double hangReady = 35;
+    public static double hangIntermediate = 50;
+    public static double hangL3Ready = 40;
     public static double powerCutAngle = 30;
+
 
     public static double slowDropPower = 0.16;
 }

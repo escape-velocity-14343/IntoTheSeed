@@ -239,14 +239,26 @@ public class VisionSubsystem extends SubsystemBase {
                 }
             }
 
-            ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, 20000, blobs);
-            ColorBlobLocatorProcessor.Util.filterByAspectRatio(1.5, 5, blobs);
+
+
             double dist = 10000;
             double centerDist = 10000;
-            ColorBlobLocatorProcessor.Util.sortByArea(SortOrder.DESCENDING, blobs);
+
             largestBlob = Optional.empty();
 
             if (!blobs.isEmpty()) {
+
+                ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, 20000, blobs);
+                ColorBlobLocatorProcessor.Util.filterByAspectRatio(1.5, 5, blobs);
+
+                if (blobs.isEmpty()) {
+                    samplePos = null;
+                    return;
+                }
+
+                ColorBlobLocatorProcessor.Util.sortByArea(SortOrder.DESCENDING, blobs);
+
+
                 largestBlob = Optional.of(blobs.get(0));
 
                 double[] weights = new double[blobs.size()];

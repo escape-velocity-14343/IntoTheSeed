@@ -28,7 +28,7 @@ public class DefaultGoToPointCommand extends CommandBase {
     public static double headingkP = 0.004;
     public static double headingSquidkP = 0.004;
     public static double headingKPSmall = 0.012;
-    public static double useSmallThresh = 7.0;
+    public static double useSmallThresh = 20.0;
     public static double headingkI = 0;
     public static double headingkD = 0;
     public static double headingKS = 0;

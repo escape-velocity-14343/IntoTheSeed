@@ -37,13 +37,13 @@ public class IntakeClosingCommand extends CommandBase {
 
     @Override
     public void execute() {
-        position = Math.min(IntakeConstants.singleIntakePos, position+0.01);
+        position = Math.min(IntakeConstants.singleIntakePos, position+0.02);
         intake.setClawer(position);
     }
 
     @Override
     public boolean isFinished() {
-        return time.seconds() > 0.5 || position == IntakeConstants.singleIntakePos;
+        return time.seconds() > 0.5 || position >= IntakeConstants.singleIntakePos;
     }
 
     @Override

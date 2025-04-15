@@ -47,7 +47,8 @@ public class SlideConstants {
     public static double manualControlDeadband = 0.1;
     public static boolean highExtend = false;
     public static boolean lowExtend = false;
-    public static double hangReady = 12.0;
+    public static double hangReady = 20;
+    public static double hangL3Ready = 20;
 
 
 }

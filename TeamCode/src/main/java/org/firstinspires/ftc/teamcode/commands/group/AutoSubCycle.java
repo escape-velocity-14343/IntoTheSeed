@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.ParallelRaceGroup;
 import com.arcrobotics.ftclib.command.PerpetualCommand;
+import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
@@ -59,8 +60,8 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         new InterruptCommand(
                                 new GVFWithDefaultCommand(dmc.getGvfc(), 3.0, 10.0, () -> {
 
-                                    Pose2d intermediate = SampleMovementOptimizer.getIntermediatePoint(storage.getCoarsePosition(), -18.0, 35.0, SlideConstants.submersibleIntakeMidExtension);
-                                    Pose2d end = SampleMovementOptimizer.getClosestPoint(storage.getCoarsePosition(), -18.0, 35.0, SlideConstants.submersibleIntakeMidExtension);
+                                    Pose2d intermediate = SampleMovementOptimizer.getIntermediatePoint(storage.getCoarsePosition(), -18.0, 45.0, SlideConstants.submersibleIntakeMidExtension);
+                                    Pose2d end = SampleMovementOptimizer.getClosestPoint(storage.getCoarsePosition(), -18.0, 45.0, SlideConstants.submersibleIntakeMidExtension);
 
                                     return new CubicBezier[]{new CubicBezier(AutoConstants.scorePos.getX(), AutoConstants.scorePos.getY(),
                                             -52, 48,
@@ -105,50 +106,23 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 // target and go to sample
                 new TimeoutCommand(
                         new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
-                        800
+                        100
                 ),
-                new InstantCommand(drive::clearBrake),
-                new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(
-                        new ExtendCommand(extension, storage::getNewExtension)
+                new WaitUntilCommand(extension::isClose).alongWith(
+                        new WaitUntilCommand(dmc.getGtpc()::isDone)
+                ).deadlineWith(
+                        new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret).perpetually(),
+                        new RunCommand(() -> dmc.getGtpc().setTarget(storage.getFinePosition())),
+                        new RunCommand(() -> extension.setTargetInches(SlideKinematics.getIVKClawPos(new Translation2d(storage.getNewExtension(), IVKConstants.clawIntakeIVKHeight)).getX()*IVKConstants.extensionScalar), extension)
                 ),
-                new WristCommand(wrist, IntakeConstants.toptakePos),
-                /*new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(
-                        new ExtendCommand(extension, storage::getNewExtension),
-
-                ),
-
-                /*new GoToPointWithDefaultCommand(storage::getFinePosition, dmc.getGtpc(), 0.5, 2).alongWith(
-                        new ExtendCommand(extension, storage::getNewExtension),
-
-                ),
-                //new WaitUntilStabilizedCommand(pinpoint),
-                new InstantCommand(() -> vision.setCam(true)),*/
-
-                // What we need to do next:
-                // Wait Until Stabilized pitch
-                // Use the non-supplier subPos Command because there's no reason to use a supplier, we're
-                // continually supplying the same value over and over
-                // We can keep the timeout
-                // Potentially what we can do is create a new stabilizedSubCommand which splits the IVK
-                // Into 1 inch Y value increments, and uses wait for stabilized internally between each iteration
-
-                // intake
-                new DrivetrainBrakeCommand(dmc),
-                pivot.enableManualControl(),
-                new TimeoutCommand(
-                        pivot.openloopC(() -> PivotConstants.slowDropPower * extension.getCurrentInches()/SlideConstants.maxExtension),
-                        10
-                ),
-                //new TimeoutCommand(
-                //new SubPosCommand(extension, wrist, intake, pivot, () -> Math.cos(Math.toRadians(pivot.getCurrentPosition())) * extension.getCurrentInches()), 200
-                //)
+                new WristCommand(wrist, IntakeConstants.toptakePos), new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
+                new PivotCommand(pivot, () -> SlideKinematics.getIVKClawPos(new Translation2d(storage.getNewExtension(), IVKConstants.clawIntakeIVKHeight)).getRotation().getDegrees()),
                 new TimeoutCommand(
                         new ParallelCommandGroup(
                                 new IntakeClosingCommand(intake, IntakeConstants.slightOpenPos, 1),
                                 new WaitUntilCommand(intake::proxClose))
                         , 500),
                 new IntakeControlCommand(intake, IntakeConstants.closedPos, 1),
-                new WaitCommand(450),
                 new InstantCommand(drive::clearBrake),
 
                 // go to score

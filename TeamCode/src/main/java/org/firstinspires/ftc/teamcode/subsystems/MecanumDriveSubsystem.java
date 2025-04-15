@@ -3,9 +3,11 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.lib.CachingVoltageSensor;
 import org.firstinspires.ftc.teamcode.lib.Localizer;
@@ -14,7 +16,7 @@ import org.firstinspires.ftc.teamcode.lib.Util;
 import java.util.function.DoubleSupplier;
 
 public class MecanumDriveSubsystem extends SubsystemBase {
-    DcMotor fr, fl, br, bl;
+    DcMotorEx fr, fl, br, bl;
     Localizer odo;
     CachingVoltageSensor voltage;
     private DoubleSupplier forwardCompensationSupplier;
@@ -26,10 +28,14 @@ public class MecanumDriveSubsystem extends SubsystemBase {
             DcMotor bl,
             Localizer localizer,
             CachingVoltageSensor voltage) {
-        this.fr = fr;
-        this.fl = fl;
-        this.br = br;
-        this.bl = bl;
+        this.fr = (DcMotorEx) fr;
+        this.fl = (DcMotorEx) fl;
+        this.br = (DcMotorEx) br;
+        this.bl = (DcMotorEx) bl;
+        this.fr.setCurrentAlert(7, CurrentUnit.AMPS);
+        this.fl.setCurrentAlert(7, CurrentUnit.AMPS);
+        this.br.setCurrentAlert(7, CurrentUnit.AMPS);
+        this.bl.setCurrentAlert(7, CurrentUnit.AMPS);
         br.setDirection(DcMotorSimple.Direction.REVERSE);
         fr.setDirection(DcMotorSimple.Direction.REVERSE);
         this.odo = localizer;
@@ -134,6 +140,18 @@ public class MecanumDriveSubsystem extends SubsystemBase {
     }
 
     public void driveRaw(double fl, double bl, double fr, double br) {
+        if (this.fl.isOverCurrent()) {
+            fl*=0.75;
+        }
+        if (this.fr.isOverCurrent()) {
+            fr*=0.75;
+        }
+        if (this.bl.isOverCurrent()) {
+            bl*=0.75;
+        }
+        if (this.br.isOverCurrent()) {
+            br*=0.75;
+        }
         this.fl.setPower(fl);
         this.bl.setPower(bl);
         this.fr.setPower(fr);

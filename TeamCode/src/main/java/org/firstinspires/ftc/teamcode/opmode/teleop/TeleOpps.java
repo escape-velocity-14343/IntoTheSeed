@@ -52,7 +52,7 @@ public class TeleOpps extends Robot {
         driverPad = new GamepadEx(gamepad1);
         operatorPad = new GamepadEx(gamepad2);
 
-        DoubleSupplier fieldCentricHeading = true ? () -> pinpoint.getPose().getRotation().getDegrees() : () -> 0.0;
+        DoubleSupplier fieldCentricHeading = false ? () -> pinpoint.getPose().getRotation().getDegrees() : () -> 0.0;
         BooleanSupplier inIntake = () -> currentlyInState(FSMStates.TOP_INTAKE, FSMStates.TOP_INTAKE_READY, FSMStates.GROUND_INTAKE, FSMStates.GROUND_INTAKE_READY);
         DoubleSupplier xyGain = () -> 1.0;//inIntake.getAsBoolean() ? 0.7 : 1;
         DoubleSupplier tGain = () -> inIntake.getAsBoolean() ? 0.3 : 1;
@@ -169,7 +169,8 @@ public class TeleOpps extends Robot {
         new Trigger(() -> driverPad.gamepad.touchpad).whenActive(bucketAlign());
 
         // ------- HANG -------
-        driverPad.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(hangReady());
+        driverPad.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(hangL2Ready());
+        driverPad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(hangL3Ready());
         driverPad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileActiveOnce(hangL2()).whenInactive(new InstantCommand(() -> pto.setEngaged(false)));
 
         new Trigger(() -> Util.isGamepadAlive(driverPad.gamepad) && pto.isEngaged())

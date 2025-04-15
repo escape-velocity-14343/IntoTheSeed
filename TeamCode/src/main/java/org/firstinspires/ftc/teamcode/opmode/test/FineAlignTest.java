@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmode.test;
 import android.util.Log;
 
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.teamcode.commands.custom.IVKCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.InterruptCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.SequentialIVKCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.StoreFinePositionCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TimeoutCommand;
@@ -29,6 +31,7 @@ import org.firstinspires.ftc.teamcode.commands.group.SubPosCommand;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.IVKConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
+import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.SamplePoseStorage;
 import org.firstinspires.ftc.teamcode.lib.SlideKinematics;
@@ -63,7 +66,7 @@ public class FineAlignTest extends Robot {
                                 new WristCommand(wrist, IntakeConstants.halfFoldPos)
                         ),
                         new TimeoutCommand(new InterruptCommand(
-                                SlideKinematics.getIVKCommand(extension, pivot, new Translation2d(SlideConstants.submersibleIntakeMidExtension, IVKConstants.clawIntakeIVKHeight+8), 0.8),
+                                SlideKinematics.getIVKCommand(extension, pivot, new Translation2d(SlideConstants.submersibleIntakeMidExtension, IVKConstants.clawIntakeIVKHeight + 4), 0.8),
                                 // live in Puyallup farming every day they know me where it rains i farm apples daily i dont know no nothin bout no citrus its too cold 40 something milli apples farmed every dayI
                                 () -> pivot.getPivotVelocity() < AutoConstants.autoscoreMaxPivotVel && extension.isClose()
                         ), 2000
@@ -72,19 +75,20 @@ public class FineAlignTest extends Robot {
                                 new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
                                 800
                         ),
-                        new GoToPointWithDefaultCommand(storage::getFinePosition, gtpc, 0.5, 2).alongWith(
-                                new ExtendCommand(extension, storage::getNewExtension)
-                        ),
-                        new TimeoutCommand(
-                                new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
-                                800
+                        new WaitUntilCommand(extension::isClose).alongWith(
+                                new WaitUntilCommand(gtpc::isDone)
+                        ).deadlineWith(
+                                new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret).perpetually(),
+                                new RunCommand(() -> gtpc.setTarget(storage.getFinePosition())),
+                                new RunCommand(() -> extension.setTargetInches(SlideKinematics.getIVKClawPos(new Translation2d(storage.getNewExtension(), IVKConstants.clawIntakeIVKHeight)).getX()*IVKConstants.extensionScalar), extension)
                         ),
                         new WristCommand(wrist, IntakeConstants.toptakePos), new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
-                        pivot.enableManualControl(),
+                        new PivotCommand(pivot, () -> SlideKinematics.getIVKClawPos(new Translation2d(storage.getNewExtension(), IVKConstants.clawIntakeIVKHeight)).getRotation().getDegrees())
+                        /*pivot.enableManualControl(),
                         new TimeoutCommand(
-                                pivot.openloopC(() -> 0.0),
+                                pivot.openloopC(() -> PivotConstants.slowDropPower * extension.getCurrentInches() / SlideConstants.maxExtension),
                                 10
-                        )
+                        )*/
                         //new CoarseAlignCommand(gtpc, vision, pinpoint),
                         /*new SequentialIVKCommand(SlideConstants.submersibleIntakeMidExtension, IVKCommand.intakeReadyY, extension, pivot).alongWith(
                                 new TurretCommand(turret, 0.0),

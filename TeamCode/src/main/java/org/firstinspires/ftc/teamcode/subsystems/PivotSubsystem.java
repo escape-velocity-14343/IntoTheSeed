@@ -39,6 +39,8 @@ public class PivotSubsystem extends SubsystemBase {
     private Trigger extensionSetTrigger = new Trigger(() -> !supplierSet).whileActiveContinuous(() -> Log.i("WARNING", "PIVOT EXTENSION SUPPPLIER UNSET"));
     public Trigger manualControlTrigger = new Trigger(() -> manualControl);
 
+    public boolean useKg = true;
+
     public PivotSubsystem(HardwareMap hMap, CachingVoltageSensor voltage) {
         motor0 = hMap.dcMotor.get("tilt0");
         motor0.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -102,7 +104,7 @@ public class PivotSubsystem extends SubsystemBase {
         }
 
         //stop breaking belt, doesnt seem to cause problems
-        if (power < 0 && currentPos < PivotConstants.powerCutAngle) {
+        if (power < 0 && currentPos < PivotConstants.powerCutAngle && useKg) {
             power = 0;
         }
 
@@ -215,7 +217,7 @@ public class PivotSubsystem extends SubsystemBase {
     }
 
     private double getKg(){
-        return (interpolatedRawFeedforwardkG() * Math.cos(Math.toRadians(getCurrentPosition())));
+        return useKg ? (interpolatedRawFeedforwardkG() * Math.cos(Math.toRadians(getCurrentPosition()))) : 0;
     }
 
     @Override
@@ -236,5 +238,8 @@ public class PivotSubsystem extends SubsystemBase {
         }
         //Timer reset
         timer.reset();
+    }
+    public void setUseKg(boolean use) {
+        useKg = use;
     }
 }

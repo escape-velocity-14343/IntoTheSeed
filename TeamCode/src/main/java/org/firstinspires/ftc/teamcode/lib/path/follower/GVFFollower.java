@@ -34,7 +34,7 @@ public class GVFFollower {
     /**
      * Higher values means the bot sticks closer to the path.
      */
-    public static double correctionP = 0.1;
+    public static double correctionP = 0.15;
 
     /**
      * Higher values means the bot follows curvature more. This value is able to make
@@ -45,7 +45,7 @@ public class GVFFollower {
     /**
      * Increase if the bot isn't going forwards at full speed.
      */
-    public static double forwardMult = 1.0;
+    public static double forwardMult = 2.0;
 
     /**
      * Number of inches before the bot transitions to the next spline.
@@ -57,7 +57,7 @@ public class GVFFollower {
      */
     public static double pathEndUsageInches = 24.0;
 
-    public static double headingLookaheadScalar = 15.0 / 40.0;
+    public static double headingLookaheadScalar = 20.0 / 40.0;
 
     private Pose2d lastPose;
     private boolean reverseHeading = false;

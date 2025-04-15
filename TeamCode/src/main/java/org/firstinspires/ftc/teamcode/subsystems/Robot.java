@@ -270,10 +270,17 @@ public abstract class Robot extends LinearOpMode {
         });
     }
 
-    public Command hangReady() {
+    public Command hangL2Ready() {
         return new ParallelCommandGroup(
                 new ExtendCommand(extension, SlideConstants.hangReady),
                 new PivotCommand(pivot, PivotConstants.hangReady),
+                new WristCommand(wrist, IntakeConstants.hangReady)
+        ).andThen(setStateCommand(FSMStates.HANG_READY));
+    }
+    public Command hangL3Ready() {
+        return new ParallelCommandGroup(
+                new ExtendCommand(extension, SlideConstants.hangL3Ready),
+                new PivotCommand(pivot, PivotConstants.hangL3Ready),
                 new WristCommand(wrist, IntakeConstants.hangReady)
         ).andThen(setStateCommand(FSMStates.HANG_READY));
     }
@@ -281,11 +288,15 @@ public abstract class Robot extends LinearOpMode {
     public Command hangL2() {
         return new SequentialCommandGroup(
                 setStateCommand(FSMStates.HANG_L2),
+                new InstantCommand(() -> pivot.setUseKg(false)),
+                new InstantCommand(() -> pivot.setTarget(PivotConstants.hangPuyallup)),
                 new InstantCommand(() -> wrist.setPwmDisabled(true)),
-                new TimeoutCommand(new ExtendCommand(extension, 0.0), 250),
-                new ExtensionPowerCommand(extension, mecanum, pto, -0.8).alongWith(
-                        new WaitUntilCommand(() -> extension.isClose(0.0, 3.0)).andThen(
-                                new PivotCommand(pivot, 30.0)
+                new TimeoutCommand(new ExtendCommand(extension, 0.0), 1000),
+                new ExtensionPowerCommand(extension, mecanum, pto, -1).alongWith(
+                        new TimeoutCommand(new WaitUntilCommand(() -> extension.isClose(0.0, 1.0)), 3000).andThen(
+                                new InstantCommand(() -> pivot.setUseKg(false)),
+                                new PivotCommand(pivot, PivotConstants.hangIntermediate),
+                                new InstantCommand(() -> pivot.setUseKg(true))
                         )
                 )
         );
