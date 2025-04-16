@@ -101,13 +101,19 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         new WristCommand(wrist, IntakeConstants.halfFoldPos)
                 ),
                 dmc.setP2P(),
-                new InstantCommand(() -> dmc.getGtpc().setTarget(pinpoint.getPose())),
 
                 // target and go to sample
+                new InstantCommand(() -> dmc.getGtpc().setToggle(false)),
+
                 new TimeoutCommand(
                         new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
-                        100
+                        1000
+                ).deadlineWith(
+                        new RunCommand(() -> drive.driveFieldCentric(0.5, 0, 0))
                 ),
+
+                new InstantCommand(() -> dmc.getGtpc().setTarget(pinpoint.getPose())),
+                new InstantCommand(() -> dmc.getGtpc().setToggle(true)),
                 new WaitUntilCommand(extension::isClose).alongWith(
                         new WaitUntilCommand(dmc.getGtpc()::isDone)
                 ).deadlineWith(
