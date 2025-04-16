@@ -470,16 +470,21 @@ public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor im
 
         @Override
         public double getAspectRatio() {
-            if (aspectRatio < 0) {
-                RotatedRect r = getBoxFit();
+            try{
+                if (aspectRatio < 0) {
+                    RotatedRect r = getBoxFit();
 
-                double longSize = Math.max(1, Math.max(r.size.width, r.size.height));
-                double shortSize = Math.max(1, Math.min(r.size.width, r.size.height));
+                    double longSize = Math.max(1, Math.max(r.size.width, r.size.height));
+                    double shortSize = Math.max(1, Math.min(r.size.width, r.size.height));
 
-                aspectRatio = longSize / shortSize;
+                    aspectRatio = longSize / shortSize;
+                }
+
+                return aspectRatio;
             }
-
-            return aspectRatio;
+            catch (NullPointerException e){
+                return 1;
+            }
         }
 
         @Override
