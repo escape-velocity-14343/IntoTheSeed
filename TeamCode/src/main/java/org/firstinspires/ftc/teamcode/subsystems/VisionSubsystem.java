@@ -246,8 +246,10 @@ public class VisionSubsystem extends SubsystemBase {
 
             List<ColorBlobLocatorProcessor.Blob> blobs = new LinkedList<>();
             for (ColorBlobLocatorProcessor.Blob blob : ogBlobs){
-                if (!blob.getBoxFit().size.empty()){
+                try {
                     blobs.add(blob);
+                } catch (NullPointerException e) {
+                    Log.i("Null pointer exception", "Blob.size is null");
                 }
             }
 
@@ -311,6 +313,11 @@ public class VisionSubsystem extends SubsystemBase {
                     Point center = blobs.get(i).getBoxFit().center;
                     double newDist = Math.hypot(VisionConstants.xOffset - center.x, VisionConstants.yOffset - center.y);
                     weights[i] += centerDist * 0.15 / newDist;
+                }
+
+                for (int i = 0; i < blobs.size(); i++){
+                    Point center = blobs.get(i).getBoxFit().center;
+                    weights[i] -= center.y/VisionConstants.height * 1.3;
                 }
 
 
