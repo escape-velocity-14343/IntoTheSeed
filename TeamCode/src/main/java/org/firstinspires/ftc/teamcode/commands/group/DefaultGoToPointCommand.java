@@ -27,8 +27,11 @@ public class DefaultGoToPointCommand extends CommandBase {
     public static double translationkD = 0;
     public static double headingkP = 0.004;
     public static double headingSquidkP = 0.004;
+
+    public static double headingKPHalfSmall = 0.008;
     public static double headingKPSmall = 0.012;
-    public static double useSmallThresh = 20.0;
+    public static double useSmallThresh = 10.0;
+    public static double useHalfSmallThresh = 20.0;
     public static double headingkI = 0;
     public static double headingkD = 0;
     public static double headingKS = 0;
@@ -210,9 +213,14 @@ public class DefaultGoToPointCommand extends CommandBase {
         zeroVelocityTimer.reset();
         hasBeenZeroVelocity = false;
         timer.reset();
+        double currRotDegrees = pinpoint.getPose().getRotation().getDegrees();
+        double diff = Math.abs(Util.getAngularDifference(target.getRotation().getDegrees(),
+                        currRotDegrees));
         headingPID.setPID(
-                Math.abs(Util.getAngularDifference(target.getRotation().getDegrees(), pinpoint.getPose().getRotation().getDegrees())) < useSmallThresh
-                        ? headingKPSmall : headingkP, headingkI, headingkD
+                diff < useHalfSmallThresh
+                        ? (diff < useSmallThresh ? headingKPSmall : headingKPHalfSmall)
+                        : headingkP
+                , headingkI, headingkD
         );
     }
 
