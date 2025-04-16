@@ -19,8 +19,8 @@
             <goBILDA5202SeriesMotor name="backLeft" port="2" />
             <goBILDA5202SeriesMotor name="frontLeft" port="3" />
             <Servo name="wrist" port="0" />
-            <Servo name="turret" port="1" />
-            <Servo name="clawer" port="2" />
+            <Servo name="clawer" port="1" />
+            <Servo name="turret" port="2" />
             <ContinuousRotationServo name="intake" port="4" />
             <Servo name="leftPTO" port="5" />
             <AnalogInput name="sensOrange" port="1" />

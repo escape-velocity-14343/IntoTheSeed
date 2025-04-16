@@ -19,7 +19,7 @@ public class IVKConstants {
     public static Double neutralX = 12.0;
     public static Double neutralY = 8.0;
     public static Double intakeY = 7.0;
-    public static double intakeReadyY = 10.0;
+    public static double intakeReadyY = 11.0;
     public static double slideBackOffset = 1.5;
     public static double slideRotationOffset = 0.0;
     public static double pivotPointForwardOffset = -3.36;
@@ -29,5 +29,5 @@ public class IVKConstants {
     public static double clawOffsetForward = 9.25;
     public static double clawOffsetUp = -9.5;
     public static double extensionScalar = 0.9;
-    public static double clawIntakeIVKHeight = 0;
+    public static double clawIntakeIVKHeight = 0.5;
 }

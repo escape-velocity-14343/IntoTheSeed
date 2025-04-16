@@ -32,8 +32,8 @@ public class WaitUntilStabilizedCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return (pinpointSubsystem.getVelocity().getTranslation().getNorm() < autoscoreMaxVel
-                && (timer.seconds() > timeout) && pinpointSubsystem.getVelocity().getRotation().getDegrees() < stabilziedMaxAngVel);
+        return ((pinpointSubsystem.getVelocity().getTranslation().getNorm() < autoscoreMaxVel && pinpointSubsystem.getVelocity().getRotation().getDegrees() < stabilziedMaxAngVel))
+                || (timer.seconds() > timeout);
     }
 
     @Override

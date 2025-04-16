@@ -23,7 +23,7 @@ public class WristSubsystem extends SubsystemBase {
     }
 
     public void setWrist(double rotation) {
-        setPwmDisabled(false);
+//        setPwmDisabled(false);
         wrist.setPosition(rotation + IntakeConstants.wristOffset);
         this.rotation = rotation + IntakeConstants.wristOffset;
     }

@@ -88,7 +88,7 @@ public class AutoSubCycle extends SequentialCommandGroup {
                                         new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1)
                                 ),
                                 new InterruptCommand(
-                                        SlideKinematics.getIVKCommand(extension, pivot, new Translation2d(SlideConstants.submersibleIntakeMidExtension, IVKConstants.clawIntakeIVKHeight+4.0), 0.8),
+                                        SlideKinematics.getIVKCommand(extension, pivot, new Translation2d(SlideConstants.submersibleIntakeMidExtension, IVKConstants.clawIntakeIVKHeight+6.0), 0.8),
                                         () -> pivot.getPivotVelocity() < AutoConstants.autoscoreMaxPivotVel
                                 )
                         )
@@ -115,8 +115,9 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         new RunCommand(() -> dmc.getGtpc().setTarget(storage.getFinePosition())),
                         new RunCommand(() -> extension.setTargetInches(SlideKinematics.getIVKClawPos(new Translation2d(storage.getNewExtension(), IVKConstants.clawIntakeIVKHeight)).getX()*IVKConstants.extensionScalar), extension)
                 ),
-                new WristCommand(wrist, IntakeConstants.toptakePos), new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
-                new PivotCommand(pivot, () -> SlideKinematics.getIVKClawPos(new Translation2d(storage.getNewExtension(), IVKConstants.clawIntakeIVKHeight)).getRotation().getDegrees()),
+                new WristCommand(wrist, IntakeConstants.toptakePos),
+                new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
+                new TimeoutCommand(new PivotCommand(pivot, () -> SlideKinematics.getIVKClawPos(new Translation2d(storage.getNewExtension(), IVKConstants.clawIntakeIVKHeight)).getRotation().getDegrees()), 700),
                 new TimeoutCommand(
                         new ParallelCommandGroup(
                                 new IntakeClosingCommand(intake, IntakeConstants.slightOpenPos, 1),
@@ -132,7 +133,7 @@ public class AutoSubCycle extends SequentialCommandGroup {
                                 pinpoint.getPose().getX(), pinpoint.getPose().getY(),
                                 -30 - 0.5 * pinpoint.getPose().getX() + 10, 35,
                                 -52, 48,
-                                AutoConstants.scorePos.getX(), AutoConstants.scorePos.getY()
+                                AutoConstants.scorePos.getX()+3, AutoConstants.scorePos.getY()+2
                         )}
                         ).reverseHeading(),
                         () -> AutoConstants.scorePos.minus(pinpoint.getPose()).getTranslation().getNorm() < 5.0

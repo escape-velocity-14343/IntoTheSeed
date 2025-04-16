@@ -29,7 +29,7 @@ public class PNPTest extends LinearOpMode {
     public static double y = 0;
     RobotPnP pnp;
 
-    public static int exposure = 40;
+    public static int exposure = 3000;
 
     DcMotor fr, fl, br, bl;
 

@@ -9,7 +9,6 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Vector2d;
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.SortOrder;
 
@@ -18,12 +17,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.WhiteBalanceControl;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.VisionConstants;
-import org.firstinspires.ftc.teamcode.lib.Util;
 import org.firstinspires.ftc.teamcode.vision.ColorBlobLocatorProcessorMulti;
 import org.firstinspires.ftc.teamcode.vision.ColorRange;
 import org.firstinspires.ftc.teamcode.vision.GlowUpPipeline;
@@ -32,7 +27,6 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
 import org.firstinspires.ftc.vision.opencv.ColorSpace;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 
@@ -41,9 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Vector;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BooleanSupplier;
 
 @Config
 public class VisionSubsystem extends SubsystemBase {
@@ -53,7 +45,7 @@ public class VisionSubsystem extends SubsystemBase {
     public static Scalar minimumRed2 = new Scalar(168, 70, 50);
     public static Scalar maximumRed2 = new Scalar(180, 255, 255);
 
-    public static Scalar minimumBlue = new Scalar(100, 100, 50);
+    public static Scalar minimumBlue = new Scalar(100, 150, 100);
     public static Scalar maximumBlue = new Scalar(140, 255, 255);
 
     public static Scalar minimumYellow = new Scalar(13, 40, 80);
@@ -61,8 +53,9 @@ public class VisionSubsystem extends SubsystemBase {
 
     public boolean useGlowUp = false;
 
-    public static int exposureMillis = 50;
+    public static int exposureMillis = 800;
     public static int minContourArea = 200;
+    public static int maxContourArea = 13000;
     public static double alpha = 1; //gain scalar
     public static double beta = 0; //brightness offset
 
@@ -78,10 +71,14 @@ public class VisionSubsystem extends SubsystemBase {
     VisionPortal visionPortal;
     private final WebcamName chassisCam;
     private final WebcamName slideCam;
+    //useChassisCamera is only intended to be used for init logging don't base anything off of it
+    private boolean useChassisCamera = true;
+    public static boolean defaultSetCamValue = true;
     private double angle = 0;
 
     private boolean possibleSample = false;
     private boolean confirmedSample = false;
+    public static int erodeKernel = 15;
     Optional<ColorBlobLocatorProcessor.Blob> largestBlob = Optional.empty();
 
 
@@ -109,7 +106,7 @@ public class VisionSubsystem extends SubsystemBase {
                 new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, new Scalar(13, 60, 60), new Scalar(50, 255, 255)),
                 ImageRegion.asImageCoordinates(0, 0, VisionConstants.width, VisionConstants.height),
                 ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY,
-                6,
+                erodeKernel,
                 2,
                 false,
                 -1,
@@ -166,12 +163,26 @@ public class VisionSubsystem extends SubsystemBase {
                     .build();
         }
 
-        setCam(true);
+        setCam(defaultSetCamValue);
 
         setEnabled(true);
-        waitForSetExposure(1000, 1000);
+//        waitForSetExposure(1000, 1000);
 
         this.telemetry = telemetry;
+    }
+
+    public void setCamWithTimeout(long timeoutMs, int maxAttempts, boolean switchToChassis) {
+        long startMs = System.currentTimeMillis();
+        int attempts = 0;
+        long msAfterStart = 0;
+        while (msAfterStart < timeoutMs && attempts++ < maxAttempts) {
+            Log.i("Camera Stream", String.format("Waiting for camera stream, attempt %d, %d ms after start", attempts, msAfterStart));
+            if (setCam(switchToChassis)){
+                Log.i("Camera Stream", "Camera stream was opened successfully!");
+                return;
+            }
+        }
+        Log.e("Camera Stream", "While waiting for camera stream, timeout or max attempts exited. This probably means that exposure is gonna have a hard time");
     }
 
     public boolean setCam(boolean switchToChassis) {
@@ -210,7 +221,7 @@ public class VisionSubsystem extends SubsystemBase {
 
             List<ColorBlobLocatorProcessor.Blob> blobs = colorLocator.getBlobs();
 
-            ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, 20000, blobs);
+            ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, maxContourArea, blobs);
             int dist = 10000;
             ColorBlobLocatorProcessor.Util.sortByArea(SortOrder.DESCENDING, blobs);
 
@@ -227,19 +238,18 @@ public class VisionSubsystem extends SubsystemBase {
                 }
             }
         } else if (visionPortal.getProcessorEnabled(closeLocator)) {
-            List<ColorBlobLocatorProcessor.Blob> blobs = closeLocator.getBlobs();
+            List<ColorBlobLocatorProcessor.Blob> ogBlobs = closeLocator.getBlobs();
 
-            if (blobs.isEmpty()){
+            if (ogBlobs.isEmpty()){
                 return;
             }
 
-            for (ColorBlobLocatorProcessor.Blob blob : blobs){
-                if (blob == null){
-                    blobs.remove(blob);
+            List<ColorBlobLocatorProcessor.Blob> blobs = new LinkedList<>();
+            for (ColorBlobLocatorProcessor.Blob blob : ogBlobs){
+                if (!blob.getBoxFit().size.empty()){
+                    blobs.add(blob);
                 }
             }
-
-
 
             double dist = 10000;
             double centerDist = 10000;
@@ -248,8 +258,8 @@ public class VisionSubsystem extends SubsystemBase {
 
             if (!blobs.isEmpty()) {
 
-                ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, 20000, blobs);
-                ColorBlobLocatorProcessor.Util.filterByAspectRatio(1.5, 5, blobs);
+                ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, maxContourArea, blobs);
+                ColorBlobLocatorProcessor.Util.filterByAspectRatio(1.75, 5, blobs);
 
                 if (blobs.isEmpty()) {
                     samplePos = null;
@@ -391,14 +401,14 @@ public class VisionSubsystem extends SubsystemBase {
         colorLocator.onlyFirstColor = onlyYellow;
     }
 
-    public boolean waitForSetExposure(long timeoutMs, int maxAttempts, int exposure) {
+    private boolean waitForSetExposureInternal(long timeoutMs, int maxAttempts, int exposure, String cameraNameLog) {
         long startMs = System.currentTimeMillis();
         int attempts = 0;
         long msAfterStart = 0;
         while (msAfterStart < timeoutMs && attempts++ < maxAttempts) {
-            Log.i("camera", String.format("Attempting to set camera exposure, attempt %d, %d ms after start", attempts, msAfterStart));
+            Log.i(String.format("Camera %s", cameraNameLog), String.format("Attempting to set camera exposure, attempt %d, %d ms after start", attempts, msAfterStart));
             if (setExposure(exposure)) {
-                Log.i("camera", "Set exposure succeeded");
+                Log.i("Set Exposure Succeeded: ", String.format("For Camera %s", cameraNameLog));
                 return true;
             }
             msAfterStart = System.currentTimeMillis() - startMs;
@@ -406,6 +416,14 @@ public class VisionSubsystem extends SubsystemBase {
 
         Log.e("camera", "Set exposure failed");
         return false;
+    }
+
+    public boolean waitForSetExposure(long timeoutMs, int maxAttempts, int exposure) {
+        setCam(true);
+        boolean a = waitForSetExposureInternal(timeoutMs, maxAttempts, exposure, VisionConstants.chassisCameraName);
+        setCam(false);
+        boolean b = waitForSetExposureInternal(timeoutMs, maxAttempts, exposure, VisionConstants.slideCameraName);
+        return a && b;
     }
 
     public void saveFrame(String name) {

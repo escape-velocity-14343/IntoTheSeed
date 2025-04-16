@@ -40,9 +40,9 @@ public class ChassisCameraTest extends LinearOpMode {
 //        int[] viewportids = VisionPortal.makeMultiPortalView(1, VisionPortal.MultiPortalLayout.VERTICAL);
         highCameraSubsystem = new VisionSubsystem(hardwareMap, telemetry);
 
+        highCameraSubsystem.setCam(true);
         highCameraSubsystem.waitForSetExposure(3000, 10000, exposure);
-        highCameraSubsystem.setCam(false);
-        highCameraSubsystem.setUseGlowUp(true);
+        highCameraSubsystem.setUseGlowUp(false);
 
         waitForStart();
         while (opModeIsActive()){

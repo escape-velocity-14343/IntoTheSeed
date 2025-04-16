@@ -8,6 +8,7 @@ import android.util.Log;
 
 import androidx.annotation.ColorInt;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.SortOrder;
 
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
@@ -33,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+@Config
 public class ColorBlobLocatorProcessorMulti extends ColorBlobLocatorProcessor implements VisionProcessor
 {
     private org.firstinspires.ftc.teamcode.vision.ColorRange colorRange;

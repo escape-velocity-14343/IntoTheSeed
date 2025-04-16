@@ -79,6 +79,12 @@ public class MecanumDriveSubsystem extends SubsystemBase {
         double backLeftPower = rotY - rotX + rx;
         double frontRightPower = rotY - rotX - rx;
         double backRightPower = rotY + rotX - rx;
+        if (DriveConstants.carpet) {
+            frontLeftPower *= DriveConstants.carpetMultiplier;
+            backLeftPower *= DriveConstants.carpetMultiplier;
+            frontRightPower *= DriveConstants.carpetMultiplier;
+            backRightPower *= DriveConstants.carpetMultiplier;
+        }
 
         double forwardCompensation = forwardCompensationSupplier.getAsDouble();
 
@@ -127,6 +133,19 @@ public class MecanumDriveSubsystem extends SubsystemBase {
         double backLeftPower = (rotY - rotX + rx) / denominator;
         double frontRightPower = (rotY - rotX - rx) / denominator;
         double backRightPower = (rotY + rotX - rx) / denominator;
+
+        if (DriveConstants.carpet) {
+            frontLeftPower *= DriveConstants.carpetMultiplier;
+            backLeftPower *= DriveConstants.carpetMultiplier;
+            frontRightPower *= DriveConstants.carpetMultiplier;
+            backRightPower *= DriveConstants.carpetMultiplier;
+        }
+         denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+         frontLeftPower = (rotY + rotX + rx) / denominator;
+         backLeftPower = (rotY - rotX + rx) / denominator;
+         frontRightPower = (rotY - rotX - rx) / denominator;
+         backRightPower = (rotY + rotX - rx) / denominator;
+
         if (!(Double.valueOf(frontLeftPower).isNaN()
                 || Double.valueOf(backLeftPower).isNaN()
                 || Double.valueOf(frontRightPower).isNaN()
