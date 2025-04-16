@@ -140,6 +140,7 @@ public abstract class Robot extends LinearOpMode {
         pivot.setExtensionSupplier(extension::getCurrentInches);
         pto.setEngaged(false);
         vision = new VisionSubsystem(hardwareMap, telemetry);
+        vision.setExtensionSupplier(() -> extension.getCurrentInches());
         target = new TargetingSubsystem(vision, pinpoint, telemetry);
 
         mecanum.setForwardCompensationSupplier(() -> extension.getCurrentInches() / SlideConstants.maxExtension * DriveConstants.forwardMotorMultiplier * Math.cos(Math.toRadians(pivot.getCurrentPosition())) + 1.0);

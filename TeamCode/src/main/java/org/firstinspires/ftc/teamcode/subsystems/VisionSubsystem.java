@@ -61,7 +61,7 @@ public class VisionSubsystem extends SubsystemBase {
     public static int maxContourArea = 13000;
     public static double alpha = 1; //gain scalar
     public static double beta = 0; //brightness offset
-    DoubleSupplier extensionSupplier;
+    DoubleSupplier extensionSupplier = () -> Double.MAX_VALUE;
     DoubleSupplier pivotSupplier;
     Supplier<Pose2d> pos;
 
@@ -180,6 +180,10 @@ public class VisionSubsystem extends SubsystemBase {
         this.extensionSupplier = extensionSupplier;
         this.pivotSupplier = pivotSupplier;
         this.pos = pos;
+    }
+
+    public void setExtensionSupplier(DoubleSupplier extensionSupplier) {
+        this.extensionSupplier = extensionSupplier;
     }
 
     public void setCamWithTimeout(long timeoutMs, int maxAttempts, boolean switchToChassis) {
@@ -328,9 +332,13 @@ public class VisionSubsystem extends SubsystemBase {
                     weights[i] += centerDist * 0.15 / newDist;
                 }
 
-                for (int i = 0; i < blobs.size(); i++){
-                    Point center = blobs.get(i).getBoxFit().center;
-                    weights[i] -= center.y/VisionConstants.height * 1.3;
+
+                // push away from edge
+                if (extensionSupplier.getAsDouble() < VisionConstants.submersibleIntakeWeightThresholdInches) {
+                    for (int i = 0; i < blobs.size(); i++) {
+                        Point center = blobs.get(i).getBoxFit().center;
+                        weights[i] += center.x / VisionConstants.width * 1.3;
+                    }
                 }
 
 

@@ -30,6 +30,8 @@ public class VisionConstants {
     public static boolean reverseY = false;
     public static double minSampleArea = 900;
 
+    public static double submersibleIntakeWeightThresholdInches = 15;
+
     //Supported resolutions 1280 720
     // 800 600
     // 960 540
