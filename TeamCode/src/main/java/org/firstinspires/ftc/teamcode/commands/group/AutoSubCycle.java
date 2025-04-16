@@ -122,7 +122,7 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         new ParallelCommandGroup(
                                 new IntakeClosingCommand(intake, IntakeConstants.slightOpenPos, 1.0),
                                 new WaitUntilCommand(intake::proxClose))
-                        , 500),
+                        , 250),
                 new IntakeControlCommand(intake, IntakeConstants.closedPos, 1),
                 new InstantCommand(drive::clearBrake),
 
