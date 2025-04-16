@@ -95,7 +95,7 @@ public class StoreFinePositionCommand extends CommandBase {
         fcSamp = new Translation2d(Util.clamp(0, -23, fcSamp.getX()), Util.clamp(11, -11, fcSamp.getY()));
 
         // sample position relative to robot
-        Vector2d rcSampleVector = new Vector2d(fcSamp.getX()-pinpoint.getPose().getX(), fcSamp.getY()-pinpoint.getPose().getY());
+        Vector2d rcSampleVector = new Vector2d(rcSamp.getX(), rcSamp.getY());
 
         // compute angle to turn
         double deltaAngle = Math.toDegrees(rcSampleVector.angle());

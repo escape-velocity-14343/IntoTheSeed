@@ -28,7 +28,7 @@ public class VisionConstants {
 
     public static boolean reverseX = true;
     public static boolean reverseY = false;
-    public static double minSampleArea = 900;
+    public static double minSampleArea = 2000;
 
     public static double submersibleIntakeWeightThresholdInches = 15;
 
