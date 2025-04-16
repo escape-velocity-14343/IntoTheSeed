@@ -86,8 +86,8 @@ public class PivotSubsystem extends SubsystemBase {
         double power =
                 pid.calculate(target, getCurrentPosition()) + getKg();
 
-        if (isNear(target, 0.5)){
-            power = 0;
+        if (isNear(target, PivotConstants.tolerance)){
+            power = getKg();
         }
         // if (currentPos > PivotConstants.topLimit-1 && power >= 0) {
         //    power = 0.3;

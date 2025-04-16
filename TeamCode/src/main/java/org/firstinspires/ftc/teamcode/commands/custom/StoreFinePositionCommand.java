@@ -22,6 +22,7 @@ import org.firstinspires.ftc.teamcode.lib.RobotSlidePnP;
 import org.firstinspires.ftc.teamcode.lib.SamplePoseStorage;
 import org.firstinspires.ftc.teamcode.lib.SlideKinematics;
 import org.firstinspires.ftc.teamcode.lib.SlidePnP;
+import org.firstinspires.ftc.teamcode.lib.Util;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.PinpointSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.PivotSubsystem;
@@ -85,13 +86,17 @@ public class StoreFinePositionCommand extends CommandBase {
         Log.v("FineAlign", "RP (deg): " + Math.toDegrees(RobotSlidePnP.rp));
 
         Translation2d rcSamp = pnp.getRobotCentricTranslation((int) (samplePos.getY()), (int) (320-samplePos.getX()));
-
+        Translation2d fcSamp = pnp.getFieldCoordinates((int) (samplePos.getY()), (int) (320-samplePos.getX()), pinpoint.getPose());
         Log.i("FineAlign", "RC Sample X: " + rcSamp.getX());
         Log.i("FineAlign", "RC Sample Y: " + rcSamp.getY());
 
+        Log.i("FineAlign", "FC Sample X: " + fcSamp.getX());
+        Log.i("FineAlign", "FC Sample Y: " + fcSamp.getY());
+        fcSamp = new Translation2d(Util.clamp(0, -23, fcSamp.getX()), Util.clamp(11, -11, fcSamp.getY()));
 
         // sample position relative to robot
-        Vector2d rcSampleVector = new Vector2d(rcSamp.getX(), rcSamp.getY());
+        Vector2d rcSampleVector = new Vector2d(fcSamp.getX()-pinpoint.getPose().getX(), fcSamp.getY()-pinpoint.getPose().getY());
+
         // compute angle to turn
         double deltaAngle = Math.toDegrees(rcSampleVector.angle());
         Log.i("FineAlign", "delta angle: " + deltaAngle);

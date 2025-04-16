@@ -11,9 +11,9 @@ public class PivotConstants {
     public static double kPExtended = -0.05;
     public static double kS = 0;
     public static double kD = -0.2;
-    public static double kGRetracted = 0.13;
+    public static double kGRetracted = 0.1;
     public static double debugGain = 0;
-    public static double kGFullyExtended = 0.35;
+    public static double kGFullyExtended = 0.3;
 
     public static double maxPivotVelocity = 1.0;
 

@@ -161,6 +161,8 @@ public class EZ7Piece extends Robot {
 
                         //new TimeoutCommand(new WristCommand(wrist, IntakeConstants.groundPos), 1),
                         new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target, basketSensor),
+                        new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target, basketSensor),
+                        new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target, basketSensor),
                         new AutoSubCycle(vision, pivot, extension, storage, dmc, mecanum, pinpoint, intake, wrist, turret, target, basketSensor)
                 )
         );

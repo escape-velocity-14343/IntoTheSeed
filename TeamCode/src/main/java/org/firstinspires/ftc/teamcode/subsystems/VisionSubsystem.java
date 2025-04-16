@@ -19,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.VisionConstants;
+import org.firstinspires.ftc.teamcode.lib.SlideKinematics;
 import org.firstinspires.ftc.teamcode.vision.ColorBlobLocatorProcessorMulti;
 import org.firstinspires.ftc.teamcode.vision.ColorRange;
 import org.firstinspires.ftc.teamcode.vision.GlowUpPipeline;
@@ -36,6 +37,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 @Config
 public class VisionSubsystem extends SubsystemBase {
@@ -58,6 +61,9 @@ public class VisionSubsystem extends SubsystemBase {
     public static int maxContourArea = 13000;
     public static double alpha = 1; //gain scalar
     public static double beta = 0; //brightness offset
+    DoubleSupplier extensionSupplier;
+    DoubleSupplier pivotSupplier;
+    Supplier<Pose2d> pos;
 
 
     ColorBlobLocatorProcessorMulti colorLocator, closeLocator;
@@ -170,6 +176,11 @@ public class VisionSubsystem extends SubsystemBase {
 
         this.telemetry = telemetry;
     }
+    public void setSuppliers(DoubleSupplier extensionSupplier, DoubleSupplier pivotSupplier, Supplier<Pose2d> pos) {
+        this.extensionSupplier = extensionSupplier;
+        this.pivotSupplier = pivotSupplier;
+        this.pos = pos;
+    }
 
     public void setCamWithTimeout(long timeoutMs, int maxAttempts, boolean switchToChassis) {
         long startMs = System.currentTimeMillis();
@@ -208,8 +219,8 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        telemetry.addData("Is color process", visionPortal.getProcessorEnabled(colorLocator));
-        telemetry.addData("Is close process", visionPortal.getProcessorEnabled(closeLocator));
+        //telemetry.addData("Is color process", visionPortal.getProcessorEnabled(colorLocator));
+        //telemetry.addData("Is close process", visionPortal.getProcessorEnabled(closeLocator));
 
         pixelPos = 0;
 
@@ -245,8 +256,10 @@ public class VisionSubsystem extends SubsystemBase {
             }
 
             List<ColorBlobLocatorProcessor.Blob> blobs = new LinkedList<>();
+            //Pose2d cameraPos = SlideKinematics.getRCCameraPos(Rotation2d.fromDegrees(pivotSupplier.getAsDouble()), extensionSupplier.getAsDouble());
             for (ColorBlobLocatorProcessor.Blob blob : ogBlobs){
                 try {
+
                     blobs.add(blob);
                 } catch (NullPointerException e) {
                     Log.i("Null pointer exception", "Blob.size is null");
