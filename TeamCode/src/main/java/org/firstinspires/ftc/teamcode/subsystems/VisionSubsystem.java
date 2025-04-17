@@ -94,7 +94,7 @@ public class VisionSubsystem extends SubsystemBase {
                 new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, new Scalar(13, 60, 60), new Scalar(50, 255, 255)),
                 ImageRegion.asImageCoordinates(0, 0, VisionConstants.width, VisionConstants.height),
                 ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY,
-                6,
+                5,
                 2,
                 false,
                 -1,
@@ -240,6 +240,7 @@ public class VisionSubsystem extends SubsystemBase {
             int dist = 10000;
             ColorBlobLocatorProcessor.Util.sortByArea(SortOrder.DESCENDING, blobs);
 
+
             if (!blobs.isEmpty()) {
                 for (int i = 0; i < Math.min(blobs.size(), 3); i++) {
                     samplePoses.add(new Vector2d(blobs.get(i).getBoxFit().center.x, blobs.get(i).getBoxFit().center.y));
@@ -279,6 +280,9 @@ public class VisionSubsystem extends SubsystemBase {
 
                 ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, maxContourArea, blobs);
                 ColorBlobLocatorProcessor.Util.filterByAspectRatio(1.75, 5, blobs);
+
+                // TODO: implement density filtering
+                //ColorBlobLocatorProcessor.Util.filterByDensity();
 
                 if (blobs.isEmpty()) {
                     samplePos = null;

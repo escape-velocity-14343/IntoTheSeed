@@ -33,8 +33,7 @@ import org.firstinspires.ftc.teamcode.opmode.test.PNPTest;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
 
-@Autonomous(name = "Ezell's 8 Sample")
-public class EZ7Piece extends Robot {
+public abstract class   EZ7Piece extends Robot {
     DefaultGoToPointCommand gtpc;
     DefaultGVFCommand gvfc;
     DefaultDualMoveCommand dmc;

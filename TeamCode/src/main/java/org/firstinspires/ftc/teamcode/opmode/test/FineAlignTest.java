@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmode.test;
 import android.util.Log;
 
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
@@ -15,10 +16,12 @@ import com.arcrobotics.ftclib.geometry.Translation2d;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.commands.custom.CoarseAlignCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.DrivetrainBrakeCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.FineAlignCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IVKCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.IntakeClosingCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.InterruptCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
@@ -27,6 +30,8 @@ import org.firstinspires.ftc.teamcode.commands.custom.StoreFinePositionCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TimeoutCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
+import org.firstinspires.ftc.teamcode.commands.group.DefaultDualMoveCommand;
+import org.firstinspires.ftc.teamcode.commands.group.DefaultGVFCommand;
 import org.firstinspires.ftc.teamcode.commands.group.DefaultGoToPointCommand;
 import org.firstinspires.ftc.teamcode.commands.group.GoToPointWithDefaultCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosCommand;
@@ -37,6 +42,7 @@ import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
 import org.firstinspires.ftc.teamcode.lib.SamplePoseStorage;
 import org.firstinspires.ftc.teamcode.lib.SlideKinematics;
+import org.firstinspires.ftc.teamcode.lib.path.spline.CubicBezier;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
 
@@ -59,18 +65,23 @@ public class FineAlignTest extends Robot {
         pinpoint.setHeading(0.0, 24.0, -90.0);
 
         DefaultGoToPointCommand gtpc = new DefaultGoToPointCommand(mecanum, pinpoint, new Pose2d(0.0, 24.0, Rotation2d.fromDegrees(-90.0)));
+        DefaultGVFCommand gvfc = new DefaultGVFCommand(mecanum, pinpoint, new CubicBezier(0, 0, 0, 0, 0, 0, 0, 0));
+        DefaultDualMoveCommand dmc = new DefaultDualMoveCommand(mecanum, pinpoint, gtpc, gvfc);
+        dmc.setP2P();
+
 
         driverPad = new GamepadEx(gamepad1);
 
         cs.schedule(gtpc);
 
         SequentialCommandGroup align = new SequentialCommandGroup(
+                dmc.setP2P(),
                 retract().andThen(
                         new IntakeClawCommand(intake, IntakeConstants.openPos),
                         new WristCommand(wrist, IntakeConstants.halfFoldPos)
                 ),
                 new TimeoutCommand(new InterruptCommand(
-                        SlideKinematics.getIVKCommand(extension, pivot, new Translation2d(SlideConstants.submersibleIntakeMidExtension, IVKConstants.clawIntakeIVKHeight + 4), 0.8),
+                        SlideKinematics.getIVKCommand(extension, pivot, new Translation2d(SlideConstants.submersibleIntakeMidExtension, IVKConstants.clawIntakeIVKHeight + 6), 0.8),
                         // live in Puyallup farming every day they know me where it rains i farm apples daily i dont know no nothin bout no citrus its too cold 40 something milli apples farmed every dayI
                         () -> pivot.getPivotVelocity() < AutoConstants.autoscoreMaxPivotVel && extension.isClose()
                 ), 2000
@@ -83,10 +94,22 @@ public class FineAlignTest extends Robot {
                         new WaitUntilCommand(gtpc::isDone)
                 ).deadlineWith(
                         new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret).perpetually(),
+                        new InstantCommand(() -> gtpc.setTolerances(3, 1)),
                         new RunCommand(() -> gtpc.setTarget(storage.getFinePosition())),
                         new RunCommand(() -> extension.setTargetInches(SlideKinematics.getIVKClawPos(new Translation2d(storage.getNewExtension(), IVKConstants.clawIntakeIVKHeight)).getX()*IVKConstants.extensionScalar), extension)
                 ),
-                new WristCommand(wrist, IntakeConstants.toptakePos), new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
+                new InstantCommand(() -> gtpc.setTolerances(3,4)),
+                new WristCommand(wrist, IntakeConstants.toptakePos),
+                new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1.0),
+                new DrivetrainBrakeCommand(dmc),
+                new TimeoutCommand(new PivotCommand(pivot, () -> SlideKinematics.getIVKClawPos(new Translation2d(storage.getNewExtension(), IVKConstants.clawIntakeIVKHeight)).getRotation().getDegrees()), 700),
+                new TimeoutCommand(
+                        new ParallelCommandGroup(
+                                new IntakeClosingCommand(intake, IntakeConstants.slightOpenPos, 1.0),
+                                new WaitUntilCommand(intake::proxClose))
+                        , 250),
+                new IntakeControlCommand(intake, IntakeConstants.closedPos, 1),
+                new DrivetrainBrakeCommand(dmc),
                 new TimeoutCommand(new PivotCommand(pivot, () -> SlideKinematics.getIVKClawPos(new Translation2d(storage.getNewExtension(), IVKConstants.clawIntakeIVKHeight)).getRotation().getDegrees()), 700)
                         /*pivot.enableManualControl(),
                         new TimeoutCommand(

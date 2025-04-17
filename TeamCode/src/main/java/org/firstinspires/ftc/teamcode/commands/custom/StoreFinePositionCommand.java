@@ -11,6 +11,7 @@ import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
 import com.arcrobotics.ftclib.geometry.Vector2d;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.constants.AutoConstants;
@@ -73,13 +74,13 @@ public class StoreFinePositionCommand extends CommandBase {
         if (lastCameraPos.getRotation().getRadians()==-1) {
             lastCameraPos = SlideKinematics.getRCCameraPos(Rotation2d.fromDegrees(pivot.getCurrentPosition()), extend.getCurrentInches());
         }
-
+        lastCameraPos = SlideKinematics.getRCCameraPos(Rotation2d.fromDegrees(pivot.getCurrentPosition()), extend.getCurrentInches());
 
         RobotSlidePnP.rx = lastCameraPos.getX();
         RobotSlidePnP.rz = lastCameraPos.getY();
         RobotSlidePnP.rp = Math.toRadians(-90 + pivot.getCurrentPosition());
 
-        lastCameraPos = SlideKinematics.getRCCameraPos(Rotation2d.fromDegrees(pivot.getCurrentPosition()), extend.getCurrentInches());
+
 
         Log.v("FineAlign", "RX: " + RobotSlidePnP.rx);
         Log.v("FineAlign", "RZ: " + RobotSlidePnP.rz);
@@ -106,7 +107,7 @@ public class StoreFinePositionCommand extends CommandBase {
 
         storage.setFinePosition(new Pose2d(pinpoint.getPose().getX(), pinpoint.getPose().getY(),
                 new Rotation2d(Math.toRadians(newAngle))));
-        storage.setNewExtension(rcSamp.getX());
+        storage.setNewExtension(Range.clip(rcSamp.getX(), 4, 34));
         turret.rotateTo(AnalogEncoder.normalizeDegrees(samplePos.getRotation().getDegrees() - deltaAngle));
         done = true;
 

@@ -123,6 +123,7 @@ public class AutoSubCycle extends SequentialCommandGroup {
                 ),
                 new WristCommand(wrist, IntakeConstants.toptakePos),
                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1.0),
+                new DrivetrainBrakeCommand(dmc),
                 new TimeoutCommand(new PivotCommand(pivot, () -> SlideKinematics.getIVKClawPos(new Translation2d(storage.getNewExtension(), IVKConstants.clawIntakeIVKHeight)).getRotation().getDegrees()), 700),
                 new TimeoutCommand(
                         new ParallelCommandGroup(
