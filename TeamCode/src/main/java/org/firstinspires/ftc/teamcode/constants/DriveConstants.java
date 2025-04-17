@@ -26,5 +26,5 @@ public class DriveConstants {
     public static double forwardMotorMultiplier = 0.35;
     public static double ptoPowerFac = 0.0;
     public static double carpetMultiplier = 1.25;
-    public static boolean carpet = true;
+    public static boolean carpet = false;
 }

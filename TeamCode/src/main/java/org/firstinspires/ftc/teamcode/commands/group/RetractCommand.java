@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeSpinCommand;
+import org.firstinspires.ftc.teamcode.commands.custom.InterruptCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
@@ -49,8 +50,14 @@ public class RetractCommand extends SequentialCommandGroup {
                                 ),
                                 new TurretCommand(turret, 0)
                         ),
-                        new ExtendCommand(extend, SlideConstants.minExtension),
-                        new PivotCommand(pivot, PivotConstants.bottomLimit).alongWith(
+                        new InterruptCommand(
+                                new ExtendCommand(extend, SlideConstants.minExtension),
+                                () -> extend.getCurrentInches() < 10.0
+                        ),
+                        new InterruptCommand(
+                                new PivotCommand(pivot, PivotConstants.bottomLimit),
+                                () -> pivot.getCurrentPosition() < 5.0
+                        ).alongWith(
                                 new WristCommand(wrist, IntakeConstants.foldedPos)
                         )
                 ).whenFinished(() -> Log.i("5", "Retract command"))

@@ -28,6 +28,7 @@ import org.firstinspires.ftc.teamcode.commands.custom.ExtensionPowerCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TimeoutCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
+import org.firstinspires.ftc.teamcode.commands.group.AutoSubCycle;
 import org.firstinspires.ftc.teamcode.commands.group.BucketPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.DefaultGVFCommand;
 import org.firstinspires.ftc.teamcode.commands.group.GroundSubPosCommand;
@@ -36,6 +37,7 @@ import org.firstinspires.ftc.teamcode.commands.group.LowBucketPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.RetractCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosCommand;
 import org.firstinspires.ftc.teamcode.commands.group.SubPosReadyCommand;
+import org.firstinspires.ftc.teamcode.constants.AutoConstants;
 import org.firstinspires.ftc.teamcode.constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
@@ -242,7 +244,8 @@ public abstract class Robot extends LinearOpMode {
                     x, y,
                     -30 - 0.5 * x + 10, 35,
                     -52, 48,
-                    -62, 58
+                    //-62, 58 Arbitrary Innaias points from a week ago
+                    AutoConstants.scorePos.getX()+3, AutoConstants.scorePos.getY()+2
             );
             if (currentlyInState(
                     FSMStates.TOP_INTAKE, FSMStates.TOP_INTAKE_READY,

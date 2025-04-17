@@ -118,9 +118,11 @@ public class AutoSubCycle extends SequentialCommandGroup {
                         new WaitUntilCommand(dmc.getGtpc()::isDone)
                 ).deadlineWith(
                         new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret).perpetually(),
+                        new InstantCommand(() -> dmc.getGtpc().setTolerances(3, 1)),
                         new RunCommand(() -> dmc.getGtpc().setTarget(storage.getFinePosition())),
-                        new RunCommand(() -> extension.setTargetInches(SlideKinematics.getIVKClawPos(new Translation2d(storage.getNewExtension(), IVKConstants.clawIntakeIVKHeight)).getX()), extension)
+                        new RunCommand(() -> extension.setTargetInches(SlideKinematics.getIVKClawPos(new Translation2d(storage.getNewExtension(), IVKConstants.clawIntakeIVKHeight)).getX()*IVKConstants.extensionScalar), extension)
                 ),
+                new InstantCommand(() -> dmc.getGtpc().setTolerances(3,4)),
                 new WristCommand(wrist, IntakeConstants.toptakePos),
                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1.0),
                 new DrivetrainBrakeCommand(dmc),

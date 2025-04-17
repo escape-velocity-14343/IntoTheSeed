@@ -132,7 +132,7 @@ public class VisionSubsystem extends SubsystemBase {
         colorLocator.addColors(new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, minimumYellow, maximumYellow));
         closeLocator.addColors(new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, minimumYellow, maximumYellow));
 
-        switch (AutoConstants.alliance) {
+        /*switch (AutoConstants.alliance) {
             case RED:
                 colorLocator.addColors(new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, minimumRed1, maximumRed1));
                 colorLocator.addColors(new org.firstinspires.ftc.teamcode.vision.ColorRange(ColorSpace.HSV, minimumRed2, maximumRed2));
@@ -143,7 +143,7 @@ public class VisionSubsystem extends SubsystemBase {
                 colorLocator.addColors(new ColorRange(ColorSpace.HSV, minimumBlue, maximumBlue));
                 closeLocator.addColors(new ColorRange(ColorSpace.HSV, minimumBlue, maximumBlue));
                 break;
-        }
+        }*/
 
         chassisCam = hMap.get(WebcamName.class, VisionConstants.chassisCameraName);
         slideCam = hMap.get(WebcamName.class, VisionConstants.slideCameraName);

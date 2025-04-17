@@ -28,8 +28,8 @@ public class DefaultGoToPointCommand extends CommandBase {
     public static double headingkP = 0.004;
     public static double headingSquidkP = 0.004;
 
-    public static double headingKPHalfSmall = 0.006;
-    public static double headingKPSmall = 0.01;
+    public static double headingKPHalfSmall = 0.006*1.25;
+    public static double headingKPSmall = 0.01*1.25;
     public static double useSmallThresh = 3.0;
     public static double useHalfSmallThresh = 10.0;
     public static double headingkI = 0;
@@ -223,7 +223,7 @@ public class DefaultGoToPointCommand extends CommandBase {
         Log.v("GTPCh", "SetTarget angular diff: " + diff);
         if (diff < useHalfSmallThresh) {
 
-            headingKS = 0.02;
+            headingKS = 0.02 * 1.25;
 
             if (diff < useSmallThresh) {
                 Log.v("GTPCh", "SetTarget small kp");

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands.custom;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 
@@ -9,6 +10,7 @@ import org.firstinspires.ftc.teamcode.subsystems.PivotSubsystem;
 
 import java.util.function.DoubleSupplier;
 
+@Config
 public class IVKCommand extends ParallelCommandGroup {
     // useful constants:
     // DO NOT MODIFY; MODIFY THE ONES IN IVKCONSTANTS
