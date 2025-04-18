@@ -57,7 +57,7 @@ public class VisionSubsystem extends SubsystemBase {
     public boolean useGlowUp = false;
 
     public static int exposureMillis = 800;
-    public static int minContourArea = 200;
+    public static int minContourArea = 2000;
     public static int maxContourArea = 10000;
     public static double alpha = 1; //gain scalar
     public static double beta = 0; //brightness offset
@@ -267,15 +267,16 @@ public class VisionSubsystem extends SubsystemBase {
                 }
             }
 
-            double dist = 10000;
+            double dist = 100000000;
             double centerDist = 10000;
 
             largestBlob = Optional.empty();
 
             if (!blobs.isEmpty()) {
 
-                ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, maxContourArea, blobs);
-                ColorBlobLocatorProcessor.Util.filterByAspectRatio(1.75, 5, blobs);
+                // no longer filtering by area, instead it works on weight
+                //ColorBlobLocatorProcessor.Util.filterByArea(minContourArea, maxContourArea, blobs);
+                ColorBlobLocatorProcessor.Util.filterByAspectRatio(1.4343, 20, blobs);
 
                 // TODO: implement density filtering
                 //ColorBlobLocatorProcessor.Util.filterByDensity();
@@ -315,28 +316,36 @@ public class VisionSubsystem extends SubsystemBase {
                         weights[i] += dist * 0.75 / newDist;
                     }
                 }
-                else{
+                /*else {
                     // push away from edge
                     for (int i = 0; i < blobs.size(); i++) {
                         Point center = blobs.get(i).getBoxFit().center;
                         weights[i] += (Math.abs(center.x-VisionConstants.targetMiddle)) / VisionConstants.targetMiddle * 10;
                     }
-                }
+                }*/
 
                 // weight by distance from center (15%)
+                else {
+                    for (int i = 0; i < blobs.size(); i++) {
+                        Point center = blobs.get(i).getBoxFit().center;
+                        double newDist = Math.hypot(VisionConstants.xOffset - center.x, VisionConstants.yOffset - center.y);
+                        if (newDist < centerDist) {
+                            centerDist = newDist;
+                        }
+                    }
 
-                for (int i = 0; i < blobs.size(); i++) {
-                    Point center = blobs.get(i).getBoxFit().center;
-                    double newDist = Math.hypot(VisionConstants.xOffset - center.x, VisionConstants.yOffset - center.y);
-                    if (newDist < centerDist) {
-                        centerDist = newDist;
+                    for (int i = 0; i < blobs.size(); i++) {
+                        Point center = blobs.get(i).getBoxFit().center;
+                        double newDist = Math.hypot(VisionConstants.xOffset - center.x, VisionConstants.yOffset - center.y);
+                        weights[i] += centerDist * 0.15 / newDist;
                     }
                 }
 
                 for (int i = 0; i < blobs.size(); i++) {
-                    Point center = blobs.get(i).getBoxFit().center;
-                    double newDist = Math.hypot(VisionConstants.xOffset - center.x, VisionConstants.yOffset - center.y);
-                    weights[i] += centerDist * 0.15 / newDist;
+                    double area = blobs.get(i).getContourArea();
+                    if (area < minContourArea || area > maxContourArea) {
+                        weights[i] -= 100.0;
+                    }
                 }
 
                 double maxWeight = -1;

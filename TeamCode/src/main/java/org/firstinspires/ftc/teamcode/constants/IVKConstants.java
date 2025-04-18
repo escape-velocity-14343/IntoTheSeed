@@ -29,6 +29,6 @@ public class IVKConstants {
     public static double cameraOffsetUp = -2.33;
     public static double clawOffsetForward = 9.25;
     public static double clawOffsetUp = -9.5;
-    public static double extensionScalar = 0.9;
+    public static double extensionScalar = 0.85;
     public static double clawIntakeIVKHeight = 0.45;
 }

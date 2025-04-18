@@ -104,6 +104,7 @@ public class AutoSubCycle extends SequentialCommandGroup {
 
                 // target and go to sample
                 new InstantCommand(() -> dmc.getGtpc().setToggle(false)),
+                new WaitCommand(500),
 
                 new TimeoutCommand(
                         new StoreFinePositionCommand(vision, storage, pinpoint, pivot, extension, turret),
