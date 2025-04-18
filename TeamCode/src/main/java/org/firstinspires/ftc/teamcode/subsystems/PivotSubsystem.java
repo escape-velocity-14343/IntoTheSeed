@@ -162,6 +162,10 @@ public class PivotSubsystem extends SubsystemBase {
         return isClose(target);
     }
 
+    public double getTarget() {
+        return target;
+    }
+
     /**
      * @return In degrees
      */

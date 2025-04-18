@@ -42,4 +42,5 @@ public class VisionConstants {
     public static double chassisX = 160;
     public static double chassisY = 150;
     public static Vector2d target = new Vector2d(chassisX, chassisY);
+    public static int targetMiddle = 240;
 }

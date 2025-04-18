@@ -58,12 +58,12 @@ public class VisionSubsystem extends SubsystemBase {
 
     public static int exposureMillis = 800;
     public static int minContourArea = 200;
-    public static int maxContourArea = 13000;
+    public static int maxContourArea = 10000;
     public static double alpha = 1; //gain scalar
     public static double beta = 0; //brightness offset
-    DoubleSupplier extensionSupplier = () -> Double.MAX_VALUE;
-    DoubleSupplier pivotSupplier;
-    Supplier<Pose2d> pos;
+    ExtensionSubsystem extension;
+    PivotSubsystem pivot;
+    PinpointSubsystem pinpoint;
 
 
     ColorBlobLocatorProcessorMulti colorLocator, closeLocator;
@@ -176,14 +176,10 @@ public class VisionSubsystem extends SubsystemBase {
 
         this.telemetry = telemetry;
     }
-    public void setSuppliers(DoubleSupplier extensionSupplier, DoubleSupplier pivotSupplier, Supplier<Pose2d> pos) {
-        this.extensionSupplier = extensionSupplier;
-        this.pivotSupplier = pivotSupplier;
-        this.pos = pos;
-    }
-
-    public void setExtensionSupplier(DoubleSupplier extensionSupplier) {
-        this.extensionSupplier = extensionSupplier;
+    public void setLocalizers(ExtensionSubsystem extensionSubsystem, PivotSubsystem pivotSubsystem, PinpointSubsystem pinpointSubsystem) {
+        this.extension = extensionSubsystem;
+        this.pivot = pivotSubsystem;
+        this.pinpoint = pinpointSubsystem;
     }
 
     public void setCamWithTimeout(long timeoutMs, int maxAttempts, boolean switchToChassis) {
@@ -192,7 +188,7 @@ public class VisionSubsystem extends SubsystemBase {
         long msAfterStart = 0;
         while (msAfterStart < timeoutMs && attempts++ < maxAttempts) {
             Log.i("Camera Stream", String.format("Waiting for camera stream, attempt %d, %d ms after start", attempts, msAfterStart));
-            if (setCam(switchToChassis)){
+            if (setCam(switchToChassis))  {
                 Log.i("Camera Stream", "Camera stream was opened successfully!");
                 return;
             }
@@ -319,6 +315,13 @@ public class VisionSubsystem extends SubsystemBase {
                         weights[i] += dist * 0.75 / newDist;
                     }
                 }
+                else{
+                    // push away from edge
+                    for (int i = 0; i < blobs.size(); i++) {
+                        Point center = blobs.get(i).getBoxFit().center;
+                        weights[i] += (Math.abs(center.x-VisionConstants.targetMiddle)) / VisionConstants.targetMiddle * 10;
+                    }
+                }
 
                 // weight by distance from center (15%)
 
@@ -335,16 +338,6 @@ public class VisionSubsystem extends SubsystemBase {
                     double newDist = Math.hypot(VisionConstants.xOffset - center.x, VisionConstants.yOffset - center.y);
                     weights[i] += centerDist * 0.15 / newDist;
                 }
-
-
-                // push away from edge
-                if (extensionSupplier.getAsDouble() < VisionConstants.submersibleIntakeWeightThresholdInches) {
-                    for (int i = 0; i < blobs.size(); i++) {
-                        Point center = blobs.get(i).getBoxFit().center;
-                        weights[i] += center.x / VisionConstants.width * 1.3;
-                    }
-                }
-
 
                 double maxWeight = -1;
                 int index = 0;

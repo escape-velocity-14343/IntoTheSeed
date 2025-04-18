@@ -15,8 +15,6 @@ public class IVKCommand extends ParallelCommandGroup {
     // useful constants:
     // DO NOT MODIFY; MODIFY THE ONES IN IVKCONSTANTS
     // kept for backcompatibility
-    public static double intakeReadyY = IVKConstants.intakeReadyY;
-    public static double intakeY = IVKConstants.intakeY;
 
     /**
      * Height is from the tile to the claw

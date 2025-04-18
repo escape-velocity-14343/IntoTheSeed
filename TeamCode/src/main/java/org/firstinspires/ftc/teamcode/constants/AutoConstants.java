@@ -9,6 +9,7 @@ import com.arcrobotics.ftclib.geometry.Rotation2d;
 public class AutoConstants {
 
     public static Pose2d scorePos = new Pose2d(-61, 59, Rotation2d.fromDegrees(-45));
+    public static Pose2d ultrasonicBucketPos = new Pose2d(-61, 59, Rotation2d.fromDegrees(-45));
     public static Pose2d cycleScorePos = new Pose2d(-62, 64, Rotation2d.fromDegrees(-30));
     public static Pose2d scorePosOffset = new Pose2d(-62,58.5, Rotation2d.fromDegrees(-45));
 

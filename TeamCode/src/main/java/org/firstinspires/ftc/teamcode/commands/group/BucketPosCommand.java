@@ -54,7 +54,9 @@ public class BucketPosCommand extends SequentialCommandGroup {
                                                 : 0)
                                                 + (SlideConstants.lowExtend
                                                 ? SlideConstants.lowExtendInches
-                                                : 0))
+                                                : 0
+                                                - 1
+                                        ))
                                         .withTimeout(1000)
                                         .interruptOn(
                                                 () ->

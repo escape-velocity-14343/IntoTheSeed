@@ -73,7 +73,7 @@ public abstract class Robot extends LinearOpMode {
     public FSMStates robotState = FSMStates.READY;
     public StateProgress robotProgress = StateProgress.NONE;
     public AtomicBoolean reverseClaw = new AtomicBoolean(false);
-    public AtomicBoolean lowBucket = new AtomicBoolean(false);
+    public static AtomicBoolean lowBucket = new AtomicBoolean(false);
 
     public List<LynxModule> hubs;
     public ExtensionSubsystem extension;
@@ -142,7 +142,6 @@ public abstract class Robot extends LinearOpMode {
         pivot.setExtensionSupplier(extension::getCurrentInches);
         pto.setEngaged(false);
         vision = new VisionSubsystem(hardwareMap, telemetry);
-        vision.setExtensionSupplier(() -> extension.getCurrentInches());
         target = new TargetingSubsystem(vision, pinpoint, telemetry);
 
         mecanum.setForwardCompensationSupplier(() -> extension.getCurrentInches() / SlideConstants.maxExtension * DriveConstants.forwardMotorMultiplier * Math.cos(Math.toRadians(pivot.getCurrentPosition())) + 1.0);
@@ -245,7 +244,7 @@ public abstract class Robot extends LinearOpMode {
                     -30 - 0.5 * x + 10, 35,
                     -52, 48,
                     //-62, 58 Arbitrary Innaias points from a week ago
-                    AutoConstants.scorePos.getX()+3, AutoConstants.scorePos.getY()+2
+                    AutoConstants.ultrasonicBucketPos.getX(), AutoConstants.ultrasonicBucketPos.getY()
             );
             if (currentlyInState(
                     FSMStates.TOP_INTAKE, FSMStates.TOP_INTAKE_READY,
@@ -302,7 +301,7 @@ public abstract class Robot extends LinearOpMode {
                                 new PivotCommand(pivot, PivotConstants.hangIntermediate),
                                 new InstantCommand(() -> pivot.setUseKg(true))
                         )
-                )
+                ).withTimeout(10000)
         );
     }
 

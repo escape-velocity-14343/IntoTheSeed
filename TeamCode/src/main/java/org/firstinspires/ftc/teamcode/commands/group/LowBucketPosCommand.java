@@ -46,7 +46,7 @@ public class LowBucketPosCommand extends SequentialCommandGroup {
                 new ParallelCommandGroup(
                         // minus two to prevent it from overshooting
                         new WristCommand(wrist, IntakeConstants.dunkScoringPos),
-                        new PivotCommand(pivot, PivotConstants.topLimit - 3),
+                        new PivotCommand(pivot, PivotConstants.topLimit),
                         new SequentialCommandGroup(
                                 new WaitUntilCommand(
                                         () ->

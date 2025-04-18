@@ -27,4 +27,6 @@ public class DriveConstants {
     public static double ptoPowerFac = 0.0;
     public static double carpetMultiplier = 1.25;
     public static boolean carpet = false;
+
+    public static double intakeReadyDropDownY = 10.0;
 }

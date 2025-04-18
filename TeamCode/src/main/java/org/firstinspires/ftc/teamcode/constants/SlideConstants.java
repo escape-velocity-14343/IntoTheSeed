@@ -13,7 +13,7 @@ public class SlideConstants {
 
     public static double autonBucketPos = 30;
     public static double bucketPos = 31;
-    public static double lowBucketPos = 11.5;
+    public static double lowBucketPos = 13.5;
 
     public static double minExtension = 0;
     public static double direction = 1;
@@ -37,7 +37,7 @@ public class SlideConstants {
     public static double millisPerInch = 5 * ticksPerInch;
 
     public static double highExtendInches = 1.5;
-    public static double lowExtendInches = -1;
+    public static double lowExtendInches = -2;
     public static double extendedThreshold = 3;
     // It takes 0.4 seconds from scoring pos reversed to scoring Pos
     public static double pivotDownExtension = 24;

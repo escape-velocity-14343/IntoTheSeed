@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
+import android.transition.Slide;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
@@ -63,7 +65,8 @@ public class TeleOpps extends Robot {
                 pto,
                 () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftY() / driverPad.getLeftX()) < 0.05 ? 0 : driverPad.getLeftY()) * xyGain.getAsDouble(),
                 () -> Util.halfLinearHalfCubic(Math.abs(driverPad.getLeftX() / driverPad.getLeftY()) < 0.05 ? 0 : driverPad.getLeftX()) * xyGain.getAsDouble(),
-                () -> (inIntake.getAsBoolean() ? intakingStickCurve : normalStickCurve).apply(driverPad.getRightX()) * tGain.getAsDouble(),
+                //() -> (inIntake.getAsBoolean() ? intakingStickCurve : normalStickCurve).apply(driverPad.getRightX()) * tGain.getAsDouble(),
+                () -> normalStickCurve.apply(driverPad.getRightX()),
                 fieldCentricHeading
         ));
 
@@ -100,7 +103,7 @@ public class TeleOpps extends Robot {
         // ------- UTILITIES -------
         // heading reset
         new Trigger(() -> gamepad1.options && gamepad1.share).whileActiveOnce(new InstantCommand(pinpoint::resetYaw));
-        new Trigger(intake::proxClose).whileActiveContinuous(()->gamepad1.rumble(50));
+        //new Trigger(intake::proxClose).whileActiveContinuous(()->gamepad1.rumble(50));
 
         // ------- BUCKET --------
         driverPad.getGamepadButton(GamepadKeys.Button.X).whenActive(new ConditionalCommand(
@@ -109,7 +112,8 @@ public class TeleOpps extends Robot {
                                 new ExtendCommand(extension, SlideConstants.minExtension),
                                 () -> extension.getCurrentInches() < 10.0
                         ),
-                        new FullIntakeFoldCommand(intake, turret, wrist)).andThen(bucketPos()),
+                        new FullIntakeFoldCommand(intake, turret, wrist),
+                        new InstantCommand(() -> setState(FSMStates.FOLD))).andThen(bucketPos()),
                 bucketPos(),
                 inState(FSMStates.TOP_INTAKE, FSMStates.TOP_INTAKE_READY, FSMStates.GROUND_INTAKE, FSMStates.GROUND_INTAKE_READY)
         ));
@@ -171,7 +175,7 @@ public class TeleOpps extends Robot {
         // ------- HANG -------
         driverPad.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(hangL2Ready());
         driverPad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(hangL3Ready());
-        driverPad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileActiveOnce(hangL2()).whenInactive(new InstantCommand(() -> pto.setEngaged(false)));
+        driverPad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(hangL2());//.whenInactive(new InstantCommand(() -> pto.setEngaged(false)));
 
         new Trigger(() -> Util.isGamepadAlive(driverPad.gamepad) && pto.isEngaged())
                 .whenActive(new InstantCommand(() -> pto.setEngaged(false)));
@@ -187,12 +191,14 @@ public class TeleOpps extends Robot {
 
 
         operatorPad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(extension.resetC());
+        operatorPad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(() -> lowBucket.set(true));
+        operatorPad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(() -> lowBucket.set(false));
 
         Trigger leftOperatorTrigger = new Trigger(() -> operatorPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.1);
         Trigger rightOperatorTrigger = new Trigger(() -> operatorPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1);
 
-        extension.manualControlTrigger.and(new Trigger(notInAnyState(FSMStates.HANG_READY, FSMStates.HANG_L2, FSMStates.HANG_L3))).whenActive(extension.openloopC(() -> Util.applyDeadband(operatorPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) - operatorPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER), SlideConstants.manualControlDeadband)));
-        pivot.manualControlTrigger.whenActive(pivot.openloopC(() -> Util.applyDeadband(operatorPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) - operatorPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER), PivotConstants.manualControlDeadband)));
+        extension.manualControlTrigger.and(new Trigger(notInAnyState(FSMStates.HANG_READY, FSMStates.HANG_L2, FSMStates.HANG_L3))).whenActive(extension.openloopC(() -> Util.applyDeadband(operatorPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) - operatorPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER), SlideConstants.manualControlDeadband)).interruptOn(() -> !extension.getManualControl()));
+        pivot.manualControlTrigger.whenActive(pivot.openloopC(() -> Util.applyDeadband(operatorPad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) - operatorPad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER), PivotConstants.manualControlDeadband)).interruptOn(() -> !pivot.getManualControl()));
 
         //A and Y on opposite sides
         //X and B on opposite sides

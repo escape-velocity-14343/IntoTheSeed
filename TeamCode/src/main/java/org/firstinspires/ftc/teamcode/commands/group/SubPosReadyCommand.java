@@ -13,10 +13,12 @@ import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.RunIfCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.TurretCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.WristCommand;
+import org.firstinspires.ftc.teamcode.constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.constants.IVKConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.constants.SlideConstants;
+import org.firstinspires.ftc.teamcode.lib.SlideKinematics;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.PivotSubsystem;
@@ -48,9 +50,9 @@ public class SubPosReadyCommand extends SequentialCommandGroup {
                         new ParallelCommandGroup(
                                 new IntakeControlCommand(intake, IntakeConstants.closedPos, 0),
                                 new ConditionalCommand(
-                                        new WristCommand(wrist, (IntakeConstants.foldedPos + IntakeConstants.toptakePos) / 2),
+                                        new WristCommand(wrist, IntakeConstants.groundPos - 0.075),
                                         new WristCommand(wrist, IntakeConstants.foldedPos),
-                                        () -> pivot.getCurrentPosition() > 70
+                                        () -> pivot.getCurrentPosition() > 70.0
                                 ),
                                 new TurretCommand(turret, 0),
                                 new InterruptCommand(
@@ -67,7 +69,7 @@ public class SubPosReadyCommand extends SequentialCommandGroup {
                                         () -> pivot.getCurrentPosition() < 45.0
                                 ), notAlreadyInPosition
                         ).andThen(
-                                new IVKCommand(forwardInches, () -> IVKCommand.intakeReadyY, extension, pivot) {
+                                new IVKCommand(forwardInches, () -> IVKConstants.intakeReadyY, extension, pivot) {
                                     @Override
                                     public boolean isFinished() {
                                         return true;
@@ -77,7 +79,12 @@ public class SubPosReadyCommand extends SequentialCommandGroup {
                 ).alongWith(
                         new TurretCommand(turret, angle),
                         // flip down wrist to a ready position
-                        new WaitUntilCommand(() -> Math.sin(pivot.getCurrentPosition()) * extension.getCurrentInches() > IVKCommand.intakeY - IVKConstants.pivotPointHeightOffset).andThen(new WristCommand(wrist, IntakeConstants.toptakePos))
+                        new WaitUntilCommand(() -> (extension.getCurrentInches() + IVKConstants.slideLength)
+                                * Math.sin(Math.toRadians(pivot.getCurrentPosition())) + IVKConstants.pivotPointHeightOffset
+                                > DriveConstants.intakeReadyDropDownY
+                                && (pivot.isDone() || pivot.getCurrentPosition() < pivot.getTarget())
+                        )
+                                .andThen(new WristCommand(wrist, IntakeConstants.toptakePos))
                 )
 
         );

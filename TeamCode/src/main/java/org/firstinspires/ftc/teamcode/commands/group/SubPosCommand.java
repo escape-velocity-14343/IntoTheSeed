@@ -9,6 +9,7 @@ import java.util.function.DoubleSupplier;
 import org.firstinspires.ftc.teamcode.commands.custom.IVKCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeControlCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.PivotCommand;
+import org.firstinspires.ftc.teamcode.constants.IVKConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.PivotConstants;
 import org.firstinspires.ftc.teamcode.subsystems.ExtensionSubsystem;
@@ -28,7 +29,7 @@ public class SubPosCommand extends SequentialCommandGroup {
             double forwardExtension) {
         addCommands(
                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
-                new IVKCommand(forwardExtension, IVKCommand.intakeY, extension, pivot) {
+                new IVKCommand(forwardExtension, IVKConstants.intakeY, extension, pivot) {
                     @Override
                     public boolean isFinished() {
                         return true;
@@ -47,7 +48,7 @@ public class SubPosCommand extends SequentialCommandGroup {
             DoubleSupplier forwardExtension) {
         addCommands(
                 new IntakeControlCommand(intake, IntakeConstants.singleIntakePos, 1),
-                new IVKCommand(forwardExtension, () -> IVKCommand.intakeY, extension, pivot)
+                new IVKCommand(forwardExtension, () -> IVKConstants.intakeY, extension, pivot)
         );
         addRequirements(wrist);
         this.extension = extension;

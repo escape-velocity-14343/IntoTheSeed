@@ -369,6 +369,9 @@ public class ExtensionSubsystem extends SubsystemBase {
     public boolean isClose() {
         return Util.inRange(targetInches, getCurrentInches(), SlideConstants.tolerance);
     }
+    public boolean isCloseToTarget(double tolerance) {
+        return Util.inRange(targetInches, getCurrentInches(), tolerance);
+    }
 
     /**
      * Get current position in ticks

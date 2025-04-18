@@ -14,11 +14,11 @@ public class IVKConstants {
     public static Double intakeLength = 7.0; // in inches
 
     //Offset constants
-    public static Double ivkCenterOffset = 7.0;
-    public static Double backOfSlidesToCenterOffset = 5.25;
-    public static Double neutralX = 12.0;
-    public static Double neutralY = 8.0;
-    public static Double intakeY = 7.0;
+    public static double ivkCenterOffset = 7.0;
+    public static double backOfSlidesToCenterOffset = 5.25;
+    public static double neutralX = 12.0;
+    public static double neutralY = 8.0;
+    public static double intakeY = 9.0;
     public static double intakeReadyY = 11;
     public static double slideBackOffset = 1.5;
     public static double slideRotationOffset = 0.0;
@@ -30,5 +30,5 @@ public class IVKConstants {
     public static double clawOffsetForward = 9.25;
     public static double clawOffsetUp = -9.5;
     public static double extensionScalar = 0.9;
-    public static double clawIntakeIVKHeight = 0.3;
+    public static double clawIntakeIVKHeight = 0.45;
 }
