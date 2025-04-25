@@ -81,6 +81,7 @@ public class GVFFollower {
         lastPose = robotPose;
 
         double closestT = Spline.projectPos(pos, currentSpline);
+        // test
 
         // increment to next spline as much as needed
         while (closestT >= currentSpline.getLength() - splineTransitionInches && currentSplineIndex != splines.size() - 1) {
