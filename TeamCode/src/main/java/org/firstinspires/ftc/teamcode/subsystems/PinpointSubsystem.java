@@ -1,19 +1,16 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import android.util.Log;
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.lib.Localizer;
 import org.firstinspires.ftc.teamcode.lib.drivers.GoBildaPinpoint;
 
@@ -32,53 +29,12 @@ public class PinpointSubsystem extends SubsystemBase implements Localizer {
     private Pose2D lastGoodPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
 
     public PinpointSubsystem(HardwareMap hMap) {
-        pinpoint = hMap.get(GoBildaPinpoint.class, "pinpoint");
 
-        pinpoint.initialize();
-
-        // pinpoint.setYawScalar(yawScalar);
-        pinpoint.recalibrateIMU();
-
-        pinpoint.setEncoderResolution(GoBildaPinpoint.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pinpoint.setEncoderDirections(
-                flipX
-                        ? GoBildaPinpoint.EncoderDirection.REVERSED
-                        : GoBildaPinpoint.EncoderDirection.FORWARD,
-                flipY
-                        ? GoBildaPinpoint.EncoderDirection.REVERSED
-                        : GoBildaPinpoint.EncoderDirection.FORWARD);
-        pinpoint.setOffsets(xEncOffset, yEncOffset);
-        // reset();
-        deviceStatus = pinpoint.getDeviceStatus();
     }
 
     @Override
     public void periodic() {
-        pinpoint.update();
-        if (Double.isNaN(pinpoint.getPosX())
-                || Double.isNaN(pinpoint.getPosY())
-                || (pinpoint.getPosX() == 0.0
-                        && pinpoint.getPosY() == 0.0
-                        && pinpoint.getHeading() == 0.0
-                        && pinpoint.getVelX() == 0.0)) {
-            pose = lastGoodPose;
-            Log.i("%11", "pinpoint NaN value");
-        } else {
-            pose = pinpoint.getPosition();
-            lastGoodPose = pose;
-        }
 
-        // Log.i("posex", "" + pose.getX(DistanceUnit.INCH));
-        if (DriveConstants.drawRobot) {
-            TelemetryPacket packet = new TelemetryPacket();
-            drawRobot(packet.fieldOverlay(), getPose());
-            FtcDashboard.getInstance().sendTelemetryPacket(packet);
-        }
-
-        if (pinpoint.getDeviceStatus() != deviceStatus) {
-            Log.i("%Pinpoint Status Change", pinpoint.getDeviceStatus().toString());
-            deviceStatus = pinpoint.getDeviceStatus();
-        }
     }
 
     private Pose2D getSDKPose() {
@@ -86,7 +42,7 @@ public class PinpointSubsystem extends SubsystemBase implements Localizer {
     }
 
     public int[] getEncoderCounts() {
-        return new int[] {pinpoint.getEncoderX(), pinpoint.getEncoderY()};
+        return new int[] {0,0};
     }
 
     public Pose2d getPose() {
@@ -97,15 +53,13 @@ public class PinpointSubsystem extends SubsystemBase implements Localizer {
     }
 
     public Pose2d getVelocity() {
-        Pose2D velocity = pinpoint.getVelocity();
+
         return new Pose2d(
-                velocity.getX(DistanceUnit.INCH),
-                velocity.getY(DistanceUnit.INCH),
-                Rotation2d.fromDegrees(velocity.getHeading(AngleUnit.DEGREES)));
+                0,0,new Rotation2d(0));
     }
 
     public void reset() {
-        pinpoint.resetPosAndIMU();
+
         lastGoodPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
     }
 
@@ -114,42 +68,16 @@ public class PinpointSubsystem extends SubsystemBase implements Localizer {
      * @param y In inches.
      */
     public void setPosition(double x, double y) {
-        pinpoint.setPosition(
-                new Pose2D(
-                        DistanceUnit.INCH,
-                        x,
-                        y,
-                        AngleUnit.DEGREES,
-                        pose.getHeading(AngleUnit.DEGREES)));
-        lastGoodPose =
-                new Pose2D(
-                        DistanceUnit.INCH,
-                        x,
-                        y,
-                        AngleUnit.DEGREES,
-                        pose.getHeading(AngleUnit.DEGREES));
+
     }
 
     public void setHeading(double x, double y, double headingDegrees){
-        pinpoint.setPosition(
-                new Pose2D(
-                        DistanceUnit.INCH,
-                        x,
-                        y,
-                        AngleUnit.DEGREES,
-                        headingDegrees));
-        lastGoodPose =
-                new Pose2D(
-                        DistanceUnit.INCH,
-                        x,
-                        y,
-                        AngleUnit.DEGREES,
-                        headingDegrees);
+
     }
 
     public boolean isDoneCalibration() {
 
-        return pinpoint.getDeviceStatus() == GoBildaPinpoint.DeviceStatus.READY;
+        return false;
     }
 
     public void drawRobot(Canvas c, Pose2d t) {
@@ -168,12 +96,5 @@ public class PinpointSubsystem extends SubsystemBase implements Localizer {
 
     /** Warning - will completely break position!! */
     public void resetYaw() {
-        pinpoint.setPosition(
-                new Pose2D(
-                        DistanceUnit.MM,
-                        pinpoint.getPosX(),
-                        pinpoint.getPosY(),
-                        AngleUnit.RADIANS,
-                        0));
     }
 }

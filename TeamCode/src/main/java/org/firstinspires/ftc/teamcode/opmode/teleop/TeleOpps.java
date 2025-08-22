@@ -13,6 +13,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commands.custom.DefaultDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.ExtendCommand;
 import org.firstinspires.ftc.teamcode.commands.custom.IntakeClawCommand;
@@ -54,7 +55,7 @@ public class TeleOpps extends Robot {
         driverPad = new GamepadEx(gamepad1);
         operatorPad = new GamepadEx(gamepad2);
 
-        DoubleSupplier fieldCentricHeading = true ? () -> pinpoint.getPose().getRotation().getDegrees() : () -> 0.0;
+        DoubleSupplier fieldCentricHeading = true ? () -> imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) : () -> 0.0;
         BooleanSupplier inIntake = () -> currentlyInState(FSMStates.TOP_INTAKE, FSMStates.TOP_INTAKE_READY, FSMStates.GROUND_INTAKE, FSMStates.GROUND_INTAKE_READY);
         DoubleSupplier xyGain = () -> 1.0;//inIntake.getAsBoolean() ? 0.7 : 1;
         DoubleSupplier tGain = () -> inIntake.getAsBoolean() ? 0.3 : 1;
